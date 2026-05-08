@@ -20,18 +20,14 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.WifiTethering
 import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.Badge
+import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material.icons.rounded.RocketLaunch
-import androidx.compose.material.icons.rounded.Code
-import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Fingerprint
-import androidx.compose.material.icons.rounded.Gavel
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.SettingsApplications
 import androidx.compose.material.icons.rounded.Shield
@@ -62,8 +58,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -614,7 +608,6 @@ private fun SettingUi(
 
             // ── About Section ────────────────────────────
             item {
-                val uriHandler = LocalUriHandler.current
                 SettingsSection(title = stringResource(R.string.setting_section_about), icon = Icons.Rounded.Info) {
                     ListItem(
                         headlineContent = {
@@ -622,134 +615,71 @@ private fun SettingUi(
                         },
                         supportingContent = {
                             Text(
-                                text = stringResource(R.string.setting_version, uiState.appVersion.ifBlank { "1.0" }),
+                                text = stringResource(R.string.setting_about_subtitle),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
                         leadingContent = {
                             Icon(
-                                imageVector = Icons.Rounded.Code,
+                                imageVector = Icons.Rounded.Info,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp),
                             )
                         },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            context.startActivity(
+                                android.content.Intent(
+                                    context,
+                                    app.pwhs.universalinstaller.presentation.setting.about.AboutActivity::class.java,
+                                )
+                            )
+                        },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                    LinkItem(
-                        icon = Icons.Rounded.Public,
-                        title = stringResource(R.string.setting_website_title),
-                        subtitle = stringResource(R.string.setting_website_subtitle),
-                        onClick = { uriHandler.openUri("https://universal-installer.pwhs.app/") },
                     )
                     ListItem(
                         headlineContent = {
-                            Text(stringResource(R.string.setting_github_title), style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(R.string.setting_diagnostics_title), style = MaterialTheme.typography.bodyLarge)
                         },
                         supportingContent = {
                             Text(
-                                text = stringResource(R.string.setting_github_subtitle),
+                                text = stringResource(R.string.setting_diagnostics_subtitle),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
                         leadingContent = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_github),
+                                imageVector = Icons.Rounded.BugReport,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp),
                             )
                         },
-                        modifier = Modifier.clickable {
-                            uriHandler.openUri("https://github.com/pass-with-high-score/universal-installer")
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                    ListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.setting_telegram_title), style = MaterialTheme.typography.bodyLarge)
-                        },
-                        supportingContent = {
-                            Text(
-                                text = stringResource(R.string.setting_telegram_subtitle),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
-                        leadingContent = {
+                        trailingContent = {
                             Icon(
-                                painter = painterResource(R.drawable.ic_telegram),
+                                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
                         modifier = Modifier.clickable {
-                            uriHandler.openUri("https://t.me/blockads_android")
+                            context.startActivity(
+                                android.content.Intent(
+                                    context,
+                                    app.pwhs.universalinstaller.presentation.setting.diagnostics.DiagnosticsActivity::class.java,
+                                )
+                            )
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                    ListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.setting_rate_title), style = MaterialTheme.typography.bodyLarge)
-                        },
-                        supportingContent = {
-                            Text(
-                                text = stringResource(R.string.setting_rate_subtitle),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
-                        leadingContent = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_google_play_circle),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            uriHandler.openUri("https://play.google.com/store/apps/details?id=app.pwhs.universalinstaller")
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                    ListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.setting_sponsor_title), style = MaterialTheme.typography.bodyLarge)
-                        },
-                        supportingContent = {
-                            Text(
-                                text = stringResource(R.string.setting_sponsor_subtitle),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.Favorite,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            uriHandler.openUri("https://github.com/sponsors/pass-with-high-score")
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                    LinkItem(
-                        icon = Icons.Rounded.Shield,
-                        title = stringResource(R.string.setting_privacy_title),
-                        subtitle = stringResource(R.string.setting_privacy_subtitle),
-                        onClick = { uriHandler.openUri("https://universal-installer.pwhs.app/privacy") },
-                    )
-                    LinkItem(
-                        icon = Icons.Rounded.Gavel,
-                        title = stringResource(R.string.setting_terms_title),
-                        subtitle = stringResource(R.string.setting_terms_subtitle),
-                        onClick = { uriHandler.openUri("https://universal-installer.pwhs.app/terms") },
                     )
                 }
             }
@@ -1093,36 +1023,6 @@ private fun RootInstallSourceItem(
     }
 }
 
-@Composable
-private fun LinkItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-) {
-    ListItem(
-        headlineContent = {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
-        },
-        supportingContent = {
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        },
-        leadingContent = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp),
-            )
-        },
-        modifier = Modifier.clickable(onClick = onClick),
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-    )
-}
 @Composable
 private fun BiometricToggleRow(
     title: String,

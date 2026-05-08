@@ -9,6 +9,7 @@ import app.pwhs.universalinstaller.presentation.install.controller.BackendSelfHe
 import app.pwhs.universalinstaller.presentation.install.controller.InstallerBackendFactory
 import app.pwhs.universalinstaller.util.ApkFileIconFetcher
 import app.pwhs.universalinstaller.util.AppIconFetcher
+import app.pwhs.universalinstaller.util.CrashHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +26,7 @@ class App : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+        CrashHandler.install(this)
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }

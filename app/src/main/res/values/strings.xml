@@ -395,6 +395,42 @@
     <string name="setting_privacy_subtitle">How we handle your data</string>
     <string name="setting_terms_title">Terms of service</string>
     <string name="setting_terms_subtitle">Usage terms and conditions</string>
+    <string name="setting_about_subtitle">App info, links and device details</string>
+    <string name="about_section_app">App</string>
+    <string name="about_section_community">Community</string>
+    <string name="about_section_legal">Legal</string>
+    <string name="about_section_device">Device</string>
+    <string name="about_creator_title">Created by</string>
+    <string name="about_creator_subtitle" translatable="false">Pass With High Score</string>
+    <string name="about_license_title">License</string>
+    <string name="about_license_subtitle" translatable="false">GNU GPL v3</string>
+    <string name="about_device_info_title">Device info</string>
+    <string name="about_device_manufacturer">Manufacturer: %s</string>
+    <string name="about_device_model">Model: %s</string>
+    <string name="about_device_board">Board: %s</string>
+    <string name="about_device_arch">ABIs: %s</string>
+    <string name="about_device_sdk">Android SDK: %s</string>
+    <string name="about_device_os">OS Version: %s</string>
+    <string name="about_device_density">Screen density: %s</string>
+    <string name="about_btn_ok" translatable="false">OK</string>
+    <string name="about_btn_copy">Copy</string>
+    <string name="about_copied">Device info copied</string>
+    <string name="setting_diagnostics_title">Diagnostics</string>
+    <string name="setting_diagnostics_subtitle">View logs and crash reports</string>
+    <string name="diagnostics_title">Diagnostics</string>
+    <string name="diagnostics_tab_session">Session Logs</string>
+    <string name="diagnostics_tab_crashes">Crash Reports</string>
+    <string name="diagnostics_share">Share report</string>
+    <string name="diagnostics_copy">Copy</string>
+    <string name="diagnostics_copied">Copied to clipboard</string>
+    <string name="diagnostics_loading">Loading…</string>
+    <string name="diagnostics_no_session_logs">No warnings or errors in this session</string>
+    <string name="diagnostics_no_crashes">No crashes recorded</string>
+    <string name="diagnostics_clear_crashes">Clear crash reports</string>
+    <string name="diagnostics_clear_confirm_title">Clear crash reports?</string>
+    <string name="diagnostics_clear_confirm_body">All persisted crash logs will be removed permanently.</string>
+    <string name="diagnostics_clear">Clear</string>
+    <string name="diagnostics_cancel">Cancel</string>
     <string name="installer_mode_shizuku" translatable="false">Shizuku</string>
     <string name="installer_mode_root" translatable="false">Root</string>
     <string name="installer_mode_package_installer">Package Installer</string>

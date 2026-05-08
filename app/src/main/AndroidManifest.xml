@@ -166,6 +166,14 @@
             android:name=".presentation.setting.language.LanguageActivity"
             android:exported="false"
             android:theme="@style/Theme.UniversalInstaller" />
+        <activity
+            android:name=".presentation.setting.about.AboutActivity"
+            android:exported="false"
+            android:theme="@style/Theme.UniversalInstaller" />
+        <activity
+            android:name=".presentation.setting.diagnostics.DiagnosticsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.UniversalInstaller" />
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
