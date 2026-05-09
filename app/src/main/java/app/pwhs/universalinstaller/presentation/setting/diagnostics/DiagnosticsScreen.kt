@@ -74,6 +74,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.pwhs.universalinstaller.BuildConfig
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.util.Diagnostics
 import kotlinx.coroutines.Dispatchers
@@ -216,12 +217,14 @@ fun DiagnosticsScreen(modifier: Modifier = Modifier) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { throw RuntimeException("Test Crash - ${System.currentTimeMillis()}") }) {
-                        Icon(
-                            imageVector = Icons.Rounded.BugReport,
-                            contentDescription = "Test Crash",
-                            tint = MaterialTheme.colorScheme.error
-                        )
+                    if (BuildConfig.DEBUG) {
+                        IconButton(onClick = { throw RuntimeException("Test Crash - ${System.currentTimeMillis()}") }) {
+                            Icon(
+                                imageVector = Icons.Rounded.BugReport,
+                                contentDescription = "Test Crash",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                     IconButton(onClick = ::shareReport) {
                         Icon(
