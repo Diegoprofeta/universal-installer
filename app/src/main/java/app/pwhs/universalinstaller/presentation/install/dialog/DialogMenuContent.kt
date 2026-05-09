@@ -260,7 +260,9 @@ fun DialogMenuContent(
         // ── Pager Content ──
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.heightIn(min = 300.dp, max = 380.dp),
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(max = 380.dp),
             verticalAlignment = Alignment.Top,
         ) { page ->
             // Use a LazyColumn inside each page for scrolling
