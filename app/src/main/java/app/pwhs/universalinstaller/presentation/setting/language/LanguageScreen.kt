@@ -52,7 +52,7 @@ data class AppLanguage(val tag: String, val nativeName: String)
 
 private val SUPPORTED_LANGUAGES = listOf(
     AppLanguage("en", "🇺🇸 English"),
-    AppLanguage("ar", "SA العربية"),
+    AppLanguage("ar", "🇸🇦 العربية"),
     AppLanguage("de", "🇩🇪 Deutsch"),
     AppLanguage("el", "🇬🇷 Ελληνικά"),
     AppLanguage("es", "🇪🇸 Español"),
