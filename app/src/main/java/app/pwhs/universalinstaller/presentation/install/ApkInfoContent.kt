@@ -2,21 +2,19 @@ package app.pwhs.universalinstaller.presentation.install
 
 import android.text.format.Formatter
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,11 +32,13 @@ import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.InstallMobile
 import androidx.compose.material.icons.rounded.Memory
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,7 +48,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -57,10 +59,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +71,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -103,78 +104,97 @@ internal fun ApkInfoContent(
     appProfileMapping: Map<String, String> = emptyMap(),
     onProfileSelected: (InstallerProfile?) -> Unit = {},
     onMappingChanged: (String, String?) -> Unit = { _, _ -> },
+    startCompact: Boolean = false,
 ) {
     val context = LocalContext.current
     val currentMappingProfileId = appProfileMapping[apkInfo.packageName]
-    var animationVisible by remember(apkInfo.packageName) { mutableStateOf(false) }
-    LaunchedEffect(apkInfo.packageName) { animationVisible = true }
-    val iconScale by animateFloatAsState(
-        targetValue = if (animationVisible) 1f else 0.6f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMediumLow,
-        ),
-        label = "iconScale",
-    )
-    val contentAlpha by animateFloatAsState(
-        targetValue = if (animationVisible) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 350,
-            delayMillis = 80,
-            easing = FastOutSlowInEasing,
-        ),
-        label = "contentAlpha",
-    )
+    var isExpanded by rememberSaveable { mutableStateOf(!startCompact) }
+    
+    val iconBitmap = remember(apkInfo.icon) {
+        apkInfo.icon?.toBitmap(128, 128)?.asImageBitmap()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .animateContentSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
             .padding(bottom = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val iconModifier = Modifier
-            .size(80.dp)
-            .graphicsLayer {
-                scaleX = iconScale
-                scaleY = iconScale
+        if (isExpanded) {
+            // Full View Header
+            if (iconBitmap != null) {
+                Image(
+                    bitmap = iconBitmap,
+                    contentDescription = apkInfo.appName,
+                    modifier = Modifier.size(80.dp).clip(MaterialTheme.shapes.large),
+                )
+                Spacer(Modifier.height(12.dp))
+            } else {
+                Icon(
+                    imageVector = Icons.Rounded.Android,
+                    contentDescription = null,
+                    modifier = Modifier.size(80.dp),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                )
+                Spacer(Modifier.height(12.dp))
             }
-        if (apkInfo.icon != null) {
-            Image(
-                bitmap = apkInfo.icon.toBitmap(128, 128).asImageBitmap(),
-                contentDescription = apkInfo.appName,
-                modifier = iconModifier.clip(MaterialTheme.shapes.large),
+
+            Text(
+                text = apkInfo.appName,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                text = apkInfo.packageName,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         } else {
-            Icon(
-                imageVector = Icons.Rounded.Android,
-                contentDescription = null,
-                modifier = iconModifier,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-            )
-            Spacer(Modifier.height(12.dp))
+            // Compact View Header
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (iconBitmap != null) {
+                    Image(
+                        bitmap = iconBitmap,
+                        contentDescription = apkInfo.appName,
+                        modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.medium),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Rounded.Android,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    )
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = apkInfo.appName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = "v${apkInfo.versionName}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
-
-        Text(
-            text = apkInfo.appName,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.graphicsLayer { alpha = contentAlpha },
-        )
-        Spacer(Modifier.height(4.dp))
-
-        Text(
-            text = apkInfo.packageName,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.graphicsLayer { alpha = contentAlpha },
-        )
 
         Spacer(Modifier.height(16.dp))
 
@@ -182,6 +202,7 @@ internal fun ApkInfoContent(
                 apkInfo.installedVersionCode > 0 &&
                 apkInfo.versionCode < apkInfo.installedVersionCode
 
+        // Info chips row (Always visible but filtered in compact)
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -189,9 +210,7 @@ internal fun ApkInfoContent(
         ) {
             if (isDowngrade) {
                 InfoChip(
-                    label = stringResource(
-                        R.string.dialog_chip_downgrade,
-                    ) + " ${apkInfo.installedVersionName.orEmpty().ifBlank { "?" }} → ${apkInfo.versionName.ifBlank { "?" }}",
+                    label = stringResource(R.string.dialog_chip_downgrade),
                     leadingIcon = {
                         Icon(
                             Icons.Rounded.Warning,
@@ -204,114 +223,121 @@ internal fun ApkInfoContent(
                     contentColor = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }
-            if (apkInfo.versionName.isNotBlank()) {
-                InfoChip(
-                    label = stringResource(R.string.apk_info_version_chip, apkInfo.versionName),
-                    leadingIcon = {
-                        Icon(Icons.Rounded.Android, null, modifier = Modifier.size(16.dp))
-                    },
-                )
+            
+            if (isExpanded) {
+                if (apkInfo.versionName.isNotBlank()) {
+                    InfoChip(
+                        label = stringResource(R.string.apk_info_version_chip, apkInfo.versionName),
+                        leadingIcon = {
+                            Icon(Icons.Rounded.Android, null, modifier = Modifier.size(16.dp))
+                        },
+                    )
+                }
+                if (apkInfo.fileSizeBytes > 0) {
+                    InfoChip(
+                        label = Formatter.formatShortFileSize(context, apkInfo.fileSizeBytes),
+                        leadingIcon = {
+                            Icon(Icons.Rounded.Storage, null, modifier = Modifier.size(16.dp))
+                        },
+                    )
+                }
+                InfoChip(label = apkInfo.fileFormat)
+                if (apkInfo.minSdkVersion > 0) {
+                    InfoChip(
+                        label = stringResource(R.string.apk_info_min_sdk_chip, sdkToAndroid(apkInfo.minSdkVersion)),
+                        leadingIcon = {
+                            Icon(Icons.Rounded.PhoneAndroid, null, modifier = Modifier.size(16.dp))
+                        },
+                    )
+                }
+            } else {
+                // In compact mode, show size and splits/obb if any
+                if (apkInfo.fileSizeBytes > 0) {
+                    InfoChip(label = Formatter.formatShortFileSize(context, apkInfo.fileSizeBytes))
+                }
             }
-            if (apkInfo.fileSizeBytes > 0) {
-                InfoChip(
-                    label = Formatter.formatShortFileSize(context, apkInfo.fileSizeBytes),
-                    leadingIcon = {
-                        Icon(Icons.Rounded.Storage, null, modifier = Modifier.size(16.dp))
-                    },
-                )
-            }
-            InfoChip(label = apkInfo.fileFormat)
-            if (apkInfo.minSdkVersion > 0) {
-                InfoChip(
-                    label = stringResource(R.string.apk_info_min_sdk_chip, sdkToAndroid(apkInfo.minSdkVersion)),
-                    leadingIcon = {
-                        Icon(Icons.Rounded.PhoneAndroid, null, modifier = Modifier.size(16.dp))
-                    },
-                )
-            }
+
             if (apkInfo.splitCount > 1) {
                 InfoChip(label = stringResource(R.string.apk_info_splits_count, apkInfo.splitCount))
             }
             if (apkInfo.obbFileNames.isNotEmpty()) {
-                val obbSize = if (apkInfo.obbTotalBytes > 0)
-                    " · ${Formatter.formatShortFileSize(context, apkInfo.obbTotalBytes)}"
-                else ""
-                InfoChip(
-                    label = stringResource(
-                        R.string.apk_info_obb_chip,
-                        apkInfo.obbFileNames.size,
-                    ) + obbSize,
+                InfoChip(label = "OBB: ${apkInfo.obbFileNames.size}")
+            }
+        }
+
+        if (isExpanded) {
+            Spacer(Modifier.height(16.dp))
+            ObbAttachCard(
+                attached = attachedObbFiles,
+                onAttach = onAttachObb,
+                onRemove = onRemoveObb,
+            )
+            Spacer(Modifier.height(16.dp))
+            DetailsCard(apkInfo)
+            if (apkInfo.splitEntries.size > 1) {
+                Spacer(Modifier.height(16.dp))
+                SplitsCard(splits = apkInfo.splitEntries, onToggle = onToggleSplit)
+            }
+            if (apkInfo.supportedAbis.isNotEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                AbisCard(apkInfo.supportedAbis)
+            }
+            Spacer(Modifier.height(16.dp))
+            VirusTotalCard(
+                vt = apkInfo.vtResult,
+                fileSizeBytes = apkInfo.fileSizeBytes,
+                sha256 = apkInfo.sha256,
+                onCheck = onCheckVirusTotal,
+            )
+            if (apkInfo.permissions.isNotEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                PermissionsCard(apkInfo.permissions)
+            }
+            if (profiles.isNotEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                ProfilePickerCard(
+                    profiles = profiles,
+                    currentMappingProfileId = currentMappingProfileId,
+                    onProfileSelected = onProfileSelected,
+                    onMappingToggle = { profileId ->
+                        onMappingChanged(apkInfo.packageName, profileId)
+                    }
                 )
             }
         }
 
-        Spacer(Modifier.height(16.dp))
-
-        ObbAttachCard(
-            attached = attachedObbFiles,
-            onAttach = onAttachObb,
-            onRemove = onRemoveObb,
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        DetailsCard(apkInfo)
-
-        if (apkInfo.splitEntries.size > 1) {
-            Spacer(Modifier.height(16.dp))
-            SplitsCard(
-                splits = apkInfo.splitEntries,
-                onToggle = onToggleSplit,
-            )
-        }
-
-        if (apkInfo.supportedAbis.isNotEmpty()) {
-            Spacer(Modifier.height(16.dp))
-            AbisCard(apkInfo.supportedAbis)
-        }
-
-        Spacer(Modifier.height(16.dp))
-        VirusTotalCard(
-            vt = apkInfo.vtResult,
-            fileSizeBytes = apkInfo.fileSizeBytes,
-            sha256 = apkInfo.sha256,
-            onCheck = onCheckVirusTotal,
-        )
-
-        if (apkInfo.permissions.isNotEmpty()) {
-            Spacer(Modifier.height(16.dp))
-            PermissionsCard(apkInfo.permissions)
-        }
-
-        if (profiles.isNotEmpty()) {
-            Spacer(Modifier.height(16.dp))
-            ProfilePickerCard(
-                profiles = profiles,
-                currentMappingProfileId = currentMappingProfileId,
-                onProfileSelected = onProfileSelected,
-                onMappingToggle = { profileId ->
-                    onMappingChanged(apkInfo.packageName, profileId)
-                }
-            )
-        }
-
         Spacer(Modifier.height(24.dp))
 
+        // Action buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             OutlinedButton(
-                onClick = onCancel,
+                onClick = { if (isExpanded && startCompact) isExpanded = false else onCancel() },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.medium,
             ) {
-                Text(stringResource(R.string.cancel))
+                Text(if (isExpanded && startCompact) "Back" else stringResource(R.string.cancel))
             }
+            
+            if (!isExpanded) {
+                FilledTonalButton(
+                    onClick = { isExpanded = true },
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Icon(Icons.Rounded.Menu, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Details")
+                }
+            }
+
             Button(
                 onClick = onInstall,
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.medium,
+                colors = if (isDowngrade) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) else ButtonDefaults.buttonColors()
             ) {
                 Icon(
                     imageVector = Icons.Rounded.InstallMobile,
@@ -319,7 +345,7 @@ internal fun ApkInfoContent(
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.txt_install))
+                Text(if (isDowngrade) "Downgrade" else stringResource(R.string.txt_install))
             }
         }
     }

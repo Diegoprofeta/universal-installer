@@ -91,6 +91,7 @@ fun SettingScreen(
         onBiometricLockInstallChanged = viewModel::setBiometricLockInstall,
         onBiometricLockUninstallChanged = viewModel::setBiometricLockUninstall,
         onAutoConfirmExternalInstallChanged = viewModel::setAutoConfirmExternalInstall,
+        onCompactInstallUiChanged = viewModel::setCompactInstallUi,
         onProfilesClick = {
             context.startActivity(android.content.Intent(context, app.pwhs.universalinstaller.presentation.setting.profile.ProfileActivity::class.java))
         },
@@ -119,6 +120,7 @@ private fun SettingUi(
     onBiometricLockInstallChanged: (Boolean) -> Unit = {},
     onBiometricLockUninstallChanged: (Boolean) -> Unit = {},
     onAutoConfirmExternalInstallChanged: (Boolean) -> Unit = {},
+    onCompactInstallUiChanged: (Boolean) -> Unit = {},
     onProfilesClick: () -> Unit = {},
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -214,6 +216,12 @@ private fun SettingUi(
                         subtitle = stringResource(R.string.setting_auto_confirm_subtitle),
                         checked = uiState.autoConfirmExternalInstall,
                         onCheckedChange = onAutoConfirmExternalInstallChanged,
+                    )
+                    SwitchPreference(
+                        title = "Minimalist Install UI",
+                        subtitle = "Start installation with a compact view",
+                        checked = uiState.compactInstallUi,
+                        onCheckedChange = onCompactInstallUiChanged,
                     )
                 }
             }
