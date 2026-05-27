@@ -9,6 +9,7 @@ import app.pwhs.universalinstaller.util.BiometricGate
 import kotlinx.coroutines.flow.map
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.WifiTethering
@@ -28,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -382,7 +385,7 @@ private fun InstallUi(
             shape = MaterialTheme.shapes.extraLarge,
         ) {
             ApkInfoContent(
-                apkInfo = uiState.pendingApkInfo,
+                apkInfo = uiState.pendingApkInfo!!,
                 onInstall = onConfirmInstall,
                 onCancel = onDismissPreview,
                 onCheckVirusTotal = onCheckVirusTotal,
@@ -431,10 +434,18 @@ private fun InstallUi(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onOpenSyncServer) {
+                    val isSyncRunning = uiState.syncState == app.pwhs.universalinstaller.presentation.sync.SyncState.RUNNING
+                    IconButton(
+                        onClick = onOpenSyncServer,
+                        modifier = if (isSyncRunning) Modifier.background(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                            CircleShape
+                        ) else Modifier
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.WifiTethering,
                             contentDescription = stringResource(R.string.setting_section_sync),
+                            tint = if (isSyncRunning) MaterialTheme.colorScheme.primary else LocalContentColor.current
                         )
                     }
                     IconButton(onClick = { showPermissions = true }) {

@@ -173,6 +173,7 @@ class InstallViewModel(
         _mergeSplits,
         application.dataStore.data.map { it[PreferencesKeys.INSTALLER_PROFILES] },
         application.dataStore.data.map { it[PreferencesKeys.APP_PROFILE_MAPPING] },
+        app.pwhs.universalinstaller.presentation.sync.SyncManager.state,
     ) { flows ->
         @Suppress("UNCHECKED_CAST")
         InstallUiState(
@@ -189,6 +190,7 @@ class InstallViewModel(
             mergeSplits = flows[10] as Boolean,
             installerProfiles = ProfileManager.parseProfiles(flows[11] as String?),
             appProfileMapping = ProfileManager.parseMapping(flows[12] as String?),
+            syncState = flows[13] as app.pwhs.universalinstaller.presentation.sync.SyncState,
         )
     }
         .onStart { activeController().restoreSessionsFromSavedState(viewModelScope) }
