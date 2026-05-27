@@ -2,12 +2,18 @@ package app.pwhs.universalinstaller.presentation.manage
 
 import android.app.Application
 import android.os.Environment
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
+import app.pwhs.universalinstaller.presentation.setting.dataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -24,14 +30,32 @@ data class BackupsUiState(
     val files: List<BackupFile> = emptyList(),
     val totalBytes: Long = 0L,
     val isLoading: Boolean = true,
+    val extractorOutputPath: String = "",
+    val extractorFilenameTemplate: String = "{name}-{version}",
 )
 
 class BackupsViewModel(
     private val application: Application,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(BackupsUiState())
-    val uiState: StateFlow<BackupsUiState> = _uiState.asStateFlow()
+    private val dataStore = application.dataStore
+    private val _filesState = MutableStateFlow<List<BackupFile>>(emptyList())
+    private val _isLoading = MutableStateFlow(true)
+
+    val uiState: StateFlow<BackupsUiState> = combine(
+        _filesState,
+        _isLoading,
+        dataStore.data.map { it[PreferencesKeys.APK_EXTRACTOR_OUTPUT_PATH] ?: "" },
+        dataStore.data.map { it[PreferencesKeys.APK_EXTRACTOR_FILENAME_TEMPLATE] ?: "{name}-{version}" }
+    ) { files, loading, path, template ->
+        BackupsUiState(
+            files = files,
+            totalBytes = files.sumOf { it.sizeBytes },
+            isLoading = loading,
+            extractorOutputPath = path,
+            extractorFilenameTemplate = template
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BackupsUiState())
 
     init {
         refresh()
@@ -45,7 +69,7 @@ class BackupsViewModel(
 
     fun refresh() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _isLoading.value = true
             val files = withContext(Dispatchers.IO) {
                 val dir = backupsDir
                 if (!dir.exists()) return@withContext emptyList()
@@ -63,11 +87,28 @@ class BackupsViewModel(
                     }
                     ?: emptyList()
             }
-            _uiState.value = BackupsUiState(
-                files = files,
-                totalBytes = files.sumOf { it.sizeBytes },
-                isLoading = false,
-            )
+            _filesState.value = files
+            _isLoading.value = false
+        }
+    }
+
+    fun setExtractorOutputPath(path: String) {
+        viewModelScope.launch {
+            if (path.startsWith("content://")) {
+                runCatching {
+                    application.contentResolver.takePersistableUriPermission(
+                        android.net.Uri.parse(path),
+                        android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                }
+            }
+            dataStore.edit { prefs -> prefs[PreferencesKeys.APK_EXTRACTOR_OUTPUT_PATH] = path }
+        }
+    }
+
+    fun setExtractorFilenameTemplate(template: String) {
+        viewModelScope.launch {
+            dataStore.edit { prefs -> prefs[PreferencesKeys.APK_EXTRACTOR_FILENAME_TEMPLATE] = template }
         }
     }
 
@@ -81,7 +122,7 @@ class BackupsViewModel(
     fun deleteAll() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                _uiState.value.files.forEach { runCatching { it.file.delete() } }
+                _filesState.value.forEach { runCatching { it.file.delete() } }
             }
             refresh()
         }

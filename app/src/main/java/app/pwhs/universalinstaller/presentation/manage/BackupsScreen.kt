@@ -4,40 +4,55 @@ import android.content.Intent
 import android.net.Uri
 import android.text.format.DateUtils
 import android.text.format.Formatter
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.DriveFileRenameOutline
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material.icons.rounded.FolderZip
 import androidx.compose.material.icons.rounded.InstallMobile
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,11 +63,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import app.pwhs.universalinstaller.BuildConfig
 import app.pwhs.universalinstaller.R
+import app.pwhs.universalinstaller.presentation.composable.SettingsSection
 import app.pwhs.universalinstaller.util.ApkFileIconData
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
@@ -71,6 +89,10 @@ fun BackupsScreen(
     val context = LocalContext.current
     var pendingDeleteAll by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<BackupFile?>(null) }
+    var showSettings by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Scaffold(
         modifier = modifier,
@@ -96,24 +118,30 @@ fun BackupsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = stringResource(R.string.cancel),
                         )
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showSettings = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Settings,
+                            contentDescription = "Extraction Settings",
+                        )
+                    }
                     IconButton(
                         onClick = { openContainingFolder(context, viewModel.backupsDir) },
                     ) {
                         Icon(
-                            Icons.Rounded.FolderOpen,
+                            imageVector = Icons.Rounded.FolderOpen,
                             contentDescription = stringResource(R.string.backup_action_open_folder),
                         )
                     }
                     if (uiState.files.isNotEmpty()) {
                         IconButton(onClick = { pendingDeleteAll = true }) {
                             Icon(
-                                Icons.Rounded.DeleteSweep,
+                                imageVector = Icons.Rounded.DeleteSweep,
                                 contentDescription = stringResource(R.string.backup_action_delete_all),
                             )
                         }
@@ -151,6 +179,7 @@ fun BackupsScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
+                    contentPadding = PaddingValues(bottom = navBarPadding + 16.dp)
                 ) {
                     items(items = uiState.files, key = { it.file.absolutePath }) { backup ->
                         BackupRow(
@@ -160,7 +189,95 @@ fun BackupsScreen(
                             onDelete = { pendingDelete = backup },
                         )
                     }
-                    item { Spacer(Modifier.height(80.dp)) }
+                }
+            }
+        }
+    }
+
+    if (showSettings) {
+        ModalBottomSheet(
+            onDismissRequest = { showSettings = false },
+            sheetState = sheetState,
+            dragHandle = null,
+            contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .padding(bottom = navBarPadding + 16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                Text(
+                    text = "Extraction Settings",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                SettingsSection(
+                    title = "APK Extractor",
+                    icon = Icons.Rounded.Folder
+                ) {
+                    val folderPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+                        androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()
+                    ) { uri ->
+                        uri?.let { viewModel.setExtractorOutputPath(it.toString()) }
+                    }
+
+                    val currentPath = uiState.extractorOutputPath
+                    val displayPath = if (currentPath.startsWith("content://")) {
+                        androidx.documentfile.provider.DocumentFile.fromTreeUri(context, Uri.parse(currentPath))?.name
+                            ?: currentPath
+                    } else {
+                        currentPath.ifBlank { "Default (Download/UniversalInstaller/Extracted)" }
+                    }
+
+                    OutlinedTextField(
+                        value = displayPath,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Output Path") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .clickable { folderPickerLauncher.launch(null) },
+                        leadingIcon = { Icon(Icons.Rounded.Folder, null) },
+                        trailingIcon = {
+                            IconButton(onClick = { folderPickerLauncher.launch(null) }) {
+                                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
+                            }
+                        },
+                        enabled = true,
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                            .also { interactionSource ->
+                                LaunchedEffect(interactionSource) {
+                                    interactionSource.interactions.collect {
+                                        if (it is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                                            folderPickerLauncher.launch(null)
+                                        }
+                                    }
+                                }
+                            }
+                    )
+
+                    OutlinedTextField(
+                        value = uiState.extractorFilenameTemplate,
+                        onValueChange = viewModel::setExtractorFilenameTemplate,
+                        label = { Text("Filename Template") },
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        leadingIcon = { Icon(Icons.Rounded.DriveFileRenameOutline, null) },
+                        placeholder = { Text("{name}-{version}") },
+                        supportingText = { Text("Tags: {name}, {pkg}, {version}, {code}") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                    )
+                }
+
+                TextButton(
+                    onClick = { showSettings = false },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Done")
                 }
             }
         }
@@ -264,19 +381,19 @@ private fun BackupRow(
             androidx.compose.foundation.layout.Row {
                 IconButton(onClick = onInstall) {
                     Icon(
-                        Icons.Rounded.InstallMobile,
+                        imageVector = Icons.Rounded.InstallMobile,
                         contentDescription = stringResource(R.string.backup_action_install),
                     )
                 }
                 IconButton(onClick = onShare) {
                     Icon(
-                        Icons.Rounded.Share,
+                        imageVector = Icons.Rounded.Share,
                         contentDescription = stringResource(R.string.backup_action_share),
                     )
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
-                        Icons.Rounded.Delete,
+                        imageVector = Icons.Rounded.Delete,
                         contentDescription = stringResource(R.string.backup_action_delete),
                     )
                 }

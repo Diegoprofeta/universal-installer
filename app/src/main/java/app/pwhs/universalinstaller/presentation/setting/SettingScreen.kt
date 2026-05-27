@@ -10,27 +10,20 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.CleaningServices
-import androidx.compose.material.icons.rounded.DriveFileRenameOutline
-import androidx.compose.material.icons.rounded.Folder
-import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.SettingsApplications
 import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.WifiTethering
@@ -48,15 +41,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.presentation.composable.SettingsSection
@@ -94,8 +84,6 @@ fun SettingScreen(
         onBiometricLockInstallChanged = viewModel::setBiometricLockInstall,
         onBiometricLockUninstallChanged = viewModel::setBiometricLockUninstall,
         onAutoConfirmExternalInstallChanged = viewModel::setAutoConfirmExternalInstall,
-        onExtractorOutputPathChanged = viewModel::setExtractorOutputPath,
-        onExtractorFilenameTemplateChanged = viewModel::setExtractorFilenameTemplate,
         onProfilesClick = {
             context.startActivity(android.content.Intent(context, app.pwhs.universalinstaller.presentation.setting.profile.ProfileActivity::class.java))
         },
@@ -124,8 +112,6 @@ private fun SettingUi(
     onBiometricLockInstallChanged: (Boolean) -> Unit = {},
     onBiometricLockUninstallChanged: (Boolean) -> Unit = {},
     onAutoConfirmExternalInstallChanged: (Boolean) -> Unit = {},
-    onExtractorOutputPathChanged: (String) -> Unit = {},
-    onExtractorFilenameTemplateChanged: (String) -> Unit = {},
     onProfilesClick: () -> Unit = {},
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -264,65 +250,7 @@ private fun SettingUi(
             }
 
             // ── APK Extractor Section ────────────────────
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.setting_section_extractor),
-                    icon = Icons.Rounded.Folder
-                ) {
-                    val folderPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-                        androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()
-                    ) { uri ->
-                        uri?.let { onExtractorOutputPathChanged(it.toString()) }
-                    }
-
-                    val currentPath = uiState.extractorOutputPath
-                    val displayPath = if (currentPath.startsWith("content://")) {
-                        androidx.documentfile.provider.DocumentFile.fromTreeUri(context, android.net.Uri.parse(currentPath))?.name
-                            ?: currentPath
-                    } else {
-                        currentPath.ifBlank { "Default (Download/UniversalInstaller/Extracted)" }
-                    }
-
-                    OutlinedTextField(
-                        value = displayPath,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Output Path") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .clickable { folderPickerLauncher.launch(null) },
-                        leadingIcon = { Icon(Icons.Rounded.Folder, null) },
-                        trailingIcon = {
-                            IconButton(onClick = { folderPickerLauncher.launch(null) }) {
-                                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
-                            }
-                        },
-                        enabled = true,
-                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-                            .also { interactionSource ->
-                                LaunchedEffect(interactionSource) {
-                                    interactionSource.interactions.collect {
-                                        if (it is androidx.compose.foundation.interaction.PressInteraction.Release) {
-                                            folderPickerLauncher.launch(null)
-                                        }
-                                    }
-                                }
-                            }
-                    )
-                    OutlinedTextField(
-                        value = uiState.extractorFilenameTemplate,
-                        onValueChange = onExtractorFilenameTemplateChanged,
-                        label = { Text("Filename Template") },
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                        leadingIcon = { Icon(Icons.Rounded.DriveFileRenameOutline, null) },
-                        placeholder = { Text("{name}-{version}") },
-                        supportingText = { Text("Tags: {name}, {pkg}, {version}, {code}") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
-                    )
-                }
-            }
+            // Moved to Backups screen
 
             // ── Advanced Options ─────────────────────────
             item {
