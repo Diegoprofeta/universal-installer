@@ -370,4 +370,5 @@
     <string name="antisplit_not_installed_desc">To merge split APKs into a single APK, please install Universal Anti-Split.</string>
     <string name="antisplit_download_action">Download</string>
     <string name="antisplit_merge_success">APK merged successfully</string>
+    <string name="installer_engine_active">Active</string>
 </resources>

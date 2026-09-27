@@ -1,35 +1,15 @@
 package app.pwhs.universalinstaller.presentation.composable
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AdminPanelSettings
-import androidx.compose.material.icons.rounded.Android
-import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.rounded.Key
-import androidx.compose.material.icons.rounded.Security
-import androidx.compose.material.icons.rounded.Shield
-import androidx.compose.material.icons.rounded.Terminal
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -138,7 +118,7 @@ fun InstallerModeBadge(modifier: Modifier = Modifier) {
                     }
                 }
                 InstallBackend.ROOT -> {
-                    if (settingState.useRoot && settingState.rootState == RootState.READY) {
+                    if (settingState.useRoot && (settingState.rootState == RootState.READY || settingState.rootState == RootState.UNKNOWN)) {
                         resolved = backend
                         break
                     }
@@ -165,9 +145,15 @@ fun InstallerModeBadge(modifier: Modifier = Modifier) {
         }
         resolved ?: if (!isSystemInstallerFrozen) InstallBackend.DEFAULT
         else if (settingState.shizukuState == ShizukuState.READY) InstallBackend.SHIZUKU
-        else if (settingState.rootState == RootState.READY) InstallBackend.ROOT
+        else if (settingState.rootState == RootState.READY || settingState.rootState == RootState.UNKNOWN) InstallBackend.ROOT
         else if (dhizukuState == DhizukuState.READY) InstallBackend.DHIZUKU
         else InstallBackend.DEFAULT
+    }
+
+    LaunchedEffect(settingState.useRoot, settingState.rootState) {
+        if (settingState.useRoot && settingState.rootState == RootState.UNKNOWN) {
+            settingViewModel.retryRoot()
+        }
     }
 
     var showPicker by remember { mutableStateOf(false) }
@@ -213,209 +199,10 @@ fun InstallerModeBadge(modifier: Modifier = Modifier) {
     }
 
     if (showPicker) {
-        val rootReady = settingState.rootState == RootState.READY || activeBackend == InstallBackend.ROOT
-        val rootDimmed = activeBackend != InstallBackend.ROOT && (
-            settingState.rootState == RootState.NOT_ROOTED ||
-            settingState.rootState == RootState.UNAVAILABLE
-        )
-        val shizukuSelectable = settingState.shizukuState != ShizukuState.UNSUPPORTED &&
-            settingState.shizukuState != ShizukuState.NOT_INSTALLED
-
-        val dhizukuSupported = DhizukuCompat.isSupported
-        val dhizukuReady = dhizukuState == DhizukuState.READY || activeBackend == InstallBackend.DHIZUKU
-        val dhizukuSelectable = dhizukuSupported &&
-            dhizukuState != DhizukuState.UNSUPPORTED &&
-            dhizukuState != DhizukuState.NOT_INSTALLED &&
-            dhizukuState != DhizukuState.PROFILE_OWNER_UNSUPPORTED
-        val dhizukuDimmed = activeBackend != InstallBackend.DHIZUKU && !dhizukuReady
-
-        AlertDialog(
+        InstallPriorityBottomSheet(
             onDismissRequest = { showPicker = false },
-            title = { Text(stringResource(R.string.installer_engine_dialog_title)) },
-            text = {
-                Column {
-                    EngineOption(
-                        backend = InstallBackend.DEFAULT,
-                        title = stringResource(R.string.installer_mode_package_installer),
-                        subtitle = if (isSystemInstallerFrozen) {
-                            stringResource(R.string.setting_system_installer_frozen_badge_desc)
-                        } else if (!canInstallPackages) {
-                            stringResource(R.string.permission_install_prompt_required)
-                        } else {
-                            stringResource(R.string.installer_engine_default_desc)
-                        },
-                        selected = activeBackend == InstallBackend.DEFAULT,
-                        enabled = !isSystemInstallerFrozen,
-                        dimmed = isSystemInstallerFrozen,
-                        onClick = {
-                            if (isSystemInstallerFrozen) {
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.setting_system_installer_frozen_cannot_select),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else if (!canInstallPackages) {
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.permission_install_prompt_required),
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                runCatching {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                                            data = Uri.parse("package:${context.packageName}")
-                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        }
-                                        context.startActivity(intent)
-                                    }
-                                }
-                                settingViewModel.promoteBackendToTop(InstallBackend.DEFAULT)
-                                settingViewModel.setInstallMode(InstallMode.DEFAULT)
-                                showPicker = false
-                            } else {
-                                settingViewModel.promoteBackendToTop(InstallBackend.DEFAULT)
-                                settingViewModel.setInstallMode(InstallMode.DEFAULT)
-                                showPicker = false
-                            }
-                        },
-                    )
-                    EngineOption(
-                        backend = InstallBackend.SHIZUKU,
-                        title = stringResource(R.string.installer_mode_shizuku),
-                        subtitle = when (settingState.shizukuState) {
-                            ShizukuState.NOT_INSTALLED -> stringResource(R.string.setting_shizuku_not_installed)
-                            ShizukuState.UNSUPPORTED -> stringResource(R.string.setting_shizuku_unsupported)
-                            else -> stringResource(R.string.installer_engine_shizuku_desc)
-                        },
-                        selected = activeBackend == InstallBackend.SHIZUKU,
-                        enabled = shizukuSelectable,
-                        onClick = {
-                            settingViewModel.promoteBackendToTop(InstallBackend.SHIZUKU)
-                            settingViewModel.setInstallMode(InstallMode.SHIZUKU)
-                            showPicker = false
-                        },
-                    )
-                    if (dhizukuSupported) {
-                        EngineOption(
-                            backend = InstallBackend.DHIZUKU,
-                            title = stringResource(R.string.installer_mode_dhizuku),
-                            subtitle = when (dhizukuState) {
-                                DhizukuState.UNSUPPORTED -> stringResource(R.string.setting_dhizuku_unsupported)
-                                DhizukuState.NOT_INSTALLED -> stringResource(R.string.setting_dhizuku_not_installed)
-                                DhizukuState.NOT_RUNNING -> stringResource(R.string.setting_dhizuku_not_running)
-                                DhizukuState.PROFILE_OWNER_UNSUPPORTED -> stringResource(R.string.setting_dhizuku_profile_owner_unsupported)
-                                DhizukuState.NOT_AUTHORIZED -> stringResource(R.string.setting_dhizuku_no_permission)
-                                else -> stringResource(R.string.installer_engine_dhizuku_desc)
-                            },
-                            selected = activeBackend == InstallBackend.DHIZUKU,
-                            enabled = dhizukuSelectable,
-                            dimmed = dhizukuDimmed,
-                            onClick = {
-                                settingViewModel.promoteBackendToTop(InstallBackend.DHIZUKU)
-                                settingViewModel.setInstallMode(InstallMode.DHIZUKU)
-                                showPicker = false
-                            },
-                        )
-                    }
-                    EngineOption(
-                        backend = InstallBackend.ROOT,
-                        title = stringResource(R.string.installer_mode_root),
-                        subtitle = when {
-                            !settingState.rootSupported ->
-                                stringResource(R.string.installer_engine_root_unsupported)
-                            rootReady -> stringResource(R.string.installer_engine_root_desc)
-                            else -> stringResource(R.string.installer_engine_root_request)
-                        },
-                        selected = activeBackend == InstallBackend.ROOT,
-                        enabled = settingState.rootSupported,
-                        dimmed = rootDimmed,
-                        onClick = {
-                            settingViewModel.promoteBackendToTop(InstallBackend.ROOT)
-                            settingViewModel.setInstallMode(InstallMode.ROOT)
-                            showPicker = false
-                        },
-                    )
-                    EngineOption(
-                        backend = InstallBackend.CUSTOM,
-                        title = stringResource(R.string.installer_mode_custom),
-                        subtitle = stringResource(R.string.installer_engine_custom_desc),
-                        selected = activeBackend == InstallBackend.CUSTOM,
-                        enabled = true,
-                        onClick = {
-                            settingViewModel.promoteBackendToTop(InstallBackend.CUSTOM)
-                            settingViewModel.setInstallMode(InstallMode.CUSTOM)
-                            showPicker = false
-                        },
-                    )
-                    EngineOption(
-                        backend = InstallBackend.MICROG,
-                        title = stringResource(R.string.installer_mode_microg),
-                        subtitle = if (microGAvailable) stringResource(R.string.installer_mode_microg_desc)
-                            else stringResource(R.string.microg_not_installed),
-                        selected = activeBackend == InstallBackend.MICROG,
-                        enabled = microGAvailable,
-                        onClick = {
-                            settingViewModel.promoteBackendToTop(InstallBackend.MICROG)
-                            settingViewModel.setInstallMode(InstallMode.MICROG)
-                            showPicker = false
-                        },
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showPicker = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showPicker = false
-                    context.startActivity(Intent(context, app.pwhs.universalinstaller.presentation.setting.SettingActivity::class.java))
-                }) {
-                    Text(stringResource(R.string.setting_install_priority_title))
-                }
-            },
+            settingViewModel = settingViewModel,
         )
     }
 }
 
-@Composable
-private fun EngineOption(
-    backend: InstallBackend,
-    title: String,
-    subtitle: String,
-    selected: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    // Greyed-out look without blocking the click — used for engines that aren't ready yet
-    // but can still be tapped to start their permission/request flow (e.g. Root).
-    dimmed: Boolean = false,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .selectable(selected = selected, enabled = enabled, onClick = onClick)
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = onClick, enabled = enabled)
-        Spacer(modifier = Modifier.width(6.dp))
-        BackendIcon(
-            backend = backend,
-            modifier = Modifier
-                .size(24.dp)
-                .alpha(if (enabled && !dimmed) 1f else 0.38f),
-            tint = if (enabled && !dimmed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
-        )
-        Column(modifier = Modifier.padding(start = 10.dp)) {
-            val titleColor = if (enabled && !dimmed) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, color = titleColor)
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}

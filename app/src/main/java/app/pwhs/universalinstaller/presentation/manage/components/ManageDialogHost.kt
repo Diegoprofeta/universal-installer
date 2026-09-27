@@ -18,11 +18,15 @@ import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,10 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.InstalledApp
+import app.pwhs.universalinstaller.presentation.manage.sheets.UninstallConfirmDialog
 import app.pwhs.universalinstaller.presentation.manage.BatchExtractState
 import app.pwhs.universalinstaller.presentation.manage.ExtractState
 import app.pwhs.universalinstaller.presentation.install.controller.SystemAppMethod
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ManageDialogHost(
     confirmUninstallTarget: InstalledApp?,
@@ -74,35 +80,86 @@ internal fun ManageDialogHost(
     }
 
     confirmClearDataTarget?.let { target ->
-        AlertDialog(
+        ModalBottomSheet(
             onDismissRequest = onDismissClearData,
-            icon = {
-                Icon(
-                    Icons.Rounded.DeleteForever,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
+            dragHandle = { BottomSheetDefaults.DragHandle() },
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier.size(56.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Rounded.DeleteForever,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(28.dp),
+                        )
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.manage_clear_data_confirm_title, target.appName),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-            },
-            title = {
-                Text(stringResource(R.string.manage_clear_data_confirm_title, target.appName))
-            },
-            text = { Text(stringResource(R.string.manage_clear_data_confirm_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    onConfirmClearData(target.packageName, target.appName)
-                }) {
-                    Text(
-                        stringResource(R.string.manage_action_clear_data),
-                        color = MaterialTheme.colorScheme.error,
-                    )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.manage_clear_data_confirm_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    OutlinedButton(
+                        onClick = onDismissClearData,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = MaterialTheme.shapes.medium,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            onConfirmClearData(target.packageName, target.appName)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                        ),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.manage_action_clear_data),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissClearData) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-        )
+            }
+        }
     }
 
     if (extractState is ExtractState.Running) {
@@ -271,31 +328,84 @@ internal fun ManageDialogHost(
     }
 
     if (showBatchClearDataConfirm) {
-        AlertDialog(
+        ModalBottomSheet(
             onDismissRequest = onDismissBatchClearDataConfirm,
-            confirmButton = {
-                TextButton(onClick = onConfirmBatchClearData) {
-                    Text(
-                        stringResource(R.string.manage_batch_action_clear_data),
-                        color = MaterialTheme.colorScheme.error,
-                    )
+            dragHandle = { BottomSheetDefaults.DragHandle() },
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier.size(56.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Rounded.DeleteSweep,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(28.dp),
+                        )
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissBatchClearDataConfirm) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-            title = { Text(stringResource(R.string.manage_batch_clear_data_confirm_title, selectedPackagesCount)) },
-            text = { Text(stringResource(R.string.manage_batch_clear_data_confirm_text)) },
-            icon = {
-                Icon(
-                    imageVector = Icons.Rounded.DeleteSweep,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.manage_batch_clear_data_confirm_title, selectedPackagesCount),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-            },
-        )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.manage_batch_clear_data_confirm_text),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    OutlinedButton(
+                        onClick = onDismissBatchClearDataConfirm,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = MaterialTheme.shapes.medium,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                    Button(
+                        onClick = onConfirmBatchClearData,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                        ),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.manage_batch_action_clear_data),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            }
+        }
     }
 
     systemAppPrompt?.let { prompt ->

@@ -370,4 +370,5 @@
     <string name="antisplit_not_installed_desc">Để gộp các tệp Split APK thành một file APK hoàn chỉnh duy nhất, vui lòng cài đặt Universal Anti-Split.</string>
     <string name="antisplit_download_action">Tải về</string>
     <string name="antisplit_merge_success">Gộp APK thành công</string>
+    <string name="installer_engine_active">Đang dùng</string>
 </resources>

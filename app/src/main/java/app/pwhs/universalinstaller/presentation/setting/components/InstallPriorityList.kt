@@ -313,7 +313,7 @@ private fun PriorityBackendRow(
 }
 
 @Composable
-private fun resolveStatusText(
+internal fun resolveStatusText(
     backend: InstallBackend,
     isEnabled: Boolean,
     uiState: SettingUiState,

@@ -117,13 +117,13 @@ enum class InstallMode {
             return when {
                 configuredMode == MICROG && isMicroGAvailable -> MICROG
                 configuredMode == CUSTOM -> CUSTOM
-                configuredMode == ROOT && rootState == RootState.READY -> ROOT
+                configuredMode == ROOT && (rootState == RootState.READY || rootState == RootState.UNKNOWN) -> ROOT
                 configuredMode == SHIZUKU && shizukuState == ShizukuState.READY -> SHIZUKU
                 configuredMode == DHIZUKU && dhizukuState == app.pwhs.universalinstaller.util.DhizukuState.READY -> DHIZUKU
                 configuredMode == DEFAULT && !isSystemInstallerFrozen -> DEFAULT
                 isSystemInstallerFrozen -> when {
                     shizukuState == ShizukuState.READY -> SHIZUKU
-                    rootState == RootState.READY -> ROOT
+                    rootState == RootState.READY || rootState == RootState.UNKNOWN -> ROOT
                     dhizukuState == app.pwhs.universalinstaller.util.DhizukuState.READY -> DHIZUKU
                     else -> DEFAULT
                 }

@@ -124,7 +124,21 @@ class SettingPrivilegeDelegate(
 
         if (backendFactory.rootSupportCompiledIn) {
             scope.launch {
-                _rootState.value = backendFactory.probeRootState()
+                val probed = backendFactory.probeRootState()
+                _rootState.value = probed
+                val prefs = dataStore.data.first()
+                val useRoot = prefs[PreferencesKeys.USE_ROOT] ?: false
+                if (useRoot && (probed == RootState.UNKNOWN || probed == RootState.READY)) {
+                    _rootState.value = backendFactory.requestRoot()
+                }
+            }
+            scope.launch {
+                dataStore.data.collect { prefs ->
+                    val useRoot = prefs[PreferencesKeys.USE_ROOT] ?: false
+                    if (useRoot && _rootState.value == RootState.UNKNOWN) {
+                        _rootState.value = backendFactory.requestRoot()
+                    }
+                }
             }
         }
         scope.launch {
@@ -285,6 +299,8 @@ class SettingPrivilegeDelegate(
     fun retryRoot() {
         scope.launch {
             _rootState.value = RootState.UNKNOWN
+            backendFactory.resetCachedShell()
+            _rootState.value = backendFactory.requestRoot()
         }
     }
 
