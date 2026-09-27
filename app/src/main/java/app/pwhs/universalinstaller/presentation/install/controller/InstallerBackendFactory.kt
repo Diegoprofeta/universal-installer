@@ -137,6 +137,9 @@ interface InstallerBackendFactory {
         keepData: Boolean,
         allUsers: Boolean,
     ): Result<String>
+
+    /** Attempts to start Shizuku service via root shell starter script or binary. */
+    suspend fun startShizukuViaRoot(): Result<Boolean>
 }
 
 enum class SystemAppMethod {

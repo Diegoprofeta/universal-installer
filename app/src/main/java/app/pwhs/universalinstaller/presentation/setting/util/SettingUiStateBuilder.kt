@@ -73,7 +73,7 @@ object SettingUiStateBuilder {
             dynamicColor = themeState.dynamicColor,
             amoledMode = themeState.amoledMode,
             themePreset = themeState.themePreset,
-            useShizuku = useShizuku,
+            useShizuku = useShizuku && (shizukuState == ShizukuState.READY),
             useRoot = useRoot && (rootState == RootState.READY || rootState == RootState.UNKNOWN),
             virusTotalApiKey = vtKey,
             deleteApkAfterInstall = deleteApk,
@@ -105,7 +105,7 @@ object SettingUiStateBuilder {
             isDefaultUninstaller = isDefaultUninstaller,
             useCustomAuthorizer = useCustomAuthorizer,
             customAuthorizerCommand = customAuthorizerCommand,
-            useMicroG = useMicroG,
+            useMicroG = useMicroG && app.pwhs.universalinstaller.util.MicroGCompat.isAvailable(application),
             backendPriority = backendPriority,
         )
     }

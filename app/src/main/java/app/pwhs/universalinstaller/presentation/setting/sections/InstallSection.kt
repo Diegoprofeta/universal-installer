@@ -10,6 +10,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.SettingsApplications
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,7 +30,6 @@ import app.pwhs.universalinstaller.presentation.setting.InstallMode
 import app.pwhs.universalinstaller.presentation.install.controller.RootState
 import app.pwhs.universalinstaller.presentation.setting.SettingUiState
 import app.pwhs.universalinstaller.presentation.setting.ShizukuState
-import app.pwhs.universalinstaller.presentation.setting.components.CustomAuthorizerCard
 import app.pwhs.universalinstaller.presentation.setting.components.InstallModeSelector
 import app.pwhs.universalinstaller.presentation.setting.components.OptionGroupHeader
 import app.pwhs.universalinstaller.presentation.setting.components.SearchableItem
@@ -50,12 +50,8 @@ internal fun LazyListScope.InstallSection(
     onAutoOpenAfterInstallChanged: (Boolean) -> Unit,
     onDefaultInstallerChanged: (Boolean) -> Unit,
     onDefaultUninstallerChanged: (Boolean) -> Unit = {},
-    onCustomAuthorizerCommandChange: (String) -> Unit = {},
-    onTestCustomAuthorizerCommand: suspend (String) -> Result<String> = { Result.success("") },
     onOpenInstallOptions: () -> Unit = {},
-    onMoveBackendPriority: (Int, Int) -> Unit = { _, _ -> },
-    onResetBackendPriority: () -> Unit = {},
-    onSetBackendEnabled: (app.pwhs.universalinstaller.domain.model.InstallBackend, Boolean) -> Unit = { _, _ -> },
+    onOpenInstallPriority: () -> Unit = {},
 ) {
     if (matchesQuery(q, installLabels)) item {
         SettingsSection(title = stringResource(R.string.setting_section_installation), icon = Icons.Rounded.SettingsApplications) {
@@ -67,15 +63,36 @@ internal fun LazyListScope.InstallSection(
                 stringResource(R.string.setting_install_priority_title),
                 "shizuku dhizuku root default custom microg priority engine mode " + stringResource(R.string.setting_install_mode_title),
             ) {
-                app.pwhs.universalinstaller.presentation.setting.components.InstallPriorityList(
-                    uiState = uiState,
-                    dhizukuState = dhizukuState,
-                    useDhizuku = useDhizuku,
-                    onMovePriority = onMoveBackendPriority,
-                    onResetPriority = onResetBackendPriority,
-                    onToggleBackend = onSetBackendEnabled,
-                    onCustomAuthorizerCommandChange = onCustomAuthorizerCommandChange,
-                    onTestCustomAuthorizerCommand = onTestCustomAuthorizerCommand,
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.setting_install_priority_title),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(R.string.setting_install_priority_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Tune,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    modifier = Modifier.clickable { onOpenInstallPriority() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 )
                 if (uiState.rootSupported && uiState.useRoot && uiState.rootState == RootState.DENIED) {
                     ListItem(

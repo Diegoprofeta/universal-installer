@@ -56,6 +56,7 @@ import app.pwhs.universalinstaller.telemetry.Telemetry
 import app.pwhs.universalinstaller.domain.model.ExternalOpenMode
 import app.pwhs.universalinstaller.domain.model.InstallUiStyle
 import app.pwhs.universalinstaller.presentation.composable.EmptyStateView
+import app.pwhs.universalinstaller.presentation.composable.InstallPriorityBottomSheet
 import app.pwhs.universalinstaller.presentation.composable.SettingsSection
 import app.pwhs.universalinstaller.presentation.composable.UniversalSearchBar
 import app.pwhs.universalinstaller.presentation.install.controller.RootState
@@ -148,9 +149,6 @@ fun SettingScreen(
         },
         analyticsEnabled = analyticsEnabled,
         onAnalyticsEnabledChanged = viewModel::setAnalyticsEnabled,
-        onMoveBackendPriority = viewModel::moveBackendPriority,
-        onResetBackendPriority = viewModel::resetBackendPriority,
-        onSetBackendEnabled = viewModel::setBackendEnabled,
     )
 }
 
@@ -195,14 +193,12 @@ private fun SettingUi(
     onProfilesClick: () -> Unit = {},
     analyticsEnabled: Boolean = true,
     onAnalyticsEnabledChanged: (Boolean) -> Unit = {},
-    onMoveBackendPriority: (Int, Int) -> Unit = { _, _ -> },
-    onResetBackendPriority: () -> Unit = {},
-    onSetBackendEnabled: (app.pwhs.universalinstaller.domain.model.InstallBackend, Boolean) -> Unit = { _, _ -> },
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val backupViewModel: BackupViewModel = koinViewModel()
     var openRestorePicker by remember { mutableStateOf<(() -> Unit)?>(null) }
     var showInstallOptionsSheet by rememberSaveable { mutableStateOf(false) }
+    var showInstallPrioritySheet by rememberSaveable { mutableStateOf(false) }
     var showSyncOptionsSheet by rememberSaveable { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -358,12 +354,8 @@ private fun SettingUi(
                     onAutoOpenAfterInstallChanged = onAutoOpenAfterInstallChanged,
                     onDefaultInstallerChanged = onDefaultInstallerChanged,
                     onDefaultUninstallerChanged = onDefaultUninstallerChanged,
-                    onCustomAuthorizerCommandChange = onCustomAuthorizerCommandChange,
-                    onTestCustomAuthorizerCommand = onTestCustomAuthorizerCommand,
                     onOpenInstallOptions = { showInstallOptionsSheet = true },
-                    onMoveBackendPriority = onMoveBackendPriority,
-                    onResetBackendPriority = onResetBackendPriority,
-                    onSetBackendEnabled = onSetBackendEnabled,
+                    onOpenInstallPriority = { showInstallPrioritySheet = true },
                 )
 
                 // ── Profiles Section ─────────────────────────
@@ -463,6 +455,12 @@ private fun SettingUi(
             onPrivilegedOptionChanged = onPrivilegedOptionChanged,
             onInstallerPackageChanged = onInstallerPackageChanged,
             onShizukuOptionChanged = onShizukuOptionChanged,
+        )
+    }
+
+    if (showInstallPrioritySheet) {
+        InstallPriorityBottomSheet(
+            onDismissRequest = { showInstallPrioritySheet = false },
         )
     }
 

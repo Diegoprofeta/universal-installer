@@ -120,6 +120,7 @@ class SettingViewModel(
         shizukuState = { privilegeDelegate.shizukuState.value },
         updateShizukuState = { privilegeDelegate.updateShizukuState() },
         requestShizukuPermission = { privilegeDelegate.requestShizukuPermission() },
+        startShizukuService = { privilegeDelegate.startShizukuService() },
         updateDhizukuState = { privilegeDelegate.updateDhizukuState(it) },
         updateRootState = { privilegeDelegate.updateRootState(it) },
         emitEvent = { emitEvent(it) },
@@ -268,6 +269,8 @@ class SettingViewModel(
     fun setInstallMode(mode: InstallMode) = privilegeDelegate.setInstallMode(mode)
     fun updateShizukuState() = privilegeDelegate.updateShizukuState()
     fun setUseShizuku(enabled: Boolean) = privilegeDelegate.setUseShizuku(enabled)
+    fun startShizukuService() = privilegeDelegate.startShizukuService()
+    fun requestShizukuPermission() = privilegeDelegate.requestShizukuPermission()
     fun setUseRoot(enabled: Boolean) = privilegeDelegate.setUseRoot(enabled)
     fun retryRoot() = privilegeDelegate.retryRoot()
     fun setUseDhizuku(enabled: Boolean) = privilegeDelegate.setUseDhizuku(enabled)

@@ -125,12 +125,20 @@ fun InstallPriorityList(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 priorityList.forEachIndexed { index, backend ->
+                    val isAvailable = isBackendAvailable(
+                        backend = backend,
+                        uiState = uiState,
+                        dhizukuState = dhizukuState,
+                        microGAvailable = microGAvailable,
+                        isSystemFrozen = isSystemFrozen,
+                    )
+
                     val isEnabled = when (backend) {
-                        InstallBackend.SHIZUKU -> uiState.useShizuku
-                        InstallBackend.DHIZUKU -> useDhizuku
-                        InstallBackend.ROOT -> uiState.useRoot
+                        InstallBackend.SHIZUKU -> uiState.useShizuku && isAvailable
+                        InstallBackend.DHIZUKU -> useDhizuku && isAvailable
+                        InstallBackend.ROOT -> uiState.useRoot && isAvailable
                         InstallBackend.CUSTOM -> uiState.useCustomAuthorizer
-                        InstallBackend.MICROG -> uiState.useMicroG
+                        InstallBackend.MICROG -> uiState.useMicroG && isAvailable
                         InstallBackend.DEFAULT -> !isSystemFrozen
                     }
 
@@ -147,6 +155,7 @@ fun InstallPriorityList(
                         rank = index + 1,
                         backend = backend,
                         isEnabled = isEnabled,
+                        isAvailable = isAvailable,
                         statusText = statusText,
                         canMoveUp = index > 0,
                         canMoveDown = index < priorityList.size - 1,
@@ -178,6 +187,7 @@ private fun PriorityBackendRow(
     rank: Int,
     backend: InstallBackend,
     isEnabled: Boolean,
+    isAvailable: Boolean = true,
     statusText: String,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
@@ -187,8 +197,11 @@ private fun PriorityBackendRow(
     isDefaultFallback: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val effectiveChecked = isEnabled && isAvailable
+    val canToggle = !isDefaultFallback && isAvailable
+
     val alpha by animateFloatAsState(
-        targetValue = if (isEnabled) 1f else 0.5f,
+        targetValue = if (effectiveChecked) 1f else 0.5f,
         label = "PriorityRowAlpha",
     )
 
@@ -198,7 +211,7 @@ private fun PriorityBackendRow(
             .alpha(alpha),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isEnabled) {
+            containerColor = if (effectiveChecked) {
                 MaterialTheme.colorScheme.surfaceContainerHigh
             } else {
                 MaterialTheme.colorScheme.surfaceContainerLowest
@@ -217,7 +230,7 @@ private fun PriorityBackendRow(
                     .size(28.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isEnabled) MaterialTheme.colorScheme.primaryContainer
+                        if (effectiveChecked) MaterialTheme.colorScheme.primaryContainer
                         else MaterialTheme.colorScheme.surfaceContainerHighest
                     ),
                 contentAlignment = Alignment.Center,
@@ -226,7 +239,7 @@ private fun PriorityBackendRow(
                     text = "#$rank",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (isEnabled) MaterialTheme.colorScheme.onPrimaryContainer
+                    color = if (effectiveChecked) MaterialTheme.colorScheme.onPrimaryContainer
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -238,8 +251,8 @@ private fun PriorityBackendRow(
                 backend = backend,
                 modifier = Modifier
                     .size(24.dp)
-                    .alpha(if (isEnabled) 1f else 0.38f),
-                tint = if (isEnabled) MaterialTheme.colorScheme.primary
+                    .alpha(if (effectiveChecked) 1f else 0.38f),
+                tint = if (effectiveChecked) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
@@ -303,12 +316,29 @@ private fun PriorityBackendRow(
 
             // Enable switch
             Switch(
-                checked = isEnabled,
-                onCheckedChange = if (isDefaultFallback) null else onToggle,
-                enabled = !isDefaultFallback,
+                checked = effectiveChecked,
+                onCheckedChange = if (canToggle) onToggle else null,
+                enabled = canToggle,
                 modifier = Modifier.size(36.dp),
             )
         }
+    }
+}
+
+fun isBackendAvailable(
+    backend: InstallBackend,
+    uiState: SettingUiState,
+    dhizukuState: DhizukuState,
+    microGAvailable: Boolean,
+    isSystemFrozen: Boolean,
+): Boolean {
+    return when (backend) {
+        InstallBackend.SHIZUKU -> uiState.shizukuState == ShizukuState.READY
+        InstallBackend.DHIZUKU -> dhizukuState == DhizukuState.READY
+        InstallBackend.ROOT -> uiState.rootSupported && (uiState.rootState == RootState.READY || uiState.rootState == RootState.UNKNOWN)
+        InstallBackend.CUSTOM -> true
+        InstallBackend.MICROG -> microGAvailable
+        InstallBackend.DEFAULT -> !isSystemFrozen
     }
 }
 
@@ -321,20 +351,16 @@ internal fun resolveStatusText(
     microGAvailable: Boolean,
     isSystemFrozen: Boolean,
 ): String {
-    if (!isEnabled) {
-        return stringResource(R.string.setting_install_priority_unavailable)
-    }
-
     return when (backend) {
         InstallBackend.SHIZUKU -> when (uiState.shizukuState) {
-            ShizukuState.READY -> stringResource(R.string.setting_install_priority_ready)
+            ShizukuState.READY -> if (isEnabled) stringResource(R.string.setting_install_priority_ready) else stringResource(R.string.setting_install_priority_unavailable)
             ShizukuState.NO_PERMISSION -> stringResource(R.string.setting_shizuku_no_permission)
             ShizukuState.NOT_RUNNING -> stringResource(R.string.setting_shizuku_not_running)
             ShizukuState.NOT_INSTALLED -> stringResource(R.string.setting_shizuku_not_installed)
             ShizukuState.UNSUPPORTED -> stringResource(R.string.setting_shizuku_unsupported)
         }
         InstallBackend.DHIZUKU -> when (dhizukuState) {
-            DhizukuState.READY -> stringResource(R.string.setting_install_priority_ready)
+            DhizukuState.READY -> if (isEnabled) stringResource(R.string.setting_install_priority_ready) else stringResource(R.string.setting_install_priority_unavailable)
             DhizukuState.NOT_AUTHORIZED -> stringResource(R.string.setting_dhizuku_no_permission)
             DhizukuState.NOT_RUNNING -> stringResource(R.string.setting_dhizuku_not_running)
             DhizukuState.PROFILE_OWNER_UNSUPPORTED -> stringResource(R.string.setting_dhizuku_profile_owner_unsupported)
@@ -343,20 +369,19 @@ internal fun resolveStatusText(
         }
         InstallBackend.ROOT -> when {
             !uiState.rootSupported -> stringResource(R.string.installer_engine_root_unsupported)
-            uiState.rootState == RootState.READY -> stringResource(R.string.setting_install_priority_ready)
+            uiState.rootState == RootState.READY -> if (isEnabled) stringResource(R.string.setting_install_priority_ready) else stringResource(R.string.setting_install_priority_unavailable)
             uiState.rootState == RootState.DENIED -> stringResource(R.string.installer_engine_root_request)
             else -> stringResource(R.string.installer_engine_root_desc)
         }
         InstallBackend.CUSTOM -> {
-            if (uiState.customAuthorizerCommand.isNotBlank()) {
-                uiState.customAuthorizerCommand
-            } else {
-                stringResource(R.string.setting_install_mode_custom_sub)
-            }
+            if (!isEnabled) stringResource(R.string.setting_install_priority_unavailable)
+            else if (uiState.customAuthorizerCommand.isNotBlank()) uiState.customAuthorizerCommand
+            else stringResource(R.string.setting_install_mode_custom_sub)
         }
         InstallBackend.MICROG -> {
-            if (microGAvailable) stringResource(R.string.setting_install_priority_ready)
-            else stringResource(R.string.microg_not_installed)
+            if (!microGAvailable) stringResource(R.string.microg_not_installed)
+            else if (isEnabled) stringResource(R.string.setting_install_priority_ready)
+            else stringResource(R.string.setting_install_priority_unavailable)
         }
         InstallBackend.DEFAULT -> {
             if (isSystemFrozen) stringResource(R.string.setting_system_installer_frozen_badge_desc)

@@ -27,6 +27,7 @@ class SettingPriorityDelegate(
     private val shizukuState: () -> ShizukuState,
     private val updateShizukuState: () -> Unit,
     private val requestShizukuPermission: () -> Unit,
+    private val startShizukuService: () -> Unit,
     private val updateDhizukuState: (DhizukuState) -> Unit,
     private val updateRootState: (RootState) -> Unit,
     private val emitEvent: (Int) -> Unit,
@@ -78,13 +79,21 @@ class SettingPriorityDelegate(
                     }
                     updateShizukuState()
                     when (shizukuState()) {
-                        ShizukuState.READY -> dataStore.edit { it[PreferencesKeys.USE_SHIZUKU] = true }
-                        ShizukuState.NO_PERMISSION -> requestShizukuPermission()
-                        ShizukuState.NOT_RUNNING -> {
+                        ShizukuState.READY -> {
                             dataStore.edit { it[PreferencesKeys.USE_SHIZUKU] = true }
-                            emitEvent(R.string.setting_shizuku_start_service_hint)
                         }
-                        ShizukuState.NOT_INSTALLED -> emitEvent(R.string.setting_shizuku_install_hint)
+                        ShizukuState.NO_PERMISSION -> requestShizukuPermission()
+                        ShizukuState.NOT_RUNNING -> startShizukuService()
+                        ShizukuState.NOT_INSTALLED -> {
+                            emitEvent(R.string.setting_shizuku_install_hint)
+                            val intent = android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse("https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api")
+                            ).apply {
+                                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            runCatching { application.startActivity(intent) }
+                        }
                         ShizukuState.UNSUPPORTED -> emitEvent(R.string.setting_shizuku_unsupported)
                     }
                 }

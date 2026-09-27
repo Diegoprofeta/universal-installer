@@ -46,6 +46,7 @@ internal fun PriorityItemCard(
     backend: InstallBackend,
     isActive: Boolean,
     isEnabled: Boolean,
+    isAvailable: Boolean = true,
     statusText: String,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
@@ -56,8 +57,11 @@ internal fun PriorityItemCard(
     isDefaultFallback: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val effectiveChecked = isEnabled && isAvailable
+    val canToggle = !isDefaultFallback && isAvailable
+
     val alpha by animateFloatAsState(
-        targetValue = if (isEnabled) 1f else 0.5f,
+        targetValue = if (effectiveChecked) 1f else 0.5f,
         label = "PriorityItemAlpha",
     )
 
@@ -80,7 +84,7 @@ internal fun PriorityItemCard(
         colors = CardDefaults.cardColors(
             containerColor = if (isActive) {
                 MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-            } else if (isEnabled) {
+            } else if (effectiveChecked) {
                 MaterialTheme.colorScheme.surfaceContainerHigh
             } else {
                 MaterialTheme.colorScheme.surfaceContainerLowest
@@ -100,7 +104,7 @@ internal fun PriorityItemCard(
                     .clip(CircleShape)
                     .background(
                         if (isActive) MaterialTheme.colorScheme.primary
-                        else if (isEnabled) MaterialTheme.colorScheme.primaryContainer
+                        else if (effectiveChecked) MaterialTheme.colorScheme.primaryContainer
                         else MaterialTheme.colorScheme.surfaceContainerHighest
                     ),
                 contentAlignment = Alignment.Center,
@@ -110,7 +114,7 @@ internal fun PriorityItemCard(
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = if (isActive) MaterialTheme.colorScheme.onPrimary
-                    else if (isEnabled) MaterialTheme.colorScheme.onPrimaryContainer
+                    else if (effectiveChecked) MaterialTheme.colorScheme.onPrimaryContainer
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -122,9 +126,9 @@ internal fun PriorityItemCard(
                 backend = backend,
                 modifier = Modifier
                     .size(26.dp)
-                    .alpha(if (isEnabled) 1f else 0.38f),
+                    .alpha(if (effectiveChecked) 1f else 0.38f),
                 tint = if (isActive) MaterialTheme.colorScheme.primary
-                else if (isEnabled) MaterialTheme.colorScheme.onSurface
+                else if (effectiveChecked) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
@@ -202,9 +206,9 @@ internal fun PriorityItemCard(
 
             // Enable switch
             Switch(
-                checked = isEnabled,
-                onCheckedChange = if (isDefaultFallback) null else onToggle,
-                enabled = !isDefaultFallback,
+                checked = effectiveChecked,
+                onCheckedChange = if (canToggle) onToggle else null,
+                enabled = canToggle,
                 modifier = Modifier.size(36.dp),
             )
         }

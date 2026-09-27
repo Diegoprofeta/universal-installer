@@ -53,6 +53,7 @@ import app.pwhs.universalinstaller.presentation.setting.SettingActivity
 import app.pwhs.universalinstaller.presentation.setting.SettingViewModel
 import app.pwhs.universalinstaller.presentation.setting.ShizukuState
 import app.pwhs.universalinstaller.presentation.setting.components.CustomAuthorizerCard
+import app.pwhs.universalinstaller.presentation.setting.components.isBackendAvailable
 import app.pwhs.universalinstaller.presentation.setting.components.resolveStatusText
 import app.pwhs.universalinstaller.presentation.setting.security.util.SystemInstallerManager
 import app.pwhs.universalinstaller.util.DhizukuCompat
@@ -172,56 +173,16 @@ fun InstallPriorityBottomSheet(
     }
 
     fun selectBackend(backend: InstallBackend) {
-        when (backend) {
-            InstallBackend.DEFAULT -> {
-                if (isSystemInstallerFrozen) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.setting_system_installer_frozen_cannot_select),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return
-                }
-                if (!canInstallPackages) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.permission_install_prompt_required),
-                        Toast.LENGTH_LONG
-                    ).show()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        runCatching {
-                            val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
-                            context.startActivity(intent)
-                        }
-                    }
-                }
-                settingViewModel.promoteBackendToTop(InstallBackend.DEFAULT)
-                settingViewModel.setInstallMode(InstallMode.DEFAULT)
-            }
-            InstallBackend.SHIZUKU -> {
-                settingViewModel.promoteBackendToTop(InstallBackend.SHIZUKU)
-                settingViewModel.setInstallMode(InstallMode.SHIZUKU)
-            }
-            InstallBackend.DHIZUKU -> {
-                settingViewModel.promoteBackendToTop(InstallBackend.DHIZUKU)
-                settingViewModel.setInstallMode(InstallMode.DHIZUKU)
-            }
-            InstallBackend.ROOT -> {
-                settingViewModel.promoteBackendToTop(InstallBackend.ROOT)
-                settingViewModel.setInstallMode(InstallMode.ROOT)
-            }
-            InstallBackend.CUSTOM -> {
-                settingViewModel.promoteBackendToTop(InstallBackend.CUSTOM)
-                settingViewModel.setInstallMode(InstallMode.CUSTOM)
-            }
-            InstallBackend.MICROG -> {
-                settingViewModel.promoteBackendToTop(InstallBackend.MICROG)
-                settingViewModel.setInstallMode(InstallMode.MICROG)
-            }
-        }
+        handleBackendSelection(
+            backend = backend,
+            context = context,
+            settingViewModel = settingViewModel,
+            settingState = settingState,
+            dhizukuState = dhizukuState,
+            microGAvailable = microGAvailable,
+            isSystemInstallerFrozen = isSystemInstallerFrozen,
+            canInstallPackages = canInstallPackages,
+        )
     }
 
     ModalBottomSheet(
@@ -293,12 +254,20 @@ fun InstallPriorityBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 settingState.backendPriority.forEachIndexed { index, backend ->
+                    val isAvailable = isBackendAvailable(
+                        backend = backend,
+                        uiState = settingState,
+                        dhizukuState = dhizukuState,
+                        microGAvailable = microGAvailable,
+                        isSystemFrozen = isSystemInstallerFrozen,
+                    )
+
                     val isEnabled = when (backend) {
-                        InstallBackend.SHIZUKU -> settingState.useShizuku
-                        InstallBackend.DHIZUKU -> useDhizuku
-                        InstallBackend.ROOT -> settingState.useRoot
+                        InstallBackend.SHIZUKU -> settingState.useShizuku && isAvailable
+                        InstallBackend.DHIZUKU -> useDhizuku && isAvailable
+                        InstallBackend.ROOT -> settingState.useRoot && isAvailable
                         InstallBackend.CUSTOM -> settingState.useCustomAuthorizer
-                        InstallBackend.MICROG -> settingState.useMicroG
+                        InstallBackend.MICROG -> settingState.useMicroG && isAvailable
                         InstallBackend.DEFAULT -> !isSystemInstallerFrozen
                     }
 
@@ -318,6 +287,7 @@ fun InstallPriorityBottomSheet(
                         backend = backend,
                         isActive = isActive,
                         isEnabled = isEnabled,
+                        isAvailable = isAvailable,
                         statusText = statusText,
                         canMoveUp = index > 0,
                         canMoveDown = index < settingState.backendPriority.size - 1,
@@ -344,34 +314,38 @@ fun InstallPriorityBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            val isInSetting = context is SettingActivity
+
             // Footer Actions
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                FilledTonalButton(
-                    onClick = {
-                        closeSheet()
-                        context.startActivity(Intent(context, SettingActivity::class.java))
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Settings,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(R.string.setting_title),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
+                if (!isInSetting) {
+                    FilledTonalButton(
+                        onClick = {
+                            closeSheet()
+                            context.startActivity(Intent(context, SettingActivity::class.java))
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = MaterialTheme.shapes.medium,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Settings,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.setting_title),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
                 }
 
                 Button(
                     onClick = closeSheet,
-                    modifier = Modifier.weight(1f),
+                    modifier = if (isInSetting) Modifier.fillMaxWidth() else Modifier.weight(1f),
                     shape = MaterialTheme.shapes.medium,
                 ) {
                     Text(

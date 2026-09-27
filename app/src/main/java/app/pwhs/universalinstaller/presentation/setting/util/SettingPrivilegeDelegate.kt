@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import androidx.datastore.preferences.core.edit
 import app.pwhs.core.data.local.dataStore
 import app.pwhs.universalinstaller.R
@@ -121,6 +123,12 @@ class SettingPrivilegeDelegate(
         Shizuku.addBinderReceivedListener(binderReceivedListener)
         Shizuku.addBinderDeadListener(binderDeadListener)
         Shizuku.addRequestPermissionResultListener(requestPermissionResultListener)
+        scope.launch {
+            kotlinx.coroutines.delay(400)
+            updateShizukuState()
+            kotlinx.coroutines.delay(1000)
+            updateShizukuState()
+        }
 
         if (backendFactory.rootSupportCompiledIn) {
             scope.launch {
@@ -166,8 +174,27 @@ class SettingPrivilegeDelegate(
         Shizuku.removeRequestPermissionResultListener(requestPermissionResultListener)
     }
 
+    private fun isShizukuInstalled(): Boolean {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                application.packageManager.getPackageInfo(
+                    "moe.shizuku.privileged.api",
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                application.packageManager.getPackageInfo("moe.shizuku.privileged.api", 0)
+            }
+            true
+        } catch (_: PackageManager.NameNotFoundException) {
+            false
+        }
+    }
+
     fun updateShizukuState() {
+        val isInstalled = isShizukuInstalled()
         _shizukuState.value = when {
+            !Shizuku.pingBinder() && !isInstalled -> ShizukuState.NOT_INSTALLED
             !Shizuku.pingBinder() -> ShizukuState.NOT_RUNNING
             Shizuku.getVersion() < 11 -> ShizukuState.UNSUPPORTED
             Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED -> ShizukuState.NO_PERMISSION
@@ -243,19 +270,60 @@ class SettingPrivilegeDelegate(
         }
         updateShizukuState()
         when (_shizukuState.value) {
-            ShizukuState.READY -> scope.launch {
-                dataStore.edit { prefs ->
-                    prefs[PreferencesKeys.USE_ROOT] = false
-                    prefs[PreferencesKeys.USE_DHIZUKU] = false
-                    prefs[PreferencesKeys.USE_CUSTOM_AUTHORIZER] = false
-                    prefs[PreferencesKeys.USE_MICROG] = false
-                    prefs[PreferencesKeys.USE_SHIZUKU] = true
+            ShizukuState.READY -> {
+                scope.launch {
+                    dataStore.edit { prefs -> prefs[PreferencesKeys.USE_SHIZUKU] = true }
                 }
             }
             ShizukuState.NO_PERMISSION -> requestShizukuPermission()
-            ShizukuState.NOT_RUNNING -> emitEvent(R.string.setting_shizuku_start_service_hint)
-            ShizukuState.NOT_INSTALLED -> emitEvent(R.string.setting_shizuku_install_hint)
+            ShizukuState.NOT_RUNNING -> {
+                startShizukuService()
+            }
+            ShizukuState.NOT_INSTALLED -> {
+                emitEvent(R.string.setting_shizuku_install_hint)
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api")
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                runCatching { application.startActivity(intent) }
+            }
             ShizukuState.UNSUPPORTED -> emitEvent(R.string.setting_shizuku_unsupported)
+        }
+    }
+
+    fun startShizukuService() {
+        scope.launch {
+            if (!isShizukuInstalled()) {
+                emitEvent(R.string.setting_shizuku_install_hint)
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api")
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                runCatching { application.startActivity(intent) }
+                return@launch
+            }
+            if (backendFactory.rootSupportCompiledIn && _rootState.value == RootState.READY) {
+                backendFactory.startShizukuViaRoot()
+                kotlinx.coroutines.delay(1200)
+                updateShizukuState()
+                if (_shizukuState.value == ShizukuState.NO_PERMISSION) {
+                    requestShizukuPermission()
+                }
+                if (_shizukuState.value == ShizukuState.READY) {
+                    dataStore.edit { prefs -> prefs[PreferencesKeys.USE_SHIZUKU] = true }
+                    return@launch
+                }
+            }
+            emitEvent(R.string.setting_shizuku_start_service_hint)
+            val launchIntent = application.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
+            if (launchIntent != null) {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                runCatching { application.startActivity(launchIntent) }
+            }
         }
     }
 
