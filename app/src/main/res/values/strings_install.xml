@@ -364,4 +364,10 @@
     <string name="shizuku_promo_action_open">Open Shizuku</string>
     <string name="shizuku_promo_action_learn_more">Get Shizuku</string>
     <string name="shizuku_promo_dismiss">Dismiss</string>
+    <string name="antisplit_action_merge">Merge into Single APK</string>
+    <string name="antisplit_action_merge_desc">Merge split APK bundle into a standalone APK using Universal Anti-Split</string>
+    <string name="antisplit_not_installed_title">Universal Anti-Split Required</string>
+    <string name="antisplit_not_installed_desc">To merge split APKs into a single APK, please install Universal Anti-Split.</string>
+    <string name="antisplit_download_action">Download</string>
+    <string name="antisplit_merge_success">APK merged successfully</string>
 </resources>

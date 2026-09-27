@@ -32,7 +32,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -50,6 +52,8 @@ import app.pwhs.universalinstaller.presentation.install.InstallViewModel
 import app.pwhs.universalinstaller.ui.theme.UniversalInstallerTheme
 import app.pwhs.universalinstaller.util.SystemIntentInstaller
 import app.pwhs.universalinstaller.util.WindowBlurEffect
+import app.pwhs.universalinstaller.bridge.AntiSplitBridge
+import app.pwhs.universalinstaller.presentation.composable.AntiSplitPromptDialog
 import timber.log.Timber
 
 val FLOATING_SHEET_SHAPE = RoundedCornerShape(28.dp)
@@ -165,6 +169,41 @@ fun DialogInstallContent(
                 ).show()
             }
         }
+    }
+
+    val scope = rememberCoroutineScope()
+    var showAntiSplitPrompt by remember { mutableStateOf(false) }
+    val antiSplitLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val mergeResult = AntiSplitBridge.parseResult(result.resultCode, result.data)
+            val outputUri = mergeResult?.outputUri
+            if (outputUri != null) {
+                scope.launch {
+                    DialogInstallUriHelper.parseAndPush(context, outputUri, viewModel)
+                }
+                Toast.makeText(context, context.getString(R.string.antisplit_merge_success), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    val onMergeSplits: (() -> Unit)? = remember(uiState.pendingApkInfo, viewModel.pendingOriginalUri) {
+        val originalUri = viewModel.pendingOriginalUri
+        if (uiState.pendingApkInfo?.splitEntries?.isNotEmpty() == true && originalUri != null) {
+            {
+                val intent = AntiSplitBridge.createMergeFileIntent(originalUri, autoStart = false)
+                if (!AntiSplitBridge.canResolveIntent(context, intent)) {
+                    showAntiSplitPrompt = true
+                } else {
+                    runCatching {
+                        antiSplitLauncher.launch(intent)
+                    }.onFailure {
+                        showAntiSplitPrompt = true
+                    }
+                }
+            }
+        } else null
     }
 
     val darkTheme = when (themeMode) {
@@ -304,6 +343,7 @@ fun DialogInstallContent(
                                     onDismissAndFinish()
                                 }
                             }.takeIf { isApk && dialogTarget?.apkUri != null },
+                            onMergeSplits = onMergeSplits,
                         )
 
                         PositionDialog(
@@ -322,6 +362,13 @@ fun DialogInstallContent(
                     }
                 }
             }
+        }
+
+        if (showAntiSplitPrompt) {
+            AntiSplitPromptDialog(
+                onDismiss = { showAntiSplitPrompt = false },
+                onDownload = { AntiSplitBridge.openDownloadPage(context) },
+            )
         }
     }
 }

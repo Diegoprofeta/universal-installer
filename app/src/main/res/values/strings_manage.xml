@@ -203,4 +203,6 @@
     <string name="uninstall_option_all_users_desc">Uninstall this app for all users on this device</string>
     <string name="uninstall_option_delete_system_app">Delete SystemApp</string>
     <string name="uninstall_option_delete_system_app_desc">Allow deleting system apps for current user</string>
+    <string name="manage_action_merge_antisplit">Merge with Anti-Split</string>
+    <string name="manage_action_merge_antisplit_desc">Extract &amp; merge split app into a single standalone APK</string>
 </resources>

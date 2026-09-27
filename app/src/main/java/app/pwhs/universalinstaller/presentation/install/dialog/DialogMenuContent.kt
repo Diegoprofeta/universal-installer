@@ -136,6 +136,7 @@ fun DialogMenuContent(
     onAttachObb: () -> Unit = {},
     onToggleAllUsers: (Boolean) -> Unit = {},
     onSelectUserId: (Int?) -> Unit = {},
+    onMergeSplits: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -342,6 +343,7 @@ fun DialogMenuContent(
                         onRemoveObb = onRemoveObb,
                         onAttachObb = onAttachObb,
                         onToggleSplit = onToggleSplit,
+                        onMergeSplits = onMergeSplits,
                         allUsers = allUsers,
                         selectedUserId = selectedUserId,
                         spoofSource = spoofSource,

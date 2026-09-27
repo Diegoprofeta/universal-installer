@@ -364,4 +364,10 @@
     <string name="shizuku_promo_action_open">Mở Shizuku</string>
     <string name="shizuku_promo_action_learn_more">Cài đặt Shizuku</string>
     <string name="shizuku_promo_dismiss">Bỏ qua</string>
+    <string name="antisplit_action_merge">Gộp thành APK đơn</string>
+    <string name="antisplit_action_merge_desc">Gộp gói Split APK thành một tệp APK độc lập bằng Universal Anti-Split</string>
+    <string name="antisplit_not_installed_title">Cần cài đặt Universal Anti-Split</string>
+    <string name="antisplit_not_installed_desc">Để gộp các tệp Split APK thành một file APK hoàn chỉnh duy nhất, vui lòng cài đặt Universal Anti-Split.</string>
+    <string name="antisplit_download_action">Tải về</string>
+    <string name="antisplit_merge_success">Gộp APK thành công</string>
 </resources>

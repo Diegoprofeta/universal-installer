@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.CallMerge
 import androidx.compose.material.icons.automirrored.rounded.Launch
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.Block
@@ -53,6 +54,8 @@ import app.pwhs.universalinstaller.presentation.manage.StorageChip
 import app.pwhs.universalinstaller.presentation.manage.permissions.AppPermissionsActivity
 import app.pwhs.universalinstaller.presentation.manage.resolveInstallerInfo
 import app.pwhs.universalinstaller.util.AndroidAutoCompat
+import app.pwhs.universalinstaller.bridge.AntiSplitBridge
+import app.pwhs.universalinstaller.presentation.composable.AntiSplitPromptDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,6 +87,7 @@ internal fun AppActionSheet(
     }
     var storage by remember(app.packageName) { mutableStateOf<StorageBreakdown?>(null) }
     var usage by remember(app.packageName) { mutableStateOf<List<UsageBucket>>(emptyList()) }
+    var showAntiSplitPrompt by remember { mutableStateOf(false) }
 
     LaunchedEffect(app.packageName) {
         storage = queryStorage(app.packageName)
@@ -269,6 +273,33 @@ internal fun AppActionSheet(
                         onClick = onAddToServer,
                     )
                 )
+                if (app.hasSplits) {
+                    add(
+                        AppActionItem(
+                            icon = Icons.AutoMirrored.Rounded.CallMerge,
+                            iconTint = MaterialTheme.colorScheme.primary,
+                            label = stringResource(R.string.manage_action_merge_antisplit),
+                            subtitle = stringResource(R.string.manage_action_merge_antisplit_desc),
+                            onClick = {
+                                val intent = AntiSplitBridge.createMergeInstalledAppIntent(
+                                    app.packageName,
+                                    autoStart = false,
+                                    newTask = true,
+                                )
+                                if (!AntiSplitBridge.canResolveIntent(context, intent)) {
+                                    showAntiSplitPrompt = true
+                                } else {
+                                    runCatching {
+                                        context.startActivity(intent)
+                                        onDismiss()
+                                    }.onFailure {
+                                        showAntiSplitPrompt = true
+                                    }
+                                }
+                            },
+                        )
+                    )
+                }
                 if (isAaApp && app.installerPackage != "com.android.vending" && isAaInstalled) {
                     add(
                         AppActionItem(
@@ -349,5 +380,12 @@ internal fun AppActionSheet(
 
             Spacer(Modifier.height(16.dp))
         }
+    }
+
+    if (showAntiSplitPrompt) {
+        AntiSplitPromptDialog(
+            onDismiss = { showAntiSplitPrompt = false },
+            onDownload = { AntiSplitBridge.openDownloadPage(context) },
+        )
     }
 }

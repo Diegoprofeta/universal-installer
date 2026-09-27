@@ -28,12 +28,7 @@ object DialogInstallUriHelper {
 
                 val text = source.getStringExtra(Intent.EXTRA_TEXT)?.trim()
                 if (!text.isNullOrBlank()) {
-                    val url = text.split("\\s+".toRegex()).find {
-                        it.startsWith("http://", ignoreCase = true) || it.startsWith("https://", ignoreCase = true)
-                    }
-                    if (url != null) {
-                        runCatching { Uri.parse(url) }.getOrNull()?.let(out::add)
-                    }
+                    extractHttpUrl(text)?.let { runCatching { Uri.parse(it) }.getOrNull() }?.let(out::add)
                 }
             }
             Intent.ACTION_SEND_MULTIPLE ->
@@ -43,16 +38,37 @@ object DialogInstallUriHelper {
                     ?.let(out::addAll)
         }
 
-        // 3. ClipData (Alternative for some file managers)
+        // 3. ClipData (Alternative for some file managers and browser link shares)
         source.clipData?.let { clip ->
             for (i in 0 until clip.itemCount) {
-                val u = clip.getItemAt(i).uri ?: continue
-                if (isSupportedScheme(u.scheme)) out.add(u)
+                val item = clip.getItemAt(i)
+                val u = item.uri
+                if (u != null && isSupportedScheme(u.scheme)) {
+                    out.add(u)
+                } else {
+                    val text = item.text?.toString()?.trim()
+                    if (!text.isNullOrBlank()) {
+                        extractHttpUrl(text)?.let { runCatching { Uri.parse(it) }.getOrNull() }?.let(out::add)
+                    }
+                }
             }
         }
 
         return out.distinct()
     }
+
+    private fun extractHttpUrl(text: String): String? {
+        val trimmed = text.trim()
+        if (trimmed.startsWith("http://", ignoreCase = true) ||
+            trimmed.startsWith("https://", ignoreCase = true)
+        ) {
+            return trimmed.substringBefore(' ').substringBefore('\n')
+        }
+        val match = HTTP_URL_REGEX.find(trimmed) ?: return null
+        return match.value
+    }
+
+    private val HTTP_URL_REGEX = Regex("""https?://\S+""", RegexOption.IGNORE_CASE)
 
     private fun isSupportedScheme(scheme: String?): Boolean =
         scheme == "content" || scheme == "file" || scheme == "http" || scheme == "https"

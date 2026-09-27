@@ -78,6 +78,7 @@ import timber.log.Timber
 fun InstallScreen(
     modifier: Modifier = Modifier,
     viewModel: InstallViewModel = koinViewModel(),
+    onMergeSplits: ((Uri) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val resource = LocalResources.current
@@ -166,6 +167,20 @@ fun InstallScreen(
         }
     }
 
+    val pendingOriginalUri = viewModel.pendingOriginalUri
+    val canMerge = uiState.pendingApkInfo?.splitEntries?.isNotEmpty() == true && pendingOriginalUri != null
+    val onMerge: (() -> Unit)? = if (canMerge) {
+        {
+            if (pendingOriginalUri != null) {
+                if (onMergeSplits != null) {
+                    onMergeSplits(pendingOriginalUri)
+                } else {
+                    (context as? InstallActivity)?.requestMergeExternalFile(pendingOriginalUri)
+                }
+            }
+        }
+    } else null
+
     InstallUi(
         modifier = modifier,
         uiState = uiState,
@@ -213,6 +228,7 @@ fun InstallScreen(
         onUnblock = viewModel::unblockPackage,
         strictSecurity = strictVirusTotalCheck,
         onClearHistory = viewModel::clearHistory,
+        onMergeSplits = onMerge,
         onCheckVirusTotal = { viewModel.scanVirusTotal(context) },
         onStartDeviceScan = { viewModel.startDeviceScan(context) },
         onDismissDeviceScan = viewModel::dismissDeviceScan,
@@ -297,6 +313,7 @@ private fun InstallUi(
     uiState: InstallUiState = InstallUiState(),
     history: List<InstallHistoryEntity> = emptyList(),
     showDownloadTab: Boolean = true,
+    onMergeSplits: (() -> Unit)? = null,
     onFilePicked: (uri: Uri, splitPackage: SplitPackage.Provider, fileName: String) -> Unit = { _, _, _ -> },
     onDownloadFromUrl: (String) -> Unit = {},
     onCancelDownload: () -> Unit = {},
@@ -660,6 +677,7 @@ private fun InstallUi(
                 startCompact = true,
                 onUnblock = onUnblock,
                 strictSecurity = strictSecurity,
+                onMergeSplits = onMergeSplits,
             )
         }
     }

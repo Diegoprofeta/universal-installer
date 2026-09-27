@@ -189,7 +189,8 @@ class DialogInstallActivity : FragmentActivity() {
             return
         }
 
-        if (incomingUris.size > 1) {
+        val hasWebUrl = incomingUris.any { it.scheme == "http" || it.scheme == "https" }
+        if (incomingUris.size > 1 && !hasWebUrl) {
             IntentHandoff.postBatch(incomingUris)
             val targetIntent = Intent(this, InstallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -200,7 +201,11 @@ class DialogInstallActivity : FragmentActivity() {
             return
         }
 
-        val incomingUri = incomingUris.first()
+        val incomingUri = if (hasWebUrl) {
+            incomingUris.first { it.scheme == "http" || it.scheme == "https" }
+        } else {
+            incomingUris.first()
+        }
         viewModel.dialogStartLoading()
         skipInitialParse = restoredEntry != null
 
@@ -448,7 +453,8 @@ class DialogInstallActivity : FragmentActivity() {
         val uris = DialogInstallUriHelper.collectIncomingUris(intent)
         if (uris.isEmpty()) return
 
-        if (uris.size > 1) {
+        val hasWebUrl = uris.any { it.scheme == "http" || it.scheme == "https" }
+        if (uris.size > 1 && !hasWebUrl) {
             IntentHandoff.postBatch(uris)
             val targetIntent = Intent(this, InstallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -459,7 +465,11 @@ class DialogInstallActivity : FragmentActivity() {
             return
         }
 
-        val uri = uris.first()
+        val uri = if (hasWebUrl) {
+            uris.first { it.scheme == "http" || it.scheme == "https" }
+        } else {
+            uris.first()
+        }
         viewModel.dismissPendingInstall()
         viewModel.dialogStartLoading()
         val context = this

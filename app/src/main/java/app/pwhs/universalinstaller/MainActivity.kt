@@ -139,6 +139,23 @@ class MainActivity : ComponentActivity() {
                     AppRoute.Main -> {
                         LaunchedEffect(Unit) {
                             val uri = intent?.data
+                            val isWebOrFile = uri != null && (uri.scheme in listOf("http", "https", "content", "file"))
+                            val isShare = intent?.action == Intent.ACTION_SEND || intent?.action == Intent.ACTION_SEND_MULTIPLE
+                            if (isWebOrFile || isShare) {
+                                val dialogIntent = Intent(this@MainActivity, app.pwhs.universalinstaller.presentation.install.DialogInstallActivity::class.java).apply {
+                                    action = intent?.action ?: Intent.ACTION_VIEW
+                                    data = intent?.data
+                                    intent?.clipData?.let { clipData = it }
+                                    intent?.extras?.let { putExtras(it) }
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                }
+                                startActivity(dialogIntent)
+                                this@MainActivity.disableSceneTransition()
+                                finish()
+                                this@MainActivity.disableSceneTransition()
+                                return@LaunchedEffect
+                            }
+
                             // Handle internal deep-links (sync, uninstall).
                             // Regular launches default to InstallActivity.
                             val targetActivity = if (uri?.scheme == "universalinstaller") {

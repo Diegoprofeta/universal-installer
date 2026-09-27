@@ -275,6 +275,9 @@ class InstallViewModel(
 
     // ── Single Package Parsing ──────────────────────────────────────────────
 
+    val pendingOriginalUri: Uri?
+        get() = parseDelegate.pendingOriginalUri
+
     fun parseApkInfo(
         context: Context,
         uri: Uri,

@@ -24,6 +24,23 @@ class SplashActivity : BaseActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
+        val uri = intent?.data
+        val isWebOrFile = uri != null && (uri.scheme in listOf("http", "https", "content", "file"))
+        val isShare = intent?.action == Intent.ACTION_SEND || intent?.action == Intent.ACTION_SEND_MULTIPLE
+        if (isWebOrFile || isShare) {
+            val dialogIntent = Intent(this, app.pwhs.universalinstaller.presentation.install.DialogInstallActivity::class.java).apply {
+                action = intent.action ?: Intent.ACTION_VIEW
+                data = intent.data
+                intent.clipData?.let { clipData = it }
+                intent.extras?.let { putExtras(it) }
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(dialogIntent)
+            disableSceneTransition()
+            finish()
+            return
+        }
+
         setContentWithTheme {
             SplashScreen(
                 onNavigateToOnboarding = { navigate(showOnboarding = true) },

@@ -102,6 +102,7 @@ internal fun ApkInfoContent(
     showKeepApkOption: Boolean = false,
     keepApk: Boolean = false,
     onKeepApkChanged: (Boolean) -> Unit = {},
+    onMergeSplits: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -396,7 +397,11 @@ internal fun ApkInfoContent(
                 DetailsCard(apkInfo = apkInfo)
                 if (apkInfo.splitEntries.size > 1) {
                     Spacer(Modifier.height(16.dp))
-                    SplitsCard(splits = apkInfo.splitEntries, onToggle = onToggleSplit)
+                    SplitsCard(
+                        splits = apkInfo.splitEntries,
+                        onToggle = onToggleSplit,
+                        onMergeSplits = onMergeSplits,
+                    )
                 }
                 if (apkInfo.supportedAbis.isNotEmpty()) {
                     Spacer(Modifier.height(16.dp))
