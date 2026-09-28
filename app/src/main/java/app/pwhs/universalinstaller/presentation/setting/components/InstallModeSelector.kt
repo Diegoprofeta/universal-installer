@@ -1,5 +1,6 @@
 package app.pwhs.universalinstaller.presentation.setting.components
 
+import app.pwhs.universalinstaller.util.ShizukuServices
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -210,7 +211,10 @@ internal fun InstallModeSelector(
             }
             InstallMode.SHIZUKU -> when (shizukuState) {
                 ShizukuState.NOT_INSTALLED -> stringResource(R.string.setting_shizuku_not_installed)
-                ShizukuState.NOT_RUNNING -> stringResource(R.string.setting_shizuku_not_running)
+                ShizukuState.NOT_RUNNING -> stringResource(
+                if (ShizukuServices.isPorterOnly(LocalContext.current)) R.string.setting_porter_not_running
+                else R.string.setting_shizuku_not_running
+            )
                 ShizukuState.UNSUPPORTED -> stringResource(R.string.setting_shizuku_unsupported)
                 ShizukuState.NO_PERMISSION -> stringResource(R.string.setting_shizuku_no_permission)
                 ShizukuState.READY -> stringResource(R.string.setting_shizuku_ready)

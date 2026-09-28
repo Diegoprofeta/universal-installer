@@ -1,5 +1,6 @@
 package app.pwhs.universalinstaller.presentation.composable
 
+import app.pwhs.universalinstaller.util.ShizukuServices
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -67,7 +68,10 @@ internal fun handleBackendSelection(
                 ShizukuState.NOT_RUNNING -> {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.setting_shizuku_start_service_hint),
+                        context.getString(
+                            if (ShizukuServices.isPorterOnly(context)) R.string.setting_porter_start_service_hint
+                            else R.string.setting_shizuku_start_service_hint
+                        ),
                         Toast.LENGTH_SHORT
                     ).show()
                     settingViewModel.startShizukuService()

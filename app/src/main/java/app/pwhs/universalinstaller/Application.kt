@@ -20,6 +20,7 @@ import app.pwhs.core.ui.ApkFileIconFetcher
 import app.pwhs.universalinstaller.util.AppIconFetcher
 import app.pwhs.universalinstaller.util.CrashHandler
 import com.topjohnwu.superuser.Shell
+import eu.darken.porter.bridge.PorterShizukuBridge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -118,6 +119,9 @@ class App : Application(), SingletonImageLoader.Factory {
             androidContext(this@App)
             modules(appModule, flavorModule)
         }
+        // Once connected, a running Porter serves the Shizuku API, so the self-heal below and every
+        // Shizuku backend see it as their Shizuku server.
+        PorterShizukuBridge.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
         // Self-heal stale install-method prefs (Root revoked, Shizuku not running). Runs
         // once per process on a background dispatcher; never blocks app start.
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {

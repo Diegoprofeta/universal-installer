@@ -1,5 +1,6 @@
 package app.pwhs.universalinstaller.presentation.install.components
 
+import app.pwhs.universalinstaller.util.ShizukuServices
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -79,9 +80,12 @@ fun ShizukuPromoBanner(
     var isSystemInstallerFrozen by remember {
         mutableStateOf(SystemInstallerManager.isSystemPackageInstallerDisabled(context))
     }
+    var porterOnly by remember { mutableStateOf(ShizukuServices.isPorterOnly(context)) }
+    val porterServing by ShizukuServices.porterServing.collectAsState(initial = ShizukuServices.isPorterServing())
 
     LifecycleResumeEffect(Unit) {
         isSystemInstallerFrozen = SystemInstallerManager.isSystemPackageInstallerDisabled(context)
+        porterOnly = ShizukuServices.isPorterOnly(context)
         settingViewModel.updateShizukuState()
         onPauseOrDispose {}
     }
@@ -153,15 +157,18 @@ fun ShizukuPromoBanner(
         val actionClick: () -> Unit
         when (shizukuState) {
             ShizukuState.NO_PERMISSION -> {
-                descRes = R.string.shizuku_promo_desc_no_perm
+                descRes = if (porterOnly || porterServing) R.string.porter_promo_desc_no_perm
+                else R.string.shizuku_promo_desc_no_perm
                 actionTextRes = R.string.shizuku_promo_action_connect
                 actionClick = { settingViewModel.setInstallMode(InstallMode.SHIZUKU) }
             }
             ShizukuState.NOT_RUNNING -> {
-                descRes = R.string.shizuku_promo_desc_not_running
-                actionTextRes = R.string.shizuku_promo_action_open
+                descRes = if (porterOnly) R.string.porter_promo_desc_not_running else R.string.shizuku_promo_desc_not_running
+                actionTextRes = if (porterOnly) R.string.porter_promo_action_open else R.string.shizuku_promo_action_open
                 actionClick = {
-                    val launchIntent = context.packageManager.getLaunchIntentForPackage(SHIZUKU_PACKAGE_NAME)
+                    val launchIntent = context.packageManager.getLaunchIntentForPackage(
+                        if (porterOnly) ShizukuServices.PORTER_PACKAGE else SHIZUKU_PACKAGE_NAME
+                    )
                     if (launchIntent != null) {
                         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         runCatching { context.startActivity(launchIntent) }

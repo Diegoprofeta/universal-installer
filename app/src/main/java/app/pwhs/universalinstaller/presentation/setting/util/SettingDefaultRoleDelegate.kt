@@ -29,6 +29,7 @@ class SettingDefaultRoleDelegate(
     private val rootState: () -> RootState,
     private val updateShizukuState: () -> Unit,
     private val requestShizukuPermission: () -> Unit,
+    private val startServiceHint: () -> Int,
     private val emitEvent: (Int) -> Unit,
 ) {
     private val dataStore = application.dataStore
@@ -58,7 +59,7 @@ class SettingDefaultRoleDelegate(
                 reportDefaultInstaller("none", enabled, TelemetryEvents.RESULT_BLOCKED)
                 when {
                     currentShizukuState == ShizukuState.NO_PERMISSION && !useRoot -> requestShizukuPermission()
-                    currentShizukuState == ShizukuState.NOT_RUNNING && !useRoot -> emitEvent(R.string.setting_shizuku_start_service_hint)
+                    currentShizukuState == ShizukuState.NOT_RUNNING && !useRoot -> emitEvent(startServiceHint())
                     else -> emitEvent(R.string.setting_default_installer_needs_backend)
                 }
                 return@launch
@@ -144,7 +145,7 @@ class SettingDefaultRoleDelegate(
             if (!shizukuReady && !rootReady) {
                 when {
                     currentShizukuState == ShizukuState.NO_PERMISSION && !useRoot -> requestShizukuPermission()
-                    currentShizukuState == ShizukuState.NOT_RUNNING && !useRoot -> emitEvent(R.string.setting_shizuku_start_service_hint)
+                    currentShizukuState == ShizukuState.NOT_RUNNING && !useRoot -> emitEvent(startServiceHint())
                     else -> emitEvent(R.string.setting_default_uninstaller_needs_backend)
                 }
                 return@launch

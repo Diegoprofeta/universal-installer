@@ -1,5 +1,6 @@
 package app.pwhs.universalinstaller.presentation.setting.components
 
+import app.pwhs.universalinstaller.util.ShizukuServices
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -355,7 +356,10 @@ internal fun resolveStatusText(
         InstallBackend.SHIZUKU -> when (uiState.shizukuState) {
             ShizukuState.READY -> if (isEnabled) stringResource(R.string.setting_install_priority_ready) else stringResource(R.string.setting_install_priority_unavailable)
             ShizukuState.NO_PERMISSION -> stringResource(R.string.setting_shizuku_no_permission)
-            ShizukuState.NOT_RUNNING -> stringResource(R.string.setting_shizuku_not_running)
+            ShizukuState.NOT_RUNNING -> stringResource(
+                if (ShizukuServices.isPorterOnly(LocalContext.current)) R.string.setting_porter_not_running
+                else R.string.setting_shizuku_not_running
+            )
             ShizukuState.NOT_INSTALLED -> stringResource(R.string.setting_shizuku_not_installed)
             ShizukuState.UNSUPPORTED -> stringResource(R.string.setting_shizuku_unsupported)
         }

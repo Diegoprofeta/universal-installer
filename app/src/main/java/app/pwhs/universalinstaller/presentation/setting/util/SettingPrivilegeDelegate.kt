@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import androidx.datastore.preferences.core.edit
 import app.pwhs.core.data.local.dataStore
 import app.pwhs.universalinstaller.R
@@ -31,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
+import app.pwhs.universalinstaller.util.ShizukuServices
 import timber.log.Timber
 
 private const val SHIZUKU_PERMISSION_REQ_CODE = 0xA17
@@ -78,6 +78,7 @@ class SettingPrivilegeDelegate(
         rootState = { _rootState.value },
         updateShizukuState = { updateShizukuState() },
         requestShizukuPermission = { requestShizukuPermission() },
+        startServiceHint = { startServiceHint() },
         emitEvent = emitEvent,
     )
 
@@ -174,25 +175,14 @@ class SettingPrivilegeDelegate(
         Shizuku.removeRequestPermissionResultListener(requestPermissionResultListener)
     }
 
-    private fun isShizukuInstalled(): Boolean {
-        return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                application.packageManager.getPackageInfo(
-                    "moe.shizuku.privileged.api",
-                    PackageManager.PackageInfoFlags.of(0)
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                application.packageManager.getPackageInfo("moe.shizuku.privileged.api", 0)
-            }
-            true
-        } catch (_: PackageManager.NameNotFoundException) {
-            false
-        }
-    }
+    private fun isShizukuInstalled(): Boolean = ShizukuServices.isShizukuInstalled(application)
+
+    private fun startServiceHint(): Int =
+        if (ShizukuServices.isPorterOnly(application)) R.string.setting_porter_start_service_hint
+        else R.string.setting_shizuku_start_service_hint
 
     fun updateShizukuState() {
-        val isInstalled = isShizukuInstalled()
+        val isInstalled = isShizukuInstalled() || ShizukuServices.isPorterInstalled(application)
         _shizukuState.value = when {
             !Shizuku.pingBinder() && !isInstalled -> ShizukuState.NOT_INSTALLED
             !Shizuku.pingBinder() -> ShizukuState.NOT_RUNNING
@@ -295,6 +285,14 @@ class SettingPrivilegeDelegate(
 
     fun startShizukuService() {
         scope.launch {
+            if (ShizukuServices.isPorterOnly(application)) {
+                emitEvent(R.string.setting_porter_start_service_hint)
+                application.packageManager.getLaunchIntentForPackage(ShizukuServices.PORTER_PACKAGE)?.let { launchIntent ->
+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    runCatching { application.startActivity(launchIntent) }
+                }
+                return@launch
+            }
             if (!isShizukuInstalled()) {
                 emitEvent(R.string.setting_shizuku_install_hint)
                 val intent = Intent(
@@ -319,7 +317,7 @@ class SettingPrivilegeDelegate(
                 }
             }
             emitEvent(R.string.setting_shizuku_start_service_hint)
-            val launchIntent = application.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
+            val launchIntent = application.packageManager.getLaunchIntentForPackage(ShizukuServices.SHIZUKU_PACKAGE)
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 runCatching { application.startActivity(launchIntent) }
@@ -332,7 +330,7 @@ class SettingPrivilegeDelegate(
             Shizuku.requestPermission(SHIZUKU_PERMISSION_REQ_CODE)
         } catch (t: Throwable) {
             Timber.w(t, "Shizuku.requestPermission threw")
-            emitEvent(R.string.setting_shizuku_start_service_hint)
+            emitEvent(startServiceHint())
         }
     }
 
