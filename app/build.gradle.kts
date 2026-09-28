@@ -223,6 +223,7 @@ dependencies {
 
     implementation(libs.shizuku.api)
     implementation(libs.shizuku.provider)
+    implementation(libs.porter.shizuku.bridge)
 
     implementation(libs.bundles.ackpine.libsu)
     implementation(libs.libsu.core)

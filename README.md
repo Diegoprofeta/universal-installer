@@ -60,7 +60,7 @@
 ## Key Features
 
 - **⚡ Flexible Installation Backends**:
-  - Standard system installer, **Shizuku**, and **Root (libsu)**.
+  - Standard system installer, **Shizuku**, and **Root (libsu)**. On phones and tablets, **Porter** can serve the Shizuku engine too.
   - Silent install and uninstall without prompts.
   - Privileged controls: allow downgrade, bypass minimum SDK restrictions, grant permissions, install for all users, and spoof installer package names (Google Play, F-Droid, Aurora Store, Amazon, etc.).
 
@@ -93,7 +93,7 @@
 ## Tech Stack
 
 - **UI**: [Jetpack Compose](https://developer.android.com/jetpack/compose), [Wear Compose](https://developer.android.com/training/wearables/compose), Material 3
-- **Installer Engine**: [Ackpine](https://ackpine.solrudev.ru/) & [Shizuku](https://shizuku.rikka.app/)
+- **Installer Engine**: [Ackpine](https://ackpine.solrudev.ru/) & [Shizuku](https://shizuku.rikka.app/) (or [Porter](https://porter.darken.eu/) through its Shizuku-API bridge)
 - **Networking**: [Ktor](https://ktor.io/)
 - **Storage & Async**: [Room](https://developer.android.com/training/data-storage/room), [DataStore](https://developer.android.com/topic/libraries/architecture/datastore), [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager)
 - **Dependency Injection**: [Koin](https://insert-koin.io/)
