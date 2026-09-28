@@ -100,10 +100,25 @@ object InstallErrorHelper {
                     guidance = guidance,
                 )
             }
-            "CPU_ABI" in raw || "NO_MATCHING_ABIS" in raw || "NATIVE_LIBRARIES" in raw -> ErrorInfo(
-                title = context.getString(R.string.install_error_incompatible_abi_title),
-                guidance = context.getString(R.string.install_error_incompatible_abi_guidance),
-            )
+            "CPU_ABI" in raw || "NO_MATCHING_ABIS" in raw || "NATIVE_LIBRARIES" in raw || "RES=-113" in raw -> {
+                val deviceAbis = Build.SUPPORTED_ABIS.joinToString(", ")
+                val recommended = if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isDevice32BitOnly()) {
+                    "32-bit (armeabi-v7a)"
+                } else if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isDevice64BitOnly()) {
+                    "64-bit (arm64-v8a)"
+                } else {
+                    "Universal"
+                }
+                ErrorInfo(
+                    title = context.getString(R.string.install_error_incompatible_abi_title),
+                    guidance = context.getString(
+                        R.string.install_error_incompatible_abi_detailed_guidance,
+                        "unsupported",
+                        deviceAbis,
+                        recommended,
+                    ),
+                )
+            }
             "MISSING_FEATURE" in raw || "FEATURE" in raw -> ErrorInfo(
                 title = context.getString(R.string.install_error_incompatible_feature_title),
                 guidance = context.getString(R.string.install_error_incompatible_feature_guidance),
@@ -176,6 +191,9 @@ object InstallErrorHelper {
                 guidance = context.getString(R.string.install_error_security_frp_guidance),
             )
         }
+        if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(failure.message)) {
+            return incompatibleErrorInfo(context, failure.message)
+        }
         return when (failure) {
             is InstallFailure.Aborted -> ErrorInfo(
                 title = context.getString(R.string.install_error_cancelled_title),
@@ -223,6 +241,41 @@ object InstallErrorHelper {
     }
 
     /**
+     * Resolves exceptions originating from shell commands (libsu root, custom authorizer) into
+     * user-friendly structured [ErrorInfo] instead of surfacing raw terminal dumps.
+     */
+    fun resolveException(context: Context, message: String?): ErrorInfo {
+        if (isFrpMessage(message.orEmpty())) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_security_frp_title),
+                guidance = context.getString(R.string.install_error_security_frp_guidance),
+            )
+        }
+        if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(message)) {
+            return incompatibleErrorInfo(context, message)
+        }
+        val raw = message.orEmpty().uppercase()
+        return when {
+            "VERSION_DOWNGRADE" in raw -> ErrorInfo(
+                title = context.getString(R.string.install_error_conflict_title),
+                guidance = context.getString(R.string.install_error_conflict_downgrade_guidance),
+            )
+            "UPDATE_INCOMPATIBLE" in raw || "SIGNATURES DO NOT MATCH" in raw -> ErrorInfo(
+                title = context.getString(R.string.install_error_conflict_title),
+                guidance = context.getString(R.string.install_error_conflict_signature_guidance),
+            )
+            "INSUFFICIENT_STORAGE" in raw -> ErrorInfo(
+                title = context.getString(R.string.install_error_storage_title),
+                guidance = context.getString(R.string.install_error_storage_guidance),
+            )
+            else -> ErrorInfo(
+                title = context.getString(R.string.install_error_failed_title),
+                guidance = message ?: context.getString(R.string.install_error_unknown_guidance),
+            )
+        }
+    }
+
+    /**
      * A stable, non-localised name for a failure kind, for telemetry.
      *
      * Deliberately not `failure::class.simpleName`: R8 renames ackpine's classes, so release
@@ -260,6 +313,9 @@ object InstallErrorHelper {
             return "INSTALL_FAILED_SECURITY_FRP"
         }
         val rawMessage = failure.message.orEmpty()
+        if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(rawMessage)) {
+            return "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE"
+        }
         val match = PM_ERROR_CODE_REGEX.find(rawMessage)
         if (match != null) {
             return match.groupValues[1]

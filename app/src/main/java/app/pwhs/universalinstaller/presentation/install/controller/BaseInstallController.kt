@@ -345,9 +345,22 @@ abstract class BaseInstallController(
                 throw e
             } catch (e: Exception) {
                 val isFrp = InstallErrorHelper.isFrpException(e)
-                val errorCode = if (isFrp) "INSTALL_FAILED_SECURITY_FRP" else "INSTALL_FAILED_INTERNAL_ERROR"
-                val errorType = if (isFrp) "security_frp" else "internal_error"
-                val errorReason = if (isFrp) "security_frp" else e.javaClass.simpleName
+                val isAbi = app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(e.message)
+                val errorCode = when {
+                    isFrp -> "INSTALL_FAILED_SECURITY_FRP"
+                    isAbi -> "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE"
+                    else -> "INSTALL_FAILED_INTERNAL_ERROR"
+                }
+                val errorType = when {
+                    isFrp -> "security_frp"
+                    isAbi -> "incompatible_device"
+                    else -> "internal_error"
+                }
+                val errorReason = when {
+                    isFrp -> "security_frp"
+                    isAbi -> "abi_incompatible"
+                    else -> e.javaClass.simpleName
+                }
                 reportInstallResult(
                     TelemetryEvents.RESULT_FAILURE,
                     errorCode = errorCode,
@@ -355,10 +368,9 @@ abstract class BaseInstallController(
                     errorReason = errorReason,
                     id = session.id,
                 )
-                val userMessage = if (isFrp && context != null) {
-                    val title = context.getString(R.string.install_error_security_frp_title)
-                    val guidance = context.getString(R.string.install_error_security_frp_guidance)
-                    "$title\n$guidance"
+                val userMessage = if (context != null) {
+                    val info = InstallErrorHelper.resolveException(context, e.message)
+                    "${info.title}\n${info.guidance}"
                 } else {
                     e.message
                 }

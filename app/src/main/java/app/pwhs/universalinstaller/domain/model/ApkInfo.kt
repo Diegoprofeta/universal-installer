@@ -56,4 +56,7 @@ data class ApkInfo(
 
     val isShizukuRequested: Boolean
         get() = permissions.contains("moe.shizuku.manager.permission.API_V23")
+
+    val isAbiIncompatible: Boolean
+        get() = supportedAbis.isNotEmpty() && !app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isCompatible(supportedAbis)
 }

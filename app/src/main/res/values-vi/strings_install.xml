@@ -371,4 +371,11 @@
     <string name="antisplit_download_action">Tải về</string>
     <string name="antisplit_merge_success">Gộp APK thành công</string>
     <string name="installer_engine_active">Đang dùng</string>
+    <string name="install_error_incompatible_abi_detailed_guidance">APK này yêu cầu kiến trúc %1$s, nhưng thiết bị của bạn chỉ hỗ trợ %2$s. Android không thể chạy ứng dụng này. Vui lòng tìm bản APK %3$s hoặc bản Universal.</string>
+    <string name="dialog_chip_abi_incompatible">CPU không tương thích</string>
+    <string name="install_abi_incompatible_banner_title">Kiến trúc CPU không tương thích</string>
+    <string name="install_abi_incompatible_banner_desc">APK này yêu cầu %1$s, nhưng thiết bị chỉ hỗ trợ %2$s. Quá trình cài đặt sẽ bị Android từ chối.</string>
+    <string name="install_abi_incompatible_dialog_title">Kiến trúc không tương thích</string>
+    <string name="install_abi_incompatible_dialog_message">APK này yêu cầu kiến trúc %1$s, nhưng thiết bị của bạn chỉ hỗ trợ %2$s.\n\nAndroid sẽ từ chối cài đặt với mã lỗi INSTALL_FAILED_NO_MATCHING_ABIS.\n\nLời khuyên: Hãy tìm tải phiên bản APK %3$s hoặc bản Universal của ứng dụng này.</string>
+    <string name="install_abi_incompatible_dialog_install_anyway">Vẫn cài đặt</string>
 </resources>

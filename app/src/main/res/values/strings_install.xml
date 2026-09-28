@@ -371,4 +371,11 @@
     <string name="antisplit_download_action">Download</string>
     <string name="antisplit_merge_success">APK merged successfully</string>
     <string name="installer_engine_active">Active</string>
+    <string name="install_error_incompatible_abi_detailed_guidance">This APK requires %1$s architecture, but your device only supports %2$s. Android cannot run this app. Look for a %3$s or Universal APK.</string>
+    <string name="dialog_chip_abi_incompatible">Incompatible CPU</string>
+    <string name="install_abi_incompatible_banner_title">Incompatible CPU architecture</string>
+    <string name="install_abi_incompatible_banner_desc">This APK requires %1$s, but your device only supports %2$s. Installation is expected to fail.</string>
+    <string name="install_abi_incompatible_dialog_title">Incompatible Architecture</string>
+    <string name="install_abi_incompatible_dialog_message">This APK requires %1$s architecture, but your device only supports %2$s.\n\nAndroid will reject the installation with INSTALL_FAILED_NO_MATCHING_ABIS.\n\nTip: Look for a %3$s or Universal version of this APK.</string>
+    <string name="install_abi_incompatible_dialog_install_anyway">Install anyway</string>
 </resources>
