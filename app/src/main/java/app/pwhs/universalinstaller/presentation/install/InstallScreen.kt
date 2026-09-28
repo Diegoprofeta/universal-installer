@@ -6,6 +6,7 @@ import android.widget.Toast
 import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
 import app.pwhs.universalinstaller.presentation.setting.SecurityLevel
 import app.pwhs.core.data.local.dataStore
+import app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter
 import app.pwhs.universalinstaller.presentation.install.wear.WearApkSender
 import app.pwhs.universalinstaller.util.BiometricGate
 import kotlinx.coroutines.flow.map
@@ -64,6 +65,7 @@ import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.data.local.InstallHistoryEntity
 import app.pwhs.universalinstaller.presentation.composable.InstallerModeBadge
 import app.pwhs.universalinstaller.presentation.composable.SessionCard
+import app.pwhs.universalinstaller.presentation.install.components.ShizukuPromoBanner
 import app.pwhs.universalinstaller.util.extension.getDisplayName
 import org.koin.androidx.compose.koinViewModel
 import ru.solrudev.ackpine.splits.ApkSplits.validate
@@ -76,6 +78,7 @@ import timber.log.Timber
 fun InstallScreen(
     modifier: Modifier = Modifier,
     viewModel: InstallViewModel = koinViewModel(),
+    onMergeSplits: ((Uri) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val resource = LocalResources.current
@@ -164,6 +167,20 @@ fun InstallScreen(
         }
     }
 
+    val pendingOriginalUri = viewModel.pendingOriginalUri
+    val canMerge = uiState.pendingApkInfo?.splitEntries?.isNotEmpty() == true && pendingOriginalUri != null
+    val onMerge: (() -> Unit)? = if (canMerge) {
+        {
+            if (pendingOriginalUri != null) {
+                if (onMergeSplits != null) {
+                    onMergeSplits(pendingOriginalUri)
+                } else {
+                    (context as? InstallActivity)?.requestMergeExternalFile(pendingOriginalUri)
+                }
+            }
+        }
+    } else null
+
     InstallUi(
         modifier = modifier,
         uiState = uiState,
@@ -211,6 +228,7 @@ fun InstallScreen(
         onUnblock = viewModel::unblockPackage,
         strictSecurity = strictVirusTotalCheck,
         onClearHistory = viewModel::clearHistory,
+        onMergeSplits = onMerge,
         onCheckVirusTotal = { viewModel.scanVirusTotal(context) },
         onStartDeviceScan = { viewModel.startDeviceScan(context) },
         onDismissDeviceScan = viewModel::dismissDeviceScan,
@@ -295,6 +313,7 @@ private fun InstallUi(
     uiState: InstallUiState = InstallUiState(),
     history: List<InstallHistoryEntity> = emptyList(),
     showDownloadTab: Boolean = true,
+    onMergeSplits: (() -> Unit)? = null,
     onFilePicked: (uri: Uri, splitPackage: SplitPackage.Provider, fileName: String) -> Unit = { _, _, _ -> },
     onDownloadFromUrl: (String) -> Unit = {},
     onCancelDownload: () -> Unit = {},
@@ -378,10 +397,8 @@ private fun InstallUi(
                 val mimeType = context.contentResolver.getType(uri)?.lowercase()
                 val displayName = context.contentResolver.getDisplayName(uri)
                 val extension = displayName.substringAfterLast('.', "").lowercase()
-                val validExtensions = listOf("apk", "apks", "xapk", "apkm", "apk+", "zip")
-                val isApkMime = mimeType == "application/vnd.android.package-archive"
 
-                if (strictPickerMode && !isApkMime && extension !in validExtensions) {
+                if (!PackageFileFilter.isSupportedPackage(context, uri, displayName)) {
                     Toast.makeText(
                         context,
                         resource.getString(R.string.install_unsupported_file),
@@ -389,6 +406,7 @@ private fun InstallUi(
                     ).show()
                 } else {
                     Timber.d("Selected file: $uri, MIME type: $mimeType, strict: $strictPickerMode")
+                    val isApkMime = mimeType == "application/vnd.android.package-archive"
                     val apks = when {
                         (isApkMime || extension == "apk") -> SingletonApkSequence(
                             uri,
@@ -421,12 +439,13 @@ private fun InstallUi(
 
     val safeLaunchFilePicker: (Boolean) -> Unit = { strict ->
         strictPickerMode = strict
+        val mimes = if (strict) PackageFileFilter.PACKAGE_MIME_TYPES else arrayOf("*/*")
         val launched = runCatching {
-            filePickerLauncher.launch(arrayOf("*/*"))
+            filePickerLauncher.launch(mimes)
         }.isSuccess
         if (!launched) {
             val fallbackLaunched = runCatching {
-                fallbackFilePickerLauncher.launch("*/*")
+                fallbackFilePickerLauncher.launch(if (strict) "application/vnd.android.package-archive" else "*/*")
             }.isSuccess
             if (!fallbackLaunched) {
                 Toast.makeText(
@@ -658,6 +677,7 @@ private fun InstallUi(
                 startCompact = true,
                 onUnblock = onUnblock,
                 strictSecurity = strictSecurity,
+                onMergeSplits = onMergeSplits,
             )
         }
     }
@@ -770,6 +790,7 @@ private fun InstallUi(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(key = "storage") { StorageCard() }
+            item(key = "shizuku_promo") { ShizukuPromoBanner() }
 
             if (uiState.obbCopyState !is ObbCopyState.Idle) {
                 item(key = "obb_copy") {

@@ -100,10 +100,25 @@ object InstallErrorHelper {
                     guidance = guidance,
                 )
             }
-            "CPU_ABI" in raw || "NO_MATCHING_ABIS" in raw || "NATIVE_LIBRARIES" in raw -> ErrorInfo(
-                title = context.getString(R.string.install_error_incompatible_abi_title),
-                guidance = context.getString(R.string.install_error_incompatible_abi_guidance),
-            )
+            "CPU_ABI" in raw || "NO_MATCHING_ABIS" in raw || "NATIVE_LIBRARIES" in raw || "RES=-113" in raw -> {
+                val deviceAbis = Build.SUPPORTED_ABIS.joinToString(", ")
+                val recommended = if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isDevice32BitOnly()) {
+                    "32-bit (armeabi-v7a)"
+                } else if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isDevice64BitOnly()) {
+                    "64-bit (arm64-v8a)"
+                } else {
+                    "Universal"
+                }
+                ErrorInfo(
+                    title = context.getString(R.string.install_error_incompatible_abi_title),
+                    guidance = context.getString(
+                        R.string.install_error_incompatible_abi_detailed_guidance,
+                        "unsupported",
+                        deviceAbis,
+                        recommended,
+                    ),
+                )
+            }
             "MISSING_FEATURE" in raw || "FEATURE" in raw -> ErrorInfo(
                 title = context.getString(R.string.install_error_incompatible_feature_title),
                 guidance = context.getString(R.string.install_error_incompatible_feature_guidance),
@@ -125,64 +140,139 @@ object InstallErrorHelper {
      * in-app cancel by throwing [kotlinx.coroutines.CancellationException], so an Aborted result
      * here is always a *system* abort — precisely what MIUI optimization produces.
      */
-    private fun isMiuiSuspect(failure: InstallFailure): Boolean = when (failure) {
-        is InstallFailure.Aborted,
-        is InstallFailure.Blocked,
-        is InstallFailure.Generic,
-        -> true
-        is InstallFailure.Conflict,
-        is InstallFailure.Incompatible,
-        is InstallFailure.Invalid,
-        is InstallFailure.Storage,
-        is InstallFailure.Timeout,
-        is InstallFailure.Exceptional,
-        -> false
-        else -> true
+    fun isFrpMessage(message: String): Boolean {
+        val upper = message.uppercase()
+        return "SECURE FRP" in upper || ("FRP" in upper && ("INSTALL" in upper || "SECURITY" in upper || "DEVICE" in upper || "CAN'T INSTALL" in upper))
     }
 
-    fun getErrorInfo(context: Context, failure: InstallFailure): ErrorInfo = when (failure) {
-        is InstallFailure.Aborted -> ErrorInfo(
-            title = context.getString(R.string.install_error_cancelled_title),
-            guidance = context.getString(R.string.install_error_cancelled_guidance),
-        )
-        is InstallFailure.Blocked -> ErrorInfo(
-            title = context.getString(R.string.install_error_blocked_title),
-            guidance = context.getString(R.string.install_error_blocked_guidance),
-        )
-        is InstallFailure.Conflict -> ErrorInfo(
-            title = context.getString(R.string.install_error_conflict_title),
-            guidance = context.getString(conflictGuidance(failure.message)),
-        )
-        is InstallFailure.Incompatible -> incompatibleErrorInfo(context, failure.message)
-        is InstallFailure.Invalid -> ErrorInfo(
-            title = context.getString(R.string.install_error_invalid_title),
-            guidance = context.getString(R.string.install_error_invalid_guidance),
-        )
-        is InstallFailure.Storage -> ErrorInfo(
-            title = context.getString(R.string.install_error_storage_title),
-            guidance = context.getString(R.string.install_error_storage_guidance),
-        )
-        is InstallFailure.Timeout -> ErrorInfo(
-            title = context.getString(R.string.install_error_timeout_title),
-            guidance = context.getString(R.string.install_error_timeout_guidance),
-        )
-        is InstallFailure.Exceptional -> ErrorInfo(
-            title = context.getString(R.string.install_error_unexpected_title),
-            guidance = context.getString(R.string.install_error_unexpected_guidance, failure.message ?: ""),
-        )
-        is InstallFailure.Generic -> ErrorInfo(
-            title = context.getString(R.string.install_error_failed_title),
-            guidance = failure.message ?: context.getString(R.string.install_error_unknown_guidance),
-        )
-        else -> ErrorInfo(
-            title = context.getString(R.string.install_error_failed_title),
-            guidance = failure.message ?: context.getString(R.string.install_error_unknown_guidance_short),
-        )
+    fun isFrpException(throwable: Throwable?): Boolean {
+        var current: Throwable? = throwable
+        while (current != null) {
+            if (current is SecurityException && isFrpMessage(current.message.orEmpty())) {
+                return true
+            }
+            if (isFrpMessage(current.message.orEmpty())) {
+                return true
+            }
+            current = current.cause
+        }
+        return false
+    }
+
+    fun isFrpFailure(failure: InstallFailure): Boolean {
+        if (failure is InstallFailure.Exceptional) {
+            if (isFrpException(failure.exception)) return true
+        }
+        return isFrpMessage(failure.message.orEmpty())
+    }
+
+    private fun isMiuiSuspect(failure: InstallFailure): Boolean {
+        if (isFrpFailure(failure)) return false
+        return when (failure) {
+            is InstallFailure.Aborted,
+            is InstallFailure.Blocked,
+            is InstallFailure.Generic,
+            -> true
+            is InstallFailure.Conflict,
+            is InstallFailure.Incompatible,
+            is InstallFailure.Invalid,
+            is InstallFailure.Storage,
+            is InstallFailure.Timeout,
+            is InstallFailure.Exceptional,
+            -> false
+            else -> true
+        }
+    }
+
+    fun getErrorInfo(context: Context, failure: InstallFailure): ErrorInfo {
+        if (isFrpFailure(failure)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_security_frp_title),
+                guidance = context.getString(R.string.install_error_security_frp_guidance),
+            )
+        }
+        if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(failure.message)) {
+            return incompatibleErrorInfo(context, failure.message)
+        }
+        return when (failure) {
+            is InstallFailure.Aborted -> ErrorInfo(
+                title = context.getString(R.string.install_error_cancelled_title),
+                guidance = context.getString(R.string.install_error_cancelled_guidance),
+            )
+            is InstallFailure.Blocked -> ErrorInfo(
+                title = context.getString(R.string.install_error_blocked_title),
+                guidance = context.getString(R.string.install_error_blocked_guidance),
+            )
+            is InstallFailure.Conflict -> ErrorInfo(
+                title = context.getString(R.string.install_error_conflict_title),
+                guidance = context.getString(conflictGuidance(failure.message)),
+            )
+            is InstallFailure.Incompatible -> incompatibleErrorInfo(context, failure.message)
+            is InstallFailure.Invalid -> ErrorInfo(
+                title = context.getString(R.string.install_error_invalid_title),
+                guidance = context.getString(R.string.install_error_invalid_guidance),
+            )
+            is InstallFailure.Storage -> ErrorInfo(
+                title = context.getString(R.string.install_error_storage_title),
+                guidance = context.getString(R.string.install_error_storage_guidance),
+            )
+            is InstallFailure.Timeout -> ErrorInfo(
+                title = context.getString(R.string.install_error_timeout_title),
+                guidance = context.getString(R.string.install_error_timeout_guidance),
+            )
+            is InstallFailure.Exceptional -> ErrorInfo(
+                title = context.getString(R.string.install_error_unexpected_title),
+                guidance = context.getString(R.string.install_error_unexpected_guidance, failure.message ?: ""),
+            )
+            is InstallFailure.Generic -> ErrorInfo(
+                title = context.getString(R.string.install_error_failed_title),
+                guidance = failure.message ?: context.getString(R.string.install_error_unknown_guidance),
+            )
+            else -> ErrorInfo(
+                title = context.getString(R.string.install_error_failed_title),
+                guidance = failure.message ?: context.getString(R.string.install_error_unknown_guidance_short),
+            )
+        }
     }
 
     fun getUserFriendlyMessage(context: Context, failure: InstallFailure): String {
         val info = getErrorInfo(context, failure)
         return "${info.title}: ${info.guidance}"
+    }
+
+    /**
+     * Resolves exceptions originating from shell commands (libsu root, custom authorizer) into
+     * user-friendly structured [ErrorInfo] instead of surfacing raw terminal dumps.
+     */
+    fun resolveException(context: Context, message: String?): ErrorInfo {
+        if (isFrpMessage(message.orEmpty())) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_security_frp_title),
+                guidance = context.getString(R.string.install_error_security_frp_guidance),
+            )
+        }
+        if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(message)) {
+            return incompatibleErrorInfo(context, message)
+        }
+        val raw = message.orEmpty().uppercase()
+        return when {
+            "VERSION_DOWNGRADE" in raw -> ErrorInfo(
+                title = context.getString(R.string.install_error_conflict_title),
+                guidance = context.getString(R.string.install_error_conflict_downgrade_guidance),
+            )
+            "UPDATE_INCOMPATIBLE" in raw || "SIGNATURES DO NOT MATCH" in raw -> ErrorInfo(
+                title = context.getString(R.string.install_error_conflict_title),
+                guidance = context.getString(R.string.install_error_conflict_signature_guidance),
+            )
+            "INSUFFICIENT_STORAGE" in raw -> ErrorInfo(
+                title = context.getString(R.string.install_error_storage_title),
+                guidance = context.getString(R.string.install_error_storage_guidance),
+            )
+            else -> ErrorInfo(
+                title = context.getString(R.string.install_error_failed_title),
+                guidance = message ?: context.getString(R.string.install_error_unknown_guidance),
+            )
+        }
     }
 
     /**
@@ -192,17 +282,22 @@ object InstallErrorHelper {
      * builds would report a different — and meaningless — name than debug ones. Never include
      * `failure.message`; it carries package and file names.
      */
-    fun failureKey(failure: InstallFailure): String = when (failure) {
-        is InstallFailure.Aborted -> "aborted"
-        is InstallFailure.Blocked -> "blocked"
-        is InstallFailure.Conflict -> "conflict"
-        is InstallFailure.Incompatible -> "incompatible"
-        is InstallFailure.Invalid -> "invalid"
-        is InstallFailure.Storage -> "storage"
-        is InstallFailure.Timeout -> "timeout"
-        is InstallFailure.Exceptional -> "exceptional"
-        is InstallFailure.Generic -> "generic"
-        else -> "unknown"
+    fun failureKey(failure: InstallFailure): String {
+        if (isFrpFailure(failure)) {
+            return "security_frp"
+        }
+        return when (failure) {
+            is InstallFailure.Aborted -> "aborted"
+            is InstallFailure.Blocked -> "blocked"
+            is InstallFailure.Conflict -> "conflict"
+            is InstallFailure.Incompatible -> "incompatible"
+            is InstallFailure.Invalid -> "invalid"
+            is InstallFailure.Storage -> "storage"
+            is InstallFailure.Timeout -> "timeout"
+            is InstallFailure.Exceptional -> "exceptional"
+            is InstallFailure.Generic -> "generic"
+            else -> "unknown"
+        }
     }
 
     private val PM_ERROR_CODE_REGEX = Regex("""\b(INSTALL_(?:PARSE_)?FAILED_[A-Z0-9_]+)\b""")
@@ -214,7 +309,13 @@ object InstallErrorHelper {
      * Never returns file names or package names to preserve privacy.
      */
     fun extractErrorCode(failure: InstallFailure): String {
+        if (isFrpFailure(failure)) {
+            return "INSTALL_FAILED_SECURITY_FRP"
+        }
         val rawMessage = failure.message.orEmpty()
+        if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(rawMessage)) {
+            return "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE"
+        }
         val match = PM_ERROR_CODE_REGEX.find(rawMessage)
         if (match != null) {
             return match.groupValues[1]
@@ -248,9 +349,13 @@ object InstallErrorHelper {
     /**
      * Classifies a failure into high-level technical categories for GA4 dimension reporting:
      * signature_mismatch, version_downgrade, insufficient_storage, corrupted_package,
-     * incompatible_device, permission_denied, os_blocked, system_aborted, verification_timeout.
+     * incompatible_device, permission_denied, os_blocked, system_aborted, verification_timeout,
+     * security_frp.
      */
     fun classifyErrorType(failure: InstallFailure, errorCode: String = extractErrorCode(failure)): String {
+        if (isFrpFailure(failure) || errorCode == "INSTALL_FAILED_SECURITY_FRP" || errorCode.equals("security_frp", ignoreCase = true)) {
+            return "security_frp"
+        }
         val upperCode = errorCode.uppercase()
         val rawMessage = failure.message.orEmpty().uppercase()
         return when {

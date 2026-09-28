@@ -55,12 +55,15 @@ import app.pwhs.universalinstaller.domain.model.ApkInfo
 import app.pwhs.universalinstaller.domain.model.InstallerProfile
 import app.pwhs.universalinstaller.domain.model.VtStatus
 import app.pwhs.universalinstaller.presentation.composable.InstallerModeBadge
+import app.pwhs.universalinstaller.presentation.install.components.AbiIncompatibleBanner
 import app.pwhs.universalinstaller.presentation.install.components.AbisCard
+import app.pwhs.universalinstaller.presentation.install.components.ApkInfoHeader
 import app.pwhs.universalinstaller.presentation.install.components.ApkInfoFooter
 import app.pwhs.universalinstaller.presentation.install.components.DetailsCard
 import app.pwhs.universalinstaller.presentation.install.components.InfoChip
 import app.pwhs.universalinstaller.presentation.install.components.InstallBlockedBanner
 import app.pwhs.universalinstaller.presentation.install.components.InstallTargetCard
+import app.pwhs.universalinstaller.presentation.install.dialog.AbiIncompatibleDialog
 import app.pwhs.universalinstaller.presentation.install.dialog.TrackersDetailDialog
 import app.pwhs.universalinstaller.presentation.install.components.ObbAttachCard
 import app.pwhs.universalinstaller.presentation.install.components.PermissionsCard
@@ -102,12 +105,14 @@ internal fun ApkInfoContent(
     showKeepApkOption: Boolean = false,
     keepApk: Boolean = false,
     onKeepApkChanged: (Boolean) -> Unit = {},
+    onMergeSplits: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val currentMappingProfileId = appProfileMapping[apkInfo.packageName]
     var isExpanded by rememberSaveable { mutableStateOf(!startCompact) }
     var showTrackersDialog by rememberSaveable { mutableStateOf(false) }
+    var showAbiWarningDialog by rememberSaveable { mutableStateOf(false) }
 
     val iconBitmap by produceState<ImageBitmap?>(
         initialValue = null,
@@ -133,81 +138,11 @@ internal fun ApkInfoContent(
                 .padding(top = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val icon = iconBitmap
-            if (isExpanded) {
-                if (icon != null) {
-                    Image(
-                        bitmap = icon,
-                        contentDescription = apkInfo.appName,
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(MaterialTheme.shapes.large),
-                    )
-                    Spacer(Modifier.height(12.dp))
-                } else {
-                    Icon(
-                        imageVector = Icons.Rounded.Android,
-                        contentDescription = null,
-                        modifier = Modifier.size(80.dp),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    )
-                    Spacer(Modifier.height(12.dp))
-                }
-                Text(
-                    text = apkInfo.appName,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = apkInfo.packageName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (icon != null) {
-                        Image(
-                            bitmap = icon,
-                            contentDescription = apkInfo.appName,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(MaterialTheme.shapes.medium),
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Rounded.Android,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                        )
-                    }
-                    Spacer(Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = apkInfo.appName,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = "v${apkInfo.versionName}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
+            ApkInfoHeader(
+                apkInfo = apkInfo,
+                icon = iconBitmap,
+                isExpanded = isExpanded,
+            )
 
             Spacer(Modifier.height(16.dp))
             InstallerModeBadge()
@@ -221,6 +156,21 @@ internal fun ApkInfoContent(
                 if (isDowngrade) {
                     InfoChip(
                         label = stringResource(R.string.dialog_chip_downgrade),
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Warning,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                }
+                if (apkInfo.isAbiIncompatible) {
+                    InfoChip(
+                        label = stringResource(R.string.dialog_chip_abi_incompatible),
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Rounded.Warning,
@@ -396,7 +346,11 @@ internal fun ApkInfoContent(
                 DetailsCard(apkInfo = apkInfo)
                 if (apkInfo.splitEntries.size > 1) {
                     Spacer(Modifier.height(16.dp))
-                    SplitsCard(splits = apkInfo.splitEntries, onToggle = onToggleSplit)
+                    SplitsCard(
+                        splits = apkInfo.splitEntries,
+                        onToggle = onToggleSplit,
+                        onMergeSplits = onMergeSplits,
+                    )
                 }
                 if (apkInfo.supportedAbis.isNotEmpty()) {
                     Spacer(Modifier.height(16.dp))
@@ -433,6 +387,22 @@ internal fun ApkInfoContent(
             Spacer(Modifier.height(16.dp))
         }
 
+        if (apkInfo.isAbiIncompatible) {
+            AbiIncompatibleBanner(
+                apkAbis = apkInfo.supportedAbis,
+                onClick = { showAbiWarningDialog = true },
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
+            )
+        }
+
+        if (apkInfo.isAbiIncompatible) {
+            AbiIncompatibleBanner(
+                apkAbis = apkInfo.supportedAbis,
+                onClick = { showAbiWarningDialog = true },
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
+            )
+        }
+
         if (apkInfo.isBlocked) {
             InstallBlockedBanner(
                 packageName = apkInfo.packageName,
@@ -457,7 +427,13 @@ internal fun ApkInfoContent(
             cancelText = cancelText,
             onExpand = { isExpanded = true },
             onCollapse = { isExpanded = false },
-            onInstall = onInstall,
+            onInstall = {
+                if (apkInfo.isAbiIncompatible) {
+                    showAbiWarningDialog = true
+                } else {
+                    onInstall()
+                }
+            },
             onCancel = onCancel,
             onCheckVirusTotal = {
                 if (!isExpanded) isExpanded = true
@@ -469,6 +445,14 @@ internal fun ApkInfoContent(
             TrackersDetailDialog(
                 trackers = apkInfo.trackers,
                 onDismiss = { showTrackersDialog = false },
+            )
+        }
+
+        if (showAbiWarningDialog) {
+            AbiIncompatibleDialog(
+                apkAbis = apkInfo.supportedAbis,
+                onDismiss = { showAbiWarningDialog = false },
+                onInstallAnyway = onInstall,
             )
         }
     }

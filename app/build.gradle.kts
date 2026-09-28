@@ -201,6 +201,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.browser)
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.core.splashscreen)
 

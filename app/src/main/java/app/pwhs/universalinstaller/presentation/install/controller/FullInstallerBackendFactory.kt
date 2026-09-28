@@ -215,7 +215,14 @@ class FullInstallerBackendFactory : InstallerBackendFactory {
                 
                 // Use reflection for getIntentSender to avoid stub issues
                 val intentSender = receiver.javaClass.getMethod("getIntentSender").invoke(receiver) as android.content.IntentSender
-                session.commit(intentSender)
+                try {
+                    session.commit(intentSender)
+                } catch (e: SecurityException) {
+                    if (app.pwhs.universalinstaller.presentation.install.InstallErrorHelper.isFrpException(e)) {
+                        throw IllegalStateException("INSTALL_FAILED_SECURITY_FRP: ${e.message}", e)
+                    }
+                    throw e
+                }
             }
             "Session $sessionId committed for user $userId"
         }
@@ -235,6 +242,17 @@ class FullInstallerBackendFactory : InstallerBackendFactory {
         runCatching {
             val service = obtainPrivilegedService(context.applicationContext as Application)
             service.setDefaultInstaller(component, lock)
+        }
+    }
+
+    override suspend fun setDefaultUninstallerViaRoot(
+        context: Context,
+        component: ComponentName,
+        lock: Boolean,
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val service = obtainPrivilegedService(context.applicationContext as Application)
+            service.setDefaultUninstaller(component, lock)
         }
     }
 
@@ -279,6 +297,20 @@ class FullInstallerBackendFactory : InstallerBackendFactory {
         }
     }
 
+    override suspend fun uninstallPackageViaRoot(
+        packageName: String,
+        keepData: Boolean,
+        allUsers: Boolean,
+    ): Result<String> {
+        val cmd = buildString {
+            append("pm uninstall ")
+            if (keepData) append("-k ")
+            if (!allUsers) append("--user 0 ")
+            append(packageName)
+        }
+        return runRootShell(packageName, cmd, successToken = "Success")
+    }
+
     private suspend fun runRootShell(
         packageName: String,
         cmd: String,
@@ -299,6 +331,32 @@ class FullInstallerBackendFactory : InstallerBackendFactory {
                 )
             }
             stdout
+        }
+    }
+
+    override suspend fun startShizukuViaRoot(): Result<Boolean> = withContext(Dispatchers.IO) {
+        runCatching {
+            val starterCmd = """
+                if [ -x /data/local/tmp/shizuku_starter ]; then
+                    /data/local/tmp/shizuku_starter
+                elif [ -f /data/user_de/0/moe.shizuku.privileged.api/bin/shizuku_starter ]; then
+                    /data/user_de/0/moe.shizuku.privileged.api/bin/shizuku_starter
+                elif [ -f /sdcard/Android/data/moe.shizuku.privileged.api/start.sh ]; then
+                    sh /sdcard/Android/data/moe.shizuku.privileged.api/start.sh
+                else
+                    APK=${'$'}(pm path moe.shizuku.privileged.api 2>/dev/null | head -n 1 | cut -d: -f2)
+                    if [ -n "${'$'}APK" ]; then
+                        LIB=${'$'}(find ${'$'}(dirname "${'$'}APK")/lib -name "libshizuku.so" 2>/dev/null | head -n 1)
+                        if [ -f "${'$'}LIB" ]; then
+                            cp "${'$'}LIB" /data/local/tmp/shizuku_starter
+                            chmod 755 /data/local/tmp/shizuku_starter
+                            /data/local/tmp/shizuku_starter
+                        fi
+                    fi
+                fi
+            """.trimIndent()
+            val result = Shell.cmd(starterCmd).exec()
+            result.isSuccess
         }
     }
 }

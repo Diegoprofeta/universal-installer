@@ -75,6 +75,8 @@
     <string name="setting_blacklist_count">Đã chặn %1$d</string>
     <string name="setting_auto_approve_title">Tự động phê duyệt từ ứng dụng đã chọn</string>
     <string name="setting_auto_approve_subtitle">Tự động cài đặt yêu cầu từ các ứng dụng được chọn qua Shizuku hoặc Root mà không cần hỏi</string>
+    <string name="setting_auto_approve_block_trackers_title">Chặn tự động cài đặt khi có trình theo dõi</string>
+    <string name="setting_auto_approve_block_trackers_subtitle">Ngăn cài đặt tự động và yêu cầu xem xét thủ công nếu Exodus Privacy phát hiện thấy tracker</string>
     <string name="setting_auto_approve_apps_title">Ứng dụng được phê duyệt</string>
     <string name="setting_auto_approve_count">%1$d ứng dụng đã chọn</string>
     <string name="setting_auto_approve_none">Chưa chọn ứng dụng nào</string>
@@ -170,12 +172,20 @@
     <string name="setting_default_installer_enabled">Universal Installer hiện là trình cài đặt mặc định</string>
     <string name="setting_default_installer_disabled">Đã khôi phục trình cài đặt hệ thống</string>
     <string name="setting_default_installer_failed">Thay đổi trình cài đặt mặc định thất bại</string>
+    <string name="setting_default_uninstaller_title">Đặt làm trình gỡ cài đặt mặc định</string>
+    <string name="setting_default_uninstaller_subtitle">Đặt Universal Installer làm trình xử lý gỡ cài đặt mặc định (yêu cầu Shizuku hoặc Root)</string>
+    <string name="setting_default_uninstaller_needs_backend">Hãy bật Shizuku hoặc Root trước để thay đổi trình gỡ cài đặt mặc định</string>
+    <string name="setting_default_uninstaller_enabled">Universal Installer hiện là trình gỡ cài đặt mặc định</string>
+    <string name="setting_default_uninstaller_disabled">Đã hủy ưu tiên trình gỡ cài đặt mặc định</string>
+    <string name="setting_default_uninstaller_failed">Thay đổi trình gỡ cài đặt mặc định thất bại</string>
     <string name="setting_section_profiles">Hồ sơ trình cài đặt</string>
     <string name="setting_profiles_title">Hồ sơ</string>
     <string name="setting_profiles_subtitle">Lưu và tái sử dụng các cấu hình cài đặt</string>
     <string name="setting_install_mode_title">Chế độ cài đặt</string>
     <string name="setting_install_mode_default">Mặc định</string>
     <string name="setting_install_mode_shizuku">Shizuku</string>
+    <string name="setting_install_mode_dhizuku" translatable="false">Dhizuku</string>
+    <string name="setting_install_mode_shizuku_dhizuku" translatable="false">Shizuku + Dhizuku</string>
     <string name="setting_use_dhizuku_title">Dùng Dhizuku thay thế</string>
     <string name="setting_dhizuku_unsupported">Dhizuku cần Android 8.0 trở lên</string>
     <string name="setting_dhizuku_not_installed">Thiết bị chưa cài Dhizuku</string>
@@ -184,10 +194,21 @@
     <string name="setting_dhizuku_profile_owner_unsupported">Dhizuku đang hoạt động với quyền Profile Owner. Cài đặt im lặng yêu cầu quyền Device Owner.</string>
     <string name="setting_dhizuku_denied">Dhizuku đã từ chối yêu cầu cấp quyền</string>
     <string name="setting_dhizuku_ready">Sẵn sàng — cài im lặng. Lưu ý Dhizuku chỉ hỗ trợ \"Cho phép hạ cấp\"; các tuỳ chọn cài đặt khác chỉ áp dụng cho Shizuku và Root.</string>
+    <string name="setting_shizuku_dhizuku_not_running">Cả Shizuku và Dhizuku đều chưa chạy</string>
+    <string name="setting_shizuku_dhizuku_ready">Sẵn sàng — đang dùng Shizuku (Dhizuku dự phòng)</string>
+    <string name="setting_shizuku_dhizuku_ready_dhizuku_active">Shizuku chưa chạy — đang dùng Dhizuku dự phòng</string>
+    <string name="setting_shizuku_dhizuku_no_permission">Nhấn để cấp quyền cho Shizuku và Dhizuku</string>
     <string name="setting_install_mode_root">Root</string>
     <string name="setting_install_mode_custom">Tùy chỉnh</string>
     <string name="setting_install_mode_default_sub">Trình cài đặt của Android — sẽ hỏi bạn xác nhận từng ứng dụng</string>
-    <string name="setting_install_mode_custom_sub">Cài đặt qua lệnh shell hoặc authorizer tùy chỉnh</string>
+    <string name="setting_install_priority_title">Độ ưu tiên cài đặt</string>
+    <string name="setting_install_priority_subtitle">Thử lần lượt theo thứ tự ưu tiên; tự động chuyển sang phương thức tiếp theo nếu không sẵn sàng</string>
+    <string name="setting_install_priority_reset">Đặt lại thứ tự</string>
+    <string name="setting_install_priority_up">Tăng ưu tiên</string>
+    <string name="setting_install_priority_down">Giảm ưu tiên</string>
+    <string name="setting_install_priority_ready">Sẵn sàng</string>
+    <string name="setting_install_priority_unavailable">Chưa sẵn sàng</string>
+    <string name="setting_install_priority_fallback">Dự phòng</string>
     <string name="setting_custom_authorizer_title">Trình cấp quyền tùy chỉnh</string>
     <string name="setting_custom_authorizer_subtitle">Cấu hình lệnh shell hoặc binary để cấp quyền cài đặt</string>
     <string name="setting_custom_authorizer_configure">Cấu hình</string>

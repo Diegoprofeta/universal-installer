@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import app.pwhs.universalinstaller.presentation.install.util.AppCacheManager
 import app.pwhs.universalinstaller.presentation.install.InstallViewModel
 import app.pwhs.universalinstaller.presentation.install.util.InstallApkSplitsHelper
 import app.pwhs.universalinstaller.util.extension.getDisplayName
@@ -27,12 +28,7 @@ object DialogInstallUriHelper {
 
                 val text = source.getStringExtra(Intent.EXTRA_TEXT)?.trim()
                 if (!text.isNullOrBlank()) {
-                    val url = text.split("\\s+".toRegex()).find {
-                        it.startsWith("http://", ignoreCase = true) || it.startsWith("https://", ignoreCase = true)
-                    }
-                    if (url != null) {
-                        runCatching { Uri.parse(url) }.getOrNull()?.let(out::add)
-                    }
+                    extractHttpUrl(text)?.let { runCatching { Uri.parse(it) }.getOrNull() }?.let(out::add)
                 }
             }
             Intent.ACTION_SEND_MULTIPLE ->
@@ -42,16 +38,37 @@ object DialogInstallUriHelper {
                     ?.let(out::addAll)
         }
 
-        // 3. ClipData (Alternative for some file managers)
+        // 3. ClipData (Alternative for some file managers and browser link shares)
         source.clipData?.let { clip ->
             for (i in 0 until clip.itemCount) {
-                val u = clip.getItemAt(i).uri ?: continue
-                if (isSupportedScheme(u.scheme)) out.add(u)
+                val item = clip.getItemAt(i)
+                val u = item.uri
+                if (u != null && isSupportedScheme(u.scheme)) {
+                    out.add(u)
+                } else {
+                    val text = item.text?.toString()?.trim()
+                    if (!text.isNullOrBlank()) {
+                        extractHttpUrl(text)?.let { runCatching { Uri.parse(it) }.getOrNull() }?.let(out::add)
+                    }
+                }
             }
         }
 
         return out.distinct()
     }
+
+    private fun extractHttpUrl(text: String): String? {
+        val trimmed = text.trim()
+        if (trimmed.startsWith("http://", ignoreCase = true) ||
+            trimmed.startsWith("https://", ignoreCase = true)
+        ) {
+            return trimmed.substringBefore(' ').substringBefore('\n')
+        }
+        val match = HTTP_URL_REGEX.find(trimmed) ?: return null
+        return match.value
+    }
+
+    private val HTTP_URL_REGEX = Regex("""https?://\S+""", RegexOption.IGNORE_CASE)
 
     private fun isSupportedScheme(scheme: String?): Boolean =
         scheme == "content" || scheme == "file" || scheme == "http" || scheme == "https"
@@ -78,6 +95,10 @@ object DialogInstallUriHelper {
         viewModel: InstallViewModel,
         onDownloadProgress: ((app.pwhs.core.network.DownloadProgress) -> Unit)? = null,
     ) {
+        val originalDisplayName = context.contentResolver.getDisplayName(uri).ifBlank {
+            uri.lastPathSegment?.substringAfterLast('/') ?: "package.apk"
+        }
+
         val targetUri = if (uri.scheme == "http" || uri.scheme == "https") {
             val downloader = app.pwhs.core.network.NetworkApkDownloader(context)
             when (val result = downloader.download(uri.toString(), onDownloadProgress ?: {})) {
@@ -91,14 +112,36 @@ object DialogInstallUriHelper {
                     return
                 }
             }
+        } else if (uri.scheme == "content" && !isAppInternalUri(context, uri)) {
+            AppCacheManager.stageExternalUri(context, uri, originalDisplayName) ?: uri
         } else {
             uri
         }
 
-        val displayName = context.contentResolver.getDisplayName(targetUri)
+        val displayName = if (targetUri.scheme == "file") {
+            originalDisplayName
+        } else {
+            context.contentResolver.getDisplayName(targetUri).ifBlank { originalDisplayName }
+        }
+
+        if (!app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isSupportedPackage(context, targetUri, displayName)) {
+            android.widget.Toast.makeText(
+                context,
+                context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file),
+                android.widget.Toast.LENGTH_LONG,
+            ).show()
+            viewModel.dialogParseFailed(context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file))
+            return
+        }
+
         val ext = displayName.substringAfterLast('.', "").lowercase()
         val splitProvider = InstallApkSplitsHelper.buildSplitProvider(context, targetUri, ext)
         viewModel.parseApkInfo(context, targetUri, splitProvider, displayName)
+    }
+
+    private fun isAppInternalUri(context: Context, uri: Uri): Boolean {
+        val authority = uri.authority ?: return false
+        return authority == "${context.packageName}.fileprovider"
     }
 
     suspend fun parseAndPushFile(
@@ -107,6 +150,16 @@ object DialogInstallUriHelper {
         fileName: String,
         viewModel: InstallViewModel,
     ) {
+        if (!app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isSupportedPackageFile(file, fileName)) {
+            android.widget.Toast.makeText(
+                context,
+                context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file),
+                android.widget.Toast.LENGTH_LONG,
+            ).show()
+            viewModel.dialogParseFailed(context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file))
+            return
+        }
+
         val targetUri = Uri.fromFile(file)
         val ext = fileName.substringAfterLast('.', "").lowercase()
         val splitProvider = InstallApkSplitsHelper.buildSplitProvider(context, targetUri, ext)

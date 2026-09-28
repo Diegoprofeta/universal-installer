@@ -53,6 +53,12 @@ abstract class BaseInstallController(
      */
     protected abstract val telemetryMethod: String
 
+    /**
+     * Whether this installer backend relies on the system package installer service and
+     * requires the `REQUEST_INSTALL_PACKAGES` permission on Android 8.0+.
+     */
+    open val requiresInstallPermission: Boolean get() = false
+
     private val sessionStartTimes = mutableMapOf<UUID, Long>()
     private val sessionFileTypes = mutableMapOf<UUID, String>()
     private val sessionFileSizes = mutableMapOf<UUID, Long>()
@@ -279,8 +285,8 @@ abstract class BaseInstallController(
                     sessionDataRepository.updateSessionIsCancellable(session.id, isCancellable = false)
                 }
                 .launchIn(this)
+            val sessionData = sessionDataRepository.sessions.value.find { it.id == session.id }
             try {
-                val sessionData = sessionDataRepository.sessions.value.find { it.id == session.id }
                 when (val result = session.await()) {
                     Session.State.Succeeded -> {
                         reportInstallResult(TelemetryEvents.RESULT_SUCCESS, id = session.id)
@@ -338,14 +344,38 @@ abstract class BaseInstallController(
                 successHooks.remove(session.id)
                 throw e
             } catch (e: Exception) {
+                val isFrp = InstallErrorHelper.isFrpException(e)
+                val isAbi = app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(e.message)
+                val errorCode = when {
+                    isFrp -> "INSTALL_FAILED_SECURITY_FRP"
+                    isAbi -> "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE"
+                    else -> "INSTALL_FAILED_INTERNAL_ERROR"
+                }
+                val errorType = when {
+                    isFrp -> "security_frp"
+                    isAbi -> "incompatible_device"
+                    else -> "internal_error"
+                }
+                val errorReason = when {
+                    isFrp -> "security_frp"
+                    isAbi -> "abi_incompatible"
+                    else -> e.javaClass.simpleName
+                }
                 reportInstallResult(
                     TelemetryEvents.RESULT_FAILURE,
-                    errorCode = "INSTALL_FAILED_INTERNAL_ERROR",
-                    errorType = "internal_error",
-                    errorReason = e.javaClass.simpleName,
+                    errorCode = errorCode,
+                    errorType = errorType,
+                    errorReason = errorReason,
                     id = session.id,
                 )
-                handleError(e.message, session.id)
+                val userMessage = if (context != null) {
+                    val info = InstallErrorHelper.resolveException(context, e.message)
+                    "${info.title}\n${info.guidance}"
+                } else {
+                    e.message
+                }
+                saveHistory(sessionData, success = false, errorMessage = userMessage)
+                handleError(userMessage, session.id)
                 Timber.e(e, "Session error")
             }
         }

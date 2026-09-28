@@ -56,6 +56,7 @@ import app.pwhs.universalinstaller.telemetry.Telemetry
 import app.pwhs.universalinstaller.domain.model.ExternalOpenMode
 import app.pwhs.universalinstaller.domain.model.InstallUiStyle
 import app.pwhs.universalinstaller.presentation.composable.EmptyStateView
+import app.pwhs.universalinstaller.presentation.composable.InstallPriorityBottomSheet
 import app.pwhs.universalinstaller.presentation.composable.SettingsSection
 import app.pwhs.universalinstaller.presentation.composable.UniversalSearchBar
 import app.pwhs.universalinstaller.presentation.install.controller.RootState
@@ -126,15 +127,9 @@ fun SettingScreen(
         onCustomAuthorizerCommandChange = viewModel::setCustomAuthorizerCommand,
         onTestCustomAuthorizerCommand = viewModel::testCustomAuthorizerCommand,
         onReplayTutorial = {
-            // Reuse MainActivity's onboarding route rather than clearing ONBOARDING_COMPLETED:
-            // clearing it would also re-show the tour on the next cold start, which nobody asked
-            // for. This shows it once, on demand.
             context.startActivity(
                 android.content.Intent(context, app.pwhs.universalinstaller.MainActivity::class.java)
-                    .putExtra(
-                        app.pwhs.universalinstaller.presentation.splash.SplashActivity.EXTRA_SHOW_ONBOARDING,
-                        true,
-                    )
+                    .putExtra(app.pwhs.universalinstaller.presentation.splash.SplashActivity.EXTRA_SHOW_ONBOARDING, true)
             )
         },
         onShizukuInstallerChanged = viewModel::setShizukuInstallerPackageName,
@@ -152,6 +147,7 @@ fun SettingScreen(
         onAutoConfirmExternalInstallChanged = viewModel::setAutoConfirmExternalInstall,
         onShowDownloadTabChanged = viewModel::setShowDownloadTab,
         onDefaultInstallerChanged = viewModel::toggleDefaultInstaller,
+        onDefaultUninstallerChanged = viewModel::toggleDefaultUninstaller,
         onProfilesClick = {
             context.startActivity(android.content.Intent(context, app.pwhs.universalinstaller.presentation.setting.profile.ProfileActivity::class.java))
         },
@@ -201,6 +197,7 @@ private fun SettingUi(
     onAutoConfirmExternalInstallChanged: (Boolean) -> Unit = {},
     onShowDownloadTabChanged: (Boolean) -> Unit = {},
     onDefaultInstallerChanged: (Boolean) -> Unit = {},
+    onDefaultUninstallerChanged: (Boolean) -> Unit = {},
     onProfilesClick: () -> Unit = {},
     analyticsEnabled: Boolean = true,
     onAnalyticsEnabledChanged: (Boolean) -> Unit = {},
@@ -209,6 +206,7 @@ private fun SettingUi(
     val backupViewModel: BackupViewModel = koinViewModel()
     var openRestorePicker by remember { mutableStateOf<(() -> Unit)?>(null) }
     var showInstallOptionsSheet by rememberSaveable { mutableStateOf(false) }
+    var showInstallPrioritySheet by rememberSaveable { mutableStateOf(false) }
     var showSyncOptionsSheet by rememberSaveable { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -296,6 +294,7 @@ private fun SettingUi(
                 stringResource(R.string.setting_auto_confirm_title),
                 stringResource(R.string.setting_show_download_tab_title),
                 stringResource(R.string.setting_default_installer_title),
+                stringResource(R.string.setting_default_uninstaller_title), "uninstaller",
                 stringResource(R.string.setting_auto_approve_title),
                 "auto approve", "whitelist", "trusted",
             )
@@ -344,16 +343,10 @@ private fun SettingUi(
                     androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize())
                 } else {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 8.dp,
-                    bottom = navBarPadding + 16.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = navBarPadding + 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
                 // ── Installation Section ─────────────────────
                 InstallSection(
                     q = q,
@@ -369,9 +362,9 @@ private fun SettingUi(
                     onDeleteApkChanged = onDeleteApkChanged,
                     onAutoOpenAfterInstallChanged = onAutoOpenAfterInstallChanged,
                     onDefaultInstallerChanged = onDefaultInstallerChanged,
-                    onCustomAuthorizerCommandChange = onCustomAuthorizerCommandChange,
-                    onTestCustomAuthorizerCommand = onTestCustomAuthorizerCommand,
+                    onDefaultUninstallerChanged = onDefaultUninstallerChanged,
                     onOpenInstallOptions = { showInstallOptionsSheet = true },
+                    onOpenInstallPriority = { showInstallPrioritySheet = true },
                 )
 
                 // ── Profiles Section ─────────────────────────
@@ -471,6 +464,12 @@ private fun SettingUi(
             onPrivilegedOptionChanged = onPrivilegedOptionChanged,
             onInstallerPackageChanged = onInstallerPackageChanged,
             onShizukuOptionChanged = onShizukuOptionChanged,
+        )
+    }
+
+    if (showInstallPrioritySheet) {
+        InstallPriorityBottomSheet(
+            onDismissRequest = { showInstallPrioritySheet = false },
         )
     }
 

@@ -7,8 +7,6 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="eu.darken.porter.permission.API_V23" />
-    <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -62,8 +60,11 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
     <queries>
-        <package android:name="eu.darken.porter" />
-        <package android:name="moe.shizuku.privileged.api" />
+        <!-- Khai báo package của Universal Anti-Split -->
+        <package android:name="app.pwhs.universalantisplit" />
+        <intent>
+            <action android:name="app.pwhs.universalinstaller.action.MERGE_SPLIT" />
+        </intent>
     </queries>
 
     <application
@@ -147,7 +148,38 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
 
+            <!-- Web / URL direct install intent filter for package links. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="*" />
+                <data android:pathSuffix=".apk" />
+                <data android:pathSuffix=".xapk" />
+                <data android:pathSuffix=".apks" />
+                <data android:pathSuffix=".apkm" />
+                <data android:pathSuffix=".zip" />
+                <data android:pathPattern=".*\\.apk" />
+                <data android:pathPattern=".*\\.xapk" />
+                <data android:pathPattern=".*\\.apks" />
+                <data android:pathPattern=".*\\.apkm" />
+                <data android:pathPattern=".*\\.zip" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="*" />
+                <data android:mimeType="application/vnd.android.package-archive" />
+                <data android:mimeType="application/vnd.apkm" />
+                <data android:mimeType="application/xapk-package-archive" />
+            </intent-filter>
 
             <!-- Share intents from browsers (link share) and file managers.
                  SEND intents match on MIME type only. -->
@@ -164,6 +196,32 @@
                 <data android:mimeType="application/octet-stream" />
                 <data android:mimeType="application/zip" />
                 <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".presentation.manage.uninstall.DialogUninstallActivity"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/uninstaller_dialog_label"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.UniversalInstaller.Dialog">
+
+            <!-- Concise intent filter for uninstallation requests:
+                 Handles standard ACTION_UNINSTALL_PACKAGE and ACTION_DELETE with package: URI
+                 as well as ACTION_UNINSTALL_PACKAGE with package name extra. -->
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+                <action android:name="android.intent.action.DELETE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
@@ -238,18 +296,6 @@
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
-            tools:node="remove" />
-
-        <provider
-            android:name="eu.darken.porter.client.PorterProvider"
-            android:authorities="${applicationId}.porter"
-            android:enabled="true"
-            android:exported="true"
-            android:multiprocess="false"
-            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
-
-        <provider
-            android:name="eu.darken.porter.client.SelectedShizukuProvider"
             android:authorities="${applicationId}.shizuku"
             android:enabled="true"
             android:exported="true"

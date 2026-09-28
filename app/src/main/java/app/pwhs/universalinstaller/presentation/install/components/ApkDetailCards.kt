@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Android
+import androidx.compose.material.icons.rounded.CallMerge
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.ExpandLess
@@ -315,13 +316,37 @@ fun PermissionsCard(permissions: List<String>) {
 }
 
 @Composable
-fun SplitsCard(splits: List<SplitEntry>, onToggle: (Int) -> Unit) {
+fun SplitsCard(
+    splits: List<SplitEntry>,
+    onToggle: (Int) -> Unit,
+    onMergeSplits: (() -> Unit)? = null,
+) {
     SectionCard(
         icon = Icons.Rounded.Memory,
         title = stringResource(R.string.apk_info_section_splits, splits.size),
         defaultExpanded = true,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (onMergeSplits != null) {
+                OutlinedButton(
+                    onClick = onMergeSplits,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 6.dp),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.CallMerge,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.antisplit_action_merge),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            }
             splits.forEachIndexed { index, split ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),

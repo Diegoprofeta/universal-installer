@@ -3,23 +3,16 @@ package app.pwhs.universalinstaller.presentation.setting.sections
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.SettingsApplications
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Wallpaper
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -34,20 +27,15 @@ import app.pwhs.universalinstaller.presentation.composable.SettingsSection
 import app.pwhs.universalinstaller.util.DhizukuCompat
 import app.pwhs.universalinstaller.util.DhizukuState
 import app.pwhs.universalinstaller.presentation.setting.InstallMode
-import app.pwhs.universalinstaller.presentation.setting.PrivilegedServiceBackend
 import app.pwhs.universalinstaller.presentation.install.controller.RootState
 import app.pwhs.universalinstaller.presentation.setting.SettingUiState
 import app.pwhs.universalinstaller.presentation.setting.ShizukuState
-import app.pwhs.universalinstaller.presentation.setting.components.CustomAuthorizerCard
 import app.pwhs.universalinstaller.presentation.setting.components.InstallModeSelector
 import app.pwhs.universalinstaller.presentation.setting.components.OptionGroupHeader
 import app.pwhs.universalinstaller.presentation.setting.components.SearchableItem
 import app.pwhs.universalinstaller.presentation.setting.components.SwitchPreference
 import app.pwhs.universalinstaller.presentation.setting.components.matchesQuery
 
-/**
- * Adds the installation-related settings to the settings list.
- */
 internal fun LazyListScope.InstallSection(
     q: String,
     installLabels: List<String>,
@@ -56,116 +44,56 @@ internal fun LazyListScope.InstallSection(
     useDhizuku: Boolean,
     context: Context,
     onInstallModeChanged: (InstallMode) -> Unit,
-    onPrivilegedServiceBackendChanged: (PrivilegedServiceBackend) -> Unit = {},
     onUseDhizukuChanged: (Boolean) -> Unit,
     onRootRetry: () -> Unit,
     onDeleteApkChanged: (Boolean) -> Unit,
     onAutoOpenAfterInstallChanged: (Boolean) -> Unit,
     onDefaultInstallerChanged: (Boolean) -> Unit,
-    onCustomAuthorizerCommandChange: (String) -> Unit = {},
-    onTestCustomAuthorizerCommand: suspend (String) -> Result<String> = { Result.success("") },
+    onDefaultUninstallerChanged: (Boolean) -> Unit = {},
     onOpenInstallOptions: () -> Unit = {},
+    onOpenInstallPriority: () -> Unit = {},
 ) {
     if (matchesQuery(q, installLabels)) item {
         SettingsSection(title = stringResource(R.string.setting_section_installation), icon = Icons.Rounded.SettingsApplications) {
             // Group headers only while unfiltered: a header whose items were all
             // searched away is a label over nothing. Same rule the divider below uses.
             if (q.isBlank()) OptionGroupHeader(stringResource(R.string.setting_group_installing))
-            SearchableItem(q, stringResource(R.string.setting_install_mode_title), "shizuku dhizuku root default custom microg porter privileged service backend") {
-                val currentMode = InstallMode.from(
-                    useShizuku = uiState.useShizuku,
-                    useRoot = uiState.useRoot,
-                    useDhizuku = useDhizuku,
-                    useCustomAuthorizer = uiState.useCustomAuthorizer,
-                    useMicroG = uiState.useMicroG,
-                )
-                InstallModeSelector(
-                    currentMode = currentMode,
-                    shizukuState = uiState.shizukuState,
-                    rootSupported = uiState.rootSupported,
-                    rootState = uiState.rootState,
-                    dhizukuSupported = DhizukuCompat.isSupported,
-                    dhizukuState = dhizukuState,
-                    microGSupported = app.pwhs.universalinstaller.util.MicroGCompat.isAvailable(context),
-                    onModeChange = onInstallModeChanged,
-                )
-                if (currentMode == InstallMode.SHIZUKU) {
-                    var showBackendDialog by rememberSaveable { mutableStateOf(false) }
-                    ListItem(
-                        headlineContent = {
-                            Text(
-                                stringResource(R.string.setting_privileged_service_title),
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                        },
-                        supportingContent = {
-                            val selected = stringResource(uiState.privilegedServiceBackend.labelKey)
-                            val active = stringResource(uiState.activePrivilegedServiceBackend.labelKey)
-                            Text(
-                                stringResource(
-                                    R.string.setting_privileged_service_subtitle,
-                                    selected,
-                                    active,
-                                ),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
-                        modifier = Modifier.clickable { showBackendDialog = true },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                    if (showBackendDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showBackendDialog = false },
-                            title = { Text(stringResource(R.string.setting_privileged_service_title)) },
-                            text = {
-                                Column {
-                                    PrivilegedServiceBackend.entries.forEach { backend ->
-                                        ListItem(
-                                            headlineContent = {
-                                                Text(
-                                                    stringResource(backend.labelKey),
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                )
-                                            },
-                                            trailingContent = {
-                                                RadioButton(
-                                                    selected = uiState.privilegedServiceBackend == backend,
-                                                    onClick = null,
-                                                )
-                                            },
-                                            modifier = Modifier.clickable {
-                                                showBackendDialog = false
-                                                onPrivilegedServiceBackendChanged(backend)
-                                            },
-                                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                                        )
-                                    }
-                                }
-                            },
-                            confirmButton = {
-                                TextButton(onClick = { showBackendDialog = false }) {
-                                    Text(stringResource(android.R.string.cancel))
-                                }
-                            },
+            SearchableItem(
+                q,
+                stringResource(R.string.setting_install_priority_title),
+                "shizuku dhizuku root default custom microg priority engine mode " + stringResource(R.string.setting_install_mode_title),
+            ) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.setting_install_priority_title),
+                            style = MaterialTheme.typography.bodyLarge,
                         )
-                    }
-                }
-
-                if (currentMode == InstallMode.CUSTOM) {
-                    CustomAuthorizerCard(
-                        command = uiState.customAuthorizerCommand,
-                        onCommandChange = onCustomAuthorizerCommandChange,
-                        onTestCommand = onTestCustomAuthorizerCommand,
-                    )
-                }
+                    },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(R.string.setting_install_priority_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Tune,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    modifier = Modifier.clickable { onOpenInstallPriority() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                )
                 if (uiState.rootSupported && uiState.useRoot && uiState.rootState == RootState.DENIED) {
                     ListItem(
                         headlineContent = { Text(stringResource(R.string.setting_retry_root)) },
@@ -179,7 +107,7 @@ internal fun LazyListScope.InstallSection(
             SearchableItem(
                 q,
                 stringResource(R.string.setting_section_install_options),
-                "shizuku porter privileged service root dhizuku downgrade replace permission test bypass source rollback uninstall",
+                "shizuku root dhizuku downgrade replace permission test bypass source rollback uninstall",
             ) {
                 ListItem(
                     headlineContent = {
@@ -270,7 +198,19 @@ internal fun LazyListScope.InstallSection(
                     // and the toggle would silently no-op. Require the backend to be actually
                     // ready; tapping the disabled-state hint covers the "needs grant" case.
                     enabled = uiState.shizukuState == ShizukuState.READY ||
-                            uiState.rootState == RootState.READY
+                            uiState.rootState == RootState.READY ||
+                            uiState.useRoot
+                )
+            }
+            SearchableItem(q, stringResource(R.string.setting_default_uninstaller_title), stringResource(R.string.setting_default_uninstaller_subtitle)) {
+                SwitchPreference(
+                    title = stringResource(R.string.setting_default_uninstaller_title),
+                    subtitle = stringResource(R.string.setting_default_uninstaller_subtitle),
+                    checked = uiState.isDefaultUninstaller,
+                    onCheckedChange = onDefaultUninstallerChanged,
+                    enabled = uiState.shizukuState == ShizukuState.READY ||
+                            uiState.rootState == RootState.READY ||
+                            uiState.useRoot
                 )
             }
         }

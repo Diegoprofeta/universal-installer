@@ -64,6 +64,7 @@ fun generateDialogParams(
     onSkipParse: (() -> Unit)? = null,
     onFallbackInstall: (() -> Unit)? = null,
     onGrantInstallPermission: () -> Unit = {},
+    onMergeSplits: (() -> Unit)? = null,
 ): DialogParams {
     return when (val stage = uiState.dialogStage) {
         DialogStage.Loading -> {
@@ -187,6 +188,7 @@ fun generateDialogParams(
                             onAttachObb = onAttachObb,
                             onToggleAllUsers = onToggleAllUsers,
                             onSelectUserId = onSelectUserId,
+                            onMergeSplits = onMergeSplits,
                         )
                     }
                 )

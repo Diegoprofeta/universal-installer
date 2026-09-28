@@ -31,8 +31,10 @@ import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.SettingsApplications
+import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Shield
-import androidx.compose.material.icons.rounded.Terminal
+import app.pwhs.universalinstaller.domain.model.BackendIcon
+import app.pwhs.universalinstaller.domain.model.InstallBackend
 import app.pwhs.universalinstaller.util.DhizukuCompat
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -297,7 +299,9 @@ private fun ProfileEditUi(
                     val options = buildList {
                         add("Default")
                         add("Shizuku")
-                        if (DhizukuCompat.isSupported) add("Dhizuku")
+                        if (DhizukuCompat.isSupported) {
+                            add("Dhizuku")
+                        }
                         if (rootSupported) add("Root")
                         add("Custom")
                         add("MicroG")
@@ -328,16 +332,16 @@ private fun ProfileEditUi(
                                         )
                                     },
                                     leadingIcon = {
-                                        Icon(
-                                            imageVector = when (b) {
-                                                "Default" -> Icons.Rounded.Android
-                                                "Shizuku" -> Icons.Rounded.Key
-                                                "Dhizuku" -> Icons.Rounded.AdminPanelSettings
-                                                "Root" -> Icons.Rounded.Shield
-                                                "MicroG" -> Icons.Rounded.CloudDownload
-                                                else -> Icons.Rounded.Terminal
-                                            },
-                                            contentDescription = null,
+                                        val installBackend = when (b) {
+                                            "Default" -> InstallBackend.DEFAULT
+                                            "Shizuku" -> InstallBackend.SHIZUKU
+                                            "Dhizuku" -> InstallBackend.DHIZUKU
+                                            "Root" -> InstallBackend.ROOT
+                                            "MicroG" -> InstallBackend.MICROG
+                                            else -> InstallBackend.CUSTOM
+                                        }
+                                        BackendIcon(
+                                            backend = installBackend,
                                             modifier = Modifier.size(FilterChipDefaults.IconSize),
                                         )
                                     },

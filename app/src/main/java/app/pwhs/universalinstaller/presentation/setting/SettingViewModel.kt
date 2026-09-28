@@ -113,6 +113,19 @@ class SettingViewModel(
         emitEvent = { emitEvent(it) },
     )
 
+    private val priorityDelegate = app.pwhs.universalinstaller.presentation.setting.util.SettingPriorityDelegate(
+        application = application,
+        scope = viewModelScope,
+        backendFactory = backendFactory,
+        shizukuState = { privilegeDelegate.shizukuState.value },
+        updateShizukuState = { privilegeDelegate.updateShizukuState() },
+        requestShizukuPermission = { privilegeDelegate.requestShizukuPermission() },
+        startShizukuService = { privilegeDelegate.startShizukuService() },
+        updateDhizukuState = { privilegeDelegate.updateDhizukuState(it) },
+        updateRootState = { privilegeDelegate.updateRootState(it) },
+        emitEvent = { emitEvent(it) },
+    )
+
     private val preferencesDelegate = SettingPreferencesDelegate(
         application = application,
         scope = viewModelScope,
@@ -126,8 +139,6 @@ class SettingViewModel(
 
     val dhizukuState: StateFlow<DhizukuState> = privilegeDelegate.dhizukuState
     val useDhizuku: StateFlow<Boolean> = privilegeDelegate.useDhizuku
-    val privilegedServiceBackend: StateFlow<PrivilegedServiceBackend> = privilegeDelegate.privilegedServiceBackend
-    val activePrivilegedServiceBackend: StateFlow<PrivilegedServiceBackend> = privilegeDelegate.activePrivilegedServiceBackend
     val securityLevel: StateFlow<SecurityLevel> = preferencesDelegate.securityLevel
     val externalOpenMode: StateFlow<ExternalOpenMode> = preferencesDelegate.externalOpenMode
     val installUiStyle: StateFlow<InstallUiStyle> = preferencesDelegate.installUiStyle
@@ -169,6 +180,7 @@ class SettingViewModel(
                 requestUpdateOwnership = prefs[PreferencesKeys.SHIZUKU_REQUEST_UPDATE_OWNERSHIP] ?: false,
                 uninstallKeepData = prefs[PreferencesKeys.SHIZUKU_UNINSTALL_KEEP_DATA] ?: false,
                 uninstallAllUsers = prefs[PreferencesKeys.SHIZUKU_UNINSTALL_ALL_USERS] ?: false,
+                uninstallDeleteSystemApp = prefs[PreferencesKeys.PRIVILEGED_UNINSTALL_DELETE_SYSTEM_APP] ?: false,
                 dex2oatOptimization = prefs[PreferencesKeys.DEX2OAT_OPTIMIZATION] ?: false,
             )
         },
@@ -213,6 +225,7 @@ class SettingViewModel(
                 prefs[PreferencesKeys.SHOW_DOWNLOAD_TAB] ?: true,
                 prefs[PreferencesKeys.STRICT_VIRUSTOTAL_CHECK] ?: false,
                 prefs[PreferencesKeys.AUTO_APPROVE_CALLER_APPS] ?: false,
+                prefs[PreferencesKeys.AUTO_APPROVE_BLOCK_TRACKERS] ?: false,
             )
         },
         dataStore.data.map { prefs ->
@@ -229,8 +242,8 @@ class SettingViewModel(
         privilegeDelegate.useCustomAuthorizer,
         privilegeDelegate.customAuthorizerCommand,
         privilegeDelegate.useMicroG,
-        privilegeDelegate.privilegedServiceBackend,
-        privilegeDelegate.activePrivilegedServiceBackend,
+        privilegeDelegate.isDefaultUninstaller,
+        priorityDelegate.backendPriority,
     ) { flows ->
         SettingUiStateBuilder.build(application, backendFactory, flows)
     }.stateIn(
@@ -253,11 +266,11 @@ class SettingViewModel(
 
     // ── Privilege Delegates ─────────────────────────────────────────────────
 
-    /** Changes the installer mode used for package installation. */
     fun setInstallMode(mode: InstallMode) = privilegeDelegate.setInstallMode(mode)
+    fun updateShizukuState() = privilegeDelegate.updateShizukuState()
     fun setUseShizuku(enabled: Boolean) = privilegeDelegate.setUseShizuku(enabled)
-    /** Selects the privileged service backend for the next process launch. */
-    fun setPrivilegedServiceBackend(backend: PrivilegedServiceBackend) = privilegeDelegate.setPrivilegedServiceBackend(backend)
+    fun startShizukuService() = privilegeDelegate.startShizukuService()
+    fun requestShizukuPermission() = privilegeDelegate.requestShizukuPermission()
     fun setUseRoot(enabled: Boolean) = privilegeDelegate.setUseRoot(enabled)
     fun retryRoot() = privilegeDelegate.retryRoot()
     fun setUseDhizuku(enabled: Boolean) = privilegeDelegate.setUseDhizuku(enabled)
@@ -265,6 +278,7 @@ class SettingViewModel(
     fun setPrivilegedOption(option: PrivilegedOption, enabled: Boolean) = privilegeDelegate.setPrivilegedOption(option, enabled)
     fun setInstallerPackageName(packageName: String) = privilegeDelegate.setInstallerPackageName(packageName)
     fun toggleDefaultInstaller(enabled: Boolean) = privilegeDelegate.toggleDefaultInstaller(enabled)
+    fun toggleDefaultUninstaller(enabled: Boolean) = privilegeDelegate.toggleDefaultUninstaller(enabled)
     val useCustomAuthorizer: StateFlow<Boolean> = privilegeDelegate.useCustomAuthorizer
     val customAuthorizerCommand: StateFlow<String> = privilegeDelegate.customAuthorizerCommand
     fun setCustomAuthorizerCommand(command: String) = privilegeDelegate.setCustomAuthorizerCommand(command)
@@ -287,6 +301,8 @@ class SettingViewModel(
     fun setDialogInstallMode(enabled: Boolean) = preferencesDelegate.setDialogInstallMode(enabled)
     fun setAutoConfirmExternalInstall(enabled: Boolean) = preferencesDelegate.setAutoConfirmExternalInstall(enabled)
     fun setAutoApproveEnabled(enabled: Boolean) = preferencesDelegate.setAutoApproveEnabled(enabled)
+    fun setAutoApproveBlockTrackers(enabled: Boolean) =
+        preferencesDelegate.setAutoApproveBlockTrackers(enabled)
     fun toggleAutoApprovePackage(packageName: String, approved: Boolean) =
         preferencesDelegate.toggleAutoApprovePackage(packageName, approved)
     fun setAutoApprovePackages(packages: Set<String>) = preferencesDelegate.setAutoApprovePackages(packages)
@@ -315,4 +331,14 @@ class SettingViewModel(
         LocaleHelper.setAppLanguage(application, tag)
         _selectedLanguage.value = tag
     }
+
+    // ── Install Priority Delegates ──────────────────────────────────────────
+
+    val backendPriority: StateFlow<List<app.pwhs.universalinstaller.domain.model.InstallBackend>> = priorityDelegate.backendPriority
+    fun moveBackendPriority(fromIndex: Int, toIndex: Int) = priorityDelegate.moveBackendPriority(fromIndex, toIndex)
+    fun resetBackendPriority() = priorityDelegate.resetBackendPriority()
+    fun setBackendEnabled(backend: app.pwhs.universalinstaller.domain.model.InstallBackend, enabled: Boolean) =
+        priorityDelegate.setBackendEnabled(backend, enabled)
+    fun promoteBackendToTop(backend: app.pwhs.universalinstaller.domain.model.InstallBackend) =
+        priorityDelegate.promoteToTop(backend)
 }

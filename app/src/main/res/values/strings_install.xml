@@ -20,6 +20,10 @@
     <string name="install_ui_auto_confirm_sub">Start installing as soon as the card appears, without waiting for you to tap Install</string>
     <string name="install_storage_title">Storage</string>
     <string name="install_storage_value">%1$s free / %2$s</string>
+    <string name="install_storage_clear_cache">Clear cache</string>
+    <string name="install_storage_clear_cache_with_size">Clear cache (%1$s)</string>
+    <string name="install_storage_cache_cleared">Cache cleared (%1$s freed)</string>
+    <string name="install_storage_cache_empty">Cache is already clean</string>
     <string name="install_sessions_header">Sessions</string>
     <string name="install_history_header">History</string>
     <string name="install_history_clear">Clear</string>
@@ -155,6 +159,7 @@
     <string name="install_optimized_dex2oat">Dex2oat optimization complete for %1$s</string>
     <string name="installer_mode_shizuku" translatable="false">Shizuku</string>
     <string name="installer_mode_dhizuku" translatable="false">Dhizuku</string>
+    <string name="installer_mode_shizuku_dhizuku" translatable="false">Shizuku + Dhizuku</string>
     <string name="installer_mode_root" translatable="false">Root</string>
     <string name="installer_mode_package_installer">Package Installer</string>
     <string name="installer_mode_using">Using %s</string>
@@ -162,6 +167,7 @@
     <string name="installer_engine_default_desc">Standard Android package installer</string>
     <string name="installer_engine_shizuku_desc">Install silently via the Shizuku service</string>
     <string name="installer_engine_dhizuku_desc">Install silently via Device Owner</string>
+    <string name="installer_engine_shizuku_dhizuku_desc">Use Shizuku with Dhizuku fallback when service is stopped</string>
     <string name="installer_engine_root_desc">Install with root (su)</string>
     <string name="installer_engine_root_request">Tap to grant root access</string>
     <string name="installer_engine_root_unsupported">Not available on this build</string>
@@ -195,6 +201,8 @@
     <string name="install_error_timeout_guidance">The installation took too long and was cancelled. Tap Retry to try again.</string>
     <string name="install_error_unexpected_title">Unexpected error</string>
     <string name="install_error_unexpected_guidance">An unexpected error occurred: %s. Try restarting the app or your device.</string>
+    <string name="install_error_security_frp_title">Installation blocked by device security (FRP)</string>
+    <string name="install_error_security_frp_guidance">Android is blocking package installation because the device is in Factory Reset Protection (FRP) or an active security setup state. Please complete your device account setup or security verification and try again.</string>
     <string name="install_error_failed_title">Installation failed</string>
     <string name="install_error_unknown_guidance">An unknown error occurred. Tap Retry to try again.</string>
     <string name="install_error_unknown_guidance_short">An unknown error occurred.</string>
@@ -298,6 +306,7 @@
     <string name="dialog_risk_action_uninstall_existing">Uninstall existing app</string>
     <string name="dialog_risk_action_view_report">View VirusTotal report</string>
     <string name="dialog_risk_vt_unscanned">VirusTotal scan not completed</string>
+    <string name="dialog_risk_trackers_detected">Exodus Privacy detected %1$d tracker(s) in this package.</string>
     <string name="scan_virustotal_btn">Scan VirusTotal</string>
     <string name="skip_and_install_btn">Skip &amp; Install</string>
     <string name="scanning_progress">Scanning…</string>
@@ -346,4 +355,27 @@
     <string name="insufficient_storage_dialog_title">Insufficient Storage Space</string>
     <string name="insufficient_storage_dialog_message">Your device does not have enough free internal storage to install this package. Required space: %1$s, Available: %2$s. Please free up space and try again.</string>
     <string name="insufficient_storage_dialog_clean_up">Free Up Space</string>
+    <string name="shizuku_promo_title">Boost Install Success Rate</string>
+    <string name="shizuku_promo_badge_recommended">Recommended</string>
+    <string name="shizuku_promo_desc_no_perm">Shizuku is running. Connect now to enable seamless background installs without system prompts.</string>
+    <string name="shizuku_promo_desc_not_running">Shizuku is installed. Start the service to achieve higher install success and bypass system restrictions.</string>
+    <string name="shizuku_promo_desc_not_installed">Install via Shizuku for a 58.7% higher success rate, seamless background installs, and fewer conflict errors.</string>
+    <string name="shizuku_promo_action_connect">Connect</string>
+    <string name="shizuku_promo_action_open">Open Shizuku</string>
+    <string name="shizuku_promo_action_learn_more">Get Shizuku</string>
+    <string name="shizuku_promo_dismiss">Dismiss</string>
+    <string name="antisplit_action_merge">Merge into Single APK</string>
+    <string name="antisplit_action_merge_desc">Merge split APK bundle into a standalone APK using Universal Anti-Split</string>
+    <string name="antisplit_not_installed_title">Universal Anti-Split Required</string>
+    <string name="antisplit_not_installed_desc">To merge split APKs into a single APK, please install Universal Anti-Split.</string>
+    <string name="antisplit_download_action">Download</string>
+    <string name="antisplit_merge_success">APK merged successfully</string>
+    <string name="installer_engine_active">Active</string>
+    <string name="install_error_incompatible_abi_detailed_guidance">This APK requires %1$s architecture, but your device only supports %2$s. Android cannot run this app. Look for a %3$s or Universal APK.</string>
+    <string name="dialog_chip_abi_incompatible">Incompatible CPU</string>
+    <string name="install_abi_incompatible_banner_title">Incompatible CPU architecture</string>
+    <string name="install_abi_incompatible_banner_desc">This APK requires %1$s, but your device only supports %2$s. Installation is expected to fail.</string>
+    <string name="install_abi_incompatible_dialog_title">Incompatible Architecture</string>
+    <string name="install_abi_incompatible_dialog_message">This APK requires %1$s architecture, but your device only supports %2$s.\n\nAndroid will reject the installation with INSTALL_FAILED_NO_MATCHING_ABIS.\n\nTip: Look for a %3$s or Universal version of this APK.</string>
+    <string name="install_abi_incompatible_dialog_install_anyway">Install anyway</string>
 </resources>

@@ -3,12 +3,15 @@ package app.pwhs.universalinstaller.presentation.install.dialog.tabs
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AdminPanelSettings
+import androidx.compose.material.icons.rounded.CallMerge
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Splitscreen
@@ -16,6 +19,7 @@ import androidx.compose.material.icons.rounded.Store
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -43,6 +47,7 @@ internal fun androidx.compose.foundation.lazy.LazyListScope.advancedTab(
     onRemoveObb: (AttachedObb) -> Unit,
     onAttachObb: () -> Unit,
     onToggleSplit: (Int) -> Unit,
+    onMergeSplits: (() -> Unit)? = null,
     allUsers: Boolean,
     selectedUserId: Int?,
     spoofSource: Boolean,
@@ -170,12 +175,34 @@ internal fun androidx.compose.foundation.lazy.LazyListScope.advancedTab(
                 onClick = { expanded = !expanded },
                 badge = "$selectedCount / ${apkInfo.splitEntries.size}",
             ) {
-                SplitChipPicker(
-                    entries = apkInfo.splitEntries,
-                    selectedBytes = selectedBytes,
-                    onToggle = onToggleSplit,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-                )
+                Column {
+                    if (onMergeSplits != null) {
+                        OutlinedButton(
+                            onClick = onMergeSplits,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            shape = MaterialTheme.shapes.medium,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CallMerge,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.antisplit_action_merge),
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        }
+                    }
+                    SplitChipPicker(
+                        entries = apkInfo.splitEntries,
+                        selectedBytes = selectedBytes,
+                        onToggle = onToggleSplit,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                    )
+                }
             }
         }
     }

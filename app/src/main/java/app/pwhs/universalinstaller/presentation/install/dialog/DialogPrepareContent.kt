@@ -63,6 +63,8 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.ApkInfo
 import app.pwhs.universalinstaller.presentation.composable.InstallerModeBadge
+import app.pwhs.universalinstaller.presentation.install.components.AbiIncompatibleBanner
+import app.pwhs.universalinstaller.presentation.install.dialog.AbiIncompatibleDialog
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -81,6 +83,7 @@ fun DialogPrepareContent(
 ) {
     val context = LocalContext.current
     var showTrackersDialog by remember { mutableStateOf(false) }
+    var showAbiWarningDialog by remember { mutableStateOf(false) }
     val isUpdate = installedVersionCode != null && installedVersionCode > 0
     val isDowngrade = isUpdate && apkInfo.versionCode < installedVersionCode
 
@@ -254,6 +257,22 @@ fun DialogPrepareContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             InstallerModeBadge()
+            if (apkInfo.isAbiIncompatible) {
+                DialogPill(
+                    label = stringResource(R.string.dialog_chip_abi_incompatible),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Warning,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                    },
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    onClick = { showAbiWarningDialog = true },
+                )
+            }
             VirusTotalInstallPrompt(
                 apkInfo = apkInfo,
                 onScan = onCheckVirusTotal,
@@ -292,6 +311,13 @@ fun DialogPrepareContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         // ── Buttons: [Menu] [Install] ──
+        if (apkInfo.isAbiIncompatible) {
+            AbiIncompatibleBanner(
+                apkAbis = apkInfo.supportedAbis,
+                onClick = { showAbiWarningDialog = true },
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+        }
         if (apkInfo.isBlocked) {
             Surface(
                 color = MaterialTheme.colorScheme.errorContainer,
@@ -361,7 +387,13 @@ fun DialogPrepareContent(
 
             // Install/Update/Downgrade button
             Button(
-                onClick = onInstall,
+                onClick = {
+                    if (apkInfo.isAbiIncompatible) {
+                        showAbiWarningDialog = true
+                    } else {
+                        onInstall()
+                    }
+                },
                 modifier = Modifier.weight(1f),
                 enabled = !apkInfo.isBlocked,
                 colors = if (isDowngrade) {
@@ -402,6 +434,14 @@ fun DialogPrepareContent(
             TrackersDetailDialog(
                 trackers = apkInfo.trackers,
                 onDismiss = { showTrackersDialog = false },
+            )
+        }
+
+        if (showAbiWarningDialog) {
+            AbiIncompatibleDialog(
+                apkAbis = apkInfo.supportedAbis,
+                onDismiss = { showAbiWarningDialog = false },
+                onInstallAnyway = onInstall,
             )
         }
     }

@@ -57,6 +57,8 @@
     <string name="install_error_timeout_guidance">Quá trình cài đặt mất quá nhiều thời gian và đã bị hủy. Nhấn Thử lại để thử lại.</string>
     <string name="install_error_unexpected_title">Lỗi không mong muốn</string>
     <string name="install_error_unexpected_guidance">Đã xảy ra lỗi không mong muốn: %s. Hãy thử khởi động lại ứng dụng hoặc thiết bị của bạn.</string>
+    <string name="install_error_security_frp_title">Cài đặt bị chặn bởi bảo mật thiết bị (FRP)</string>
+    <string name="install_error_security_frp_guidance">Android đang chặn cài đặt ứng dụng do thiết bị đang trong trạng thái Factory Reset Protection (FRP) hoặc chế độ thiết lập bảo mật. Vui lòng hoàn tất đăng nhập tài khoản / xác minh bảo mật trên thiết bị rồi thử lại.</string>
     <string name="install_error_failed_title">Cài đặt thất bại</string>
     <string name="install_error_unknown_guidance">Đã xảy ra một lỗi không xác định. Nhấn Thử lại để thử lại.</string>
     <string name="install_error_unknown_guidance_short">Đã xảy ra một lỗi không xác định.</string>
@@ -86,6 +88,10 @@
     <string name="vt_notif_result_error">Quét VirusTotal thất bại</string>
     <string name="install_storage_title">Bộ nhớ</string>
     <string name="install_storage_value">Trống %1$s / %2$s</string>
+    <string name="install_storage_clear_cache">Dọn cache</string>
+    <string name="install_storage_clear_cache_with_size">Dọn cache (%1$s)</string>
+    <string name="install_storage_cache_cleared">Đã dọn dẹp cache (giải phóng %1$s)</string>
+    <string name="install_storage_cache_empty">Bộ nhớ cache đang trống</string>
     <string name="install_no_splits_error">Không thể phân tích gói. Tệp có thể bị hỏng, bị cắt ngắn hoặc không tương thích với thiết bị này.</string>
     <string name="source_tab_local">Cục bộ</string>
     <string name="source_tab_download">Tải xuống</string>
@@ -221,6 +227,7 @@
     <string name="dialog_risk_action_uninstall_existing">Gỡ ứng dụng hiện có</string>
     <string name="dialog_risk_action_view_report">Xem báo cáo VirusTotal</string>
     <string name="dialog_risk_vt_unscanned">Chưa quét VirusTotal</string>
+    <string name="dialog_risk_trackers_detected">Exodus Privacy đã phát hiện %1$d trình theo dõi trong gói cài đặt này.</string>
     <string name="scan_virustotal_btn">Quét VirusTotal</string>
     <string name="skip_and_install_btn">Bỏ qua &amp; Cài đặt</string>
     <string name="scanning_progress">Đang quét…</string>
@@ -284,6 +291,8 @@
     <string name="obb_notif_running_text">%d%%</string>
     <string name="apk_info_version_detail">%1$s (%2$d)</string>
     <string name="installer_mode_shizuku">Shizuku</string>
+    <string name="installer_mode_dhizuku" translatable="false">Dhizuku</string>
+    <string name="installer_mode_shizuku_dhizuku" translatable="false">Shizuku + Dhizuku</string>
     <string name="installer_mode_root">Root</string>
     <string name="system_installer_frozen_warning">Trình cài đặt hệ thống đang bị đóng băng. Vui lòng bật Shizuku hoặc mở lại trong Cài đặt bảo mật để cài đặt.</string>
     <string name="dialog_menu_skip_analysis">Bỏ qua &amp; Cài đặt</string>
@@ -291,6 +300,7 @@
     <string name="installer_engine_default_desc">Trình cài đặt gói Android tiêu chuẩn</string>
     <string name="installer_engine_shizuku_desc">Cài đặt im lặng qua dịch vụ Shizuku</string>
     <string name="installer_engine_dhizuku_desc">Cài đặt im lặng qua Device Owner</string>
+    <string name="installer_engine_shizuku_dhizuku_desc">Dùng Shizuku và tự động chuyển sang Dhizuku khi Shizuku tắt</string>
     <string name="installer_engine_root_desc">Cài đặt bằng root (su)</string>
     <string name="installer_engine_root_unsupported">Không khả dụng trên bản dựng này</string>
     <string name="installer_mode_custom">Tùy chỉnh</string>
@@ -345,4 +355,27 @@
     <string name="insufficient_storage_dialog_clean_up">Dọn dẹp bộ nhớ</string>
     <string name="dialog_success_keep_apk">Giữ APK</string>
     <string name="dialog_success_keep_apk_desc">Không xoá tệp nguồn sau khi cài đặt</string>
+    <string name="shizuku_promo_title">Tăng tỉ lệ cài đặt thành công</string>
+    <string name="shizuku_promo_badge_recommended">Khuyến nghị</string>
+    <string name="shizuku_promo_desc_no_perm">Shizuku đang chạy. Kết nối ngay để cài đặt ngầm mượt mà và không bị gián đoạn bởi popup hệ thống.</string>
+    <string name="shizuku_promo_desc_not_running">Đã cài đặt Shizuku. Khởi động dịch vụ để cài đặt ổn định hơn và vượt qua giới hạn hệ thống.</string>
+    <string name="shizuku_promo_desc_not_installed">Cài đặt qua Shizuku giúp tăng tỉ lệ thành công lên 58.7%, hỗ trợ cài đặt ngầm và giảm thiểu lỗi xung đột.</string>
+    <string name="shizuku_promo_action_connect">Kết nối</string>
+    <string name="shizuku_promo_action_open">Mở Shizuku</string>
+    <string name="shizuku_promo_action_learn_more">Cài đặt Shizuku</string>
+    <string name="shizuku_promo_dismiss">Bỏ qua</string>
+    <string name="antisplit_action_merge">Gộp thành APK đơn</string>
+    <string name="antisplit_action_merge_desc">Gộp gói Split APK thành một tệp APK độc lập bằng Universal Anti-Split</string>
+    <string name="antisplit_not_installed_title">Cần cài đặt Universal Anti-Split</string>
+    <string name="antisplit_not_installed_desc">Để gộp các tệp Split APK thành một file APK hoàn chỉnh duy nhất, vui lòng cài đặt Universal Anti-Split.</string>
+    <string name="antisplit_download_action">Tải về</string>
+    <string name="antisplit_merge_success">Gộp APK thành công</string>
+    <string name="installer_engine_active">Đang dùng</string>
+    <string name="install_error_incompatible_abi_detailed_guidance">APK này yêu cầu kiến trúc %1$s, nhưng thiết bị của bạn chỉ hỗ trợ %2$s. Android không thể chạy ứng dụng này. Vui lòng tìm bản APK %3$s hoặc bản Universal.</string>
+    <string name="dialog_chip_abi_incompatible">CPU không tương thích</string>
+    <string name="install_abi_incompatible_banner_title">Kiến trúc CPU không tương thích</string>
+    <string name="install_abi_incompatible_banner_desc">APK này yêu cầu %1$s, nhưng thiết bị chỉ hỗ trợ %2$s. Quá trình cài đặt sẽ bị Android từ chối.</string>
+    <string name="install_abi_incompatible_dialog_title">Kiến trúc không tương thích</string>
+    <string name="install_abi_incompatible_dialog_message">APK này yêu cầu kiến trúc %1$s, nhưng thiết bị của bạn chỉ hỗ trợ %2$s.\n\nAndroid sẽ từ chối cài đặt với mã lỗi INSTALL_FAILED_NO_MATCHING_ABIS.\n\nLời khuyên: Hãy tìm tải phiên bản APK %3$s hoặc bản Universal của ứng dụng này.</string>
+    <string name="install_abi_incompatible_dialog_install_anyway">Vẫn cài đặt</string>
 </resources>

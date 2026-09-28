@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.Key
+import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +39,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import app.pwhs.universalinstaller.R
+import app.pwhs.universalinstaller.domain.model.BackendIcon
+import app.pwhs.universalinstaller.domain.model.InstallBackend
 import app.pwhs.universalinstaller.presentation.install.controller.RootState
 import app.pwhs.universalinstaller.presentation.setting.InstallMode
 import app.pwhs.universalinstaller.presentation.setting.ShizukuState
@@ -96,7 +99,9 @@ internal fun InstallModeSelector(
         buildList {
             add(InstallMode.DEFAULT)
             add(InstallMode.SHIZUKU)
-            if (dhizukuSupported) add(InstallMode.DHIZUKU)
+            if (dhizukuSupported) {
+                add(InstallMode.DHIZUKU)
+            }
             if (rootSupported) add(InstallMode.ROOT)
             add(InstallMode.CUSTOM)
             add(InstallMode.MICROG)
@@ -172,16 +177,16 @@ internal fun InstallModeSelector(
                         )
                     },
                     leadingIcon = {
-                        Icon(
-                            imageVector = when (mode) {
-                                InstallMode.DEFAULT -> Icons.Rounded.Android
-                                InstallMode.SHIZUKU -> Icons.Rounded.Key
-                                InstallMode.DHIZUKU -> Icons.Rounded.AdminPanelSettings
-                                InstallMode.ROOT -> Icons.Rounded.Shield
-                                InstallMode.CUSTOM -> Icons.Rounded.Terminal
-                                InstallMode.MICROG -> Icons.Rounded.CloudDownload
-                            },
-                            contentDescription = null,
+                        val backend = when (mode) {
+                            InstallMode.DEFAULT -> InstallBackend.DEFAULT
+                            InstallMode.SHIZUKU -> InstallBackend.SHIZUKU
+                            InstallMode.DHIZUKU -> InstallBackend.DHIZUKU
+                            InstallMode.ROOT -> InstallBackend.ROOT
+                            InstallMode.CUSTOM -> InstallBackend.CUSTOM
+                            InstallMode.MICROG -> InstallBackend.MICROG
+                        }
+                        BackendIcon(
+                            backend = backend,
                             modifier = Modifier.size(FilterChipDefaults.IconSize),
                         )
                     },
@@ -232,7 +237,7 @@ internal fun InstallModeSelector(
                 stringResource(R.string.microg_not_installed)
             }
         }
-        val canRequestPermission = currentMode == InstallMode.DHIZUKU && dhizukuState == DhizukuState.NOT_AUTHORIZED
+        val canRequestPermission = (currentMode == InstallMode.DHIZUKU && dhizukuState == DhizukuState.NOT_AUTHORIZED)
         Text(
             text = statusText,
             style = MaterialTheme.typography.bodySmall,
@@ -240,7 +245,7 @@ internal fun InstallModeSelector(
             modifier = Modifier
                 .padding(top = 8.dp)
                 .then(
-                    if (canRequestPermission) Modifier.clickable { onModeChange(InstallMode.DHIZUKU) }
+                    if (canRequestPermission) Modifier.clickable { onModeChange(currentMode) }
                     else if (effectiveMode == InstallMode.DEFAULT && !canInstallPackages) Modifier.clickable {
                         runCatching {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -132,13 +132,13 @@ enum class InstallMode {
             return when {
                 configuredMode == MICROG && isMicroGAvailable -> MICROG
                 configuredMode == CUSTOM -> CUSTOM
-                configuredMode == ROOT && rootState == RootState.READY -> ROOT
+                configuredMode == ROOT && (rootState == RootState.READY || rootState == RootState.UNKNOWN) -> ROOT
                 configuredMode == SHIZUKU && shizukuState == ShizukuState.READY -> SHIZUKU
                 configuredMode == DHIZUKU && dhizukuState == app.pwhs.universalinstaller.util.DhizukuState.READY -> DHIZUKU
                 configuredMode == DEFAULT && !isSystemInstallerFrozen -> DEFAULT
                 isSystemInstallerFrozen -> when {
                     shizukuState == ShizukuState.READY -> SHIZUKU
-                    rootState == RootState.READY -> ROOT
+                    rootState == RootState.READY || rootState == RootState.UNKNOWN -> ROOT
                     dhizukuState == app.pwhs.universalinstaller.util.DhizukuState.READY -> DHIZUKU
                     else -> DEFAULT
                 }
@@ -172,6 +172,7 @@ data class ShizukuOptions(
     val requestUpdateOwnership: Boolean = false,
     val uninstallKeepData: Boolean = false,
     val uninstallAllUsers: Boolean = false,
+    val uninstallDeleteSystemApp: Boolean = false,
     val dex2oatOptimization: Boolean = false,
 )
 
@@ -219,16 +220,19 @@ data class SettingUiState(
     val autoConfirmExternalInstall: Boolean = false,
     val autoApproveCallerApps: Boolean = false,
     val autoApproveCount: Int = 0,
+    val autoApproveBlockTrackers: Boolean = false,
     val showDownloadTab: Boolean = true,
     val extractorOutputPath: String = "",
     val extractorFilenameTemplate: String = "{name}-{version}",
     val installerProfiles: List<InstallerProfile> = emptyList(),
     val appProfileMapping: Map<String, String> = emptyMap(),
     val isDefaultInstaller: Boolean = false,
+    val isDefaultUninstaller: Boolean = false,
     val selectedLanguage: String = "",
     val useCustomAuthorizer: Boolean = false,
     val customAuthorizerCommand: String = "",
     val useMicroG: Boolean = false,
+    val backendPriority: List<app.pwhs.universalinstaller.domain.model.InstallBackend> = app.pwhs.universalinstaller.domain.model.InstallBackend.DEFAULT_ORDER,
     /**
      * True when the device has at least one biometric or device-credential enrolled.
      * Used to inform the user that the toggles will be no-ops until they

@@ -25,12 +25,66 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import android.app.Activity
+import android.net.Uri
+import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import app.pwhs.universalinstaller.R
+import app.pwhs.universalinstaller.bridge.AntiSplitBridge
+import app.pwhs.universalinstaller.presentation.composable.AntiSplitPromptDialog
+import ru.solrudev.ackpine.splits.SplitPackage.Companion.toSplitPackage
 
 class InstallActivity : BaseActivity() {
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { /* granted or not — uninstall flow works either way, notifications just won't show */ }
+
+    private var showAntiSplitPrompt by mutableStateOf(false)
+
+    val antiSplitLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val mergeResult = AntiSplitBridge.parseResult(result.resultCode, result.data)
+            val outputUri = mergeResult?.outputUri
+            if (outputUri != null) {
+                val fileName = mergeResult.outputPath?.substringAfterLast('/')
+                    ?: "${mergeResult.packageName ?: "app"}_merged.apk"
+                val splitPackage = SingletonApkSequence(outputUri, this).toSplitPackage()
+                viewModel.parseApkInfo(this, outputUri, splitPackage, fileName)
+                Toast.makeText(this, getString(R.string.antisplit_merge_success), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun requestMergeExternalFile(fileUri: Uri, autoStart: Boolean = false) {
+        val intent = AntiSplitBridge.createMergeFileIntent(fileUri, autoStart = autoStart)
+        if (!AntiSplitBridge.canResolveIntent(this, intent)) {
+            showAntiSplitPrompt = true
+            return
+        }
+        runCatching {
+            antiSplitLauncher.launch(intent)
+        }.onFailure {
+            showAntiSplitPrompt = true
+        }
+    }
+
+    fun requestMergeInstalledPackage(packageName: String, autoStart: Boolean = false) {
+        val intent = AntiSplitBridge.createMergeInstalledAppIntent(packageName, autoStart = autoStart)
+        if (!AntiSplitBridge.canResolveIntent(this, intent)) {
+            showAntiSplitPrompt = true
+            return
+        }
+        runCatching {
+            antiSplitLauncher.launch(intent)
+        }.onFailure {
+            showAntiSplitPrompt = true
+        }
+    }
 
     private fun maybeRequestNotificationPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
@@ -53,8 +107,17 @@ class InstallActivity : BaseActivity() {
                 Box(modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = innerPadding.calculateBottomPadding())) {
-                    InstallScreen(viewModel = viewModel)
+                    InstallScreen(
+                        viewModel = viewModel,
+                        onMergeSplits = { uri -> requestMergeExternalFile(uri) },
+                    )
                 }
+            }
+            if (showAntiSplitPrompt) {
+                AntiSplitPromptDialog(
+                    onDismiss = { showAntiSplitPrompt = false },
+                    onDownload = { AntiSplitBridge.openDownloadPage(this@InstallActivity) },
+                )
             }
         }
     }

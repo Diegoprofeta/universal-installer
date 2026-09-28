@@ -4,13 +4,14 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import androidx.datastore.preferences.core.edit
 import app.pwhs.core.data.local.dataStore
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.presentation.install.controller.InstallerBackendFactory
 import app.pwhs.universalinstaller.presentation.install.controller.RootState
 import app.pwhs.universalinstaller.presentation.setting.InstallMode
-import app.pwhs.universalinstaller.presentation.setting.PrivilegedServiceBackend
 import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
 import app.pwhs.universalinstaller.presentation.setting.security.util.SystemInstallerManager
 import app.pwhs.universalinstaller.presentation.setting.SettingViewModel
@@ -25,10 +26,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import eu.darken.porter.client.PorterClient
 import rikka.shizuku.Shizuku
 import timber.log.Timber
 
@@ -44,13 +45,6 @@ class SettingPrivilegeDelegate(
 
     private val _shizukuState = MutableStateFlow(ShizukuState.NOT_INSTALLED)
     val shizukuState: StateFlow<ShizukuState> = _shizukuState.asStateFlow()
-
-    val privilegedServiceBackend: StateFlow<PrivilegedServiceBackend> = dataStore.data
-        .map { PrivilegedServiceBackend.from(it[PreferencesKeys.PRIVILEGED_SERVICE_BACKEND]) }
-        .stateIn(scope, SharingStarted.Eagerly, PrivilegedServiceBackend.AUTO)
-
-    val activePrivilegedServiceBackend: StateFlow<PrivilegedServiceBackend> =
-        MutableStateFlow(readActivePrivilegedServiceBackend())
 
     private val _dhizukuState = MutableStateFlow(DhizukuState.NOT_INSTALLED)
     val dhizukuState: StateFlow<DhizukuState> = _dhizukuState.asStateFlow()
@@ -76,18 +70,29 @@ class SettingPrivilegeDelegate(
     )
     val rootState: StateFlow<RootState> = _rootState.asStateFlow()
 
-    private val _isDefaultInstaller = MutableStateFlow(false)
-    val isDefaultInstaller: StateFlow<Boolean> = _isDefaultInstaller.asStateFlow()
+    private val defaultRoleDelegate = SettingDefaultRoleDelegate(
+        application = application,
+        scope = scope,
+        backendFactory = backendFactory,
+        shizukuState = { _shizukuState.value },
+        rootState = { _rootState.value },
+        updateShizukuState = { updateShizukuState() },
+        requestShizukuPermission = { requestShizukuPermission() },
+        emitEvent = emitEvent,
+    )
+
+    val isDefaultInstaller: StateFlow<Boolean> = defaultRoleDelegate.isDefaultInstaller
+    val isDefaultUninstaller: StateFlow<Boolean> = defaultRoleDelegate.isDefaultUninstaller
 
     private val binderReceivedListener = Shizuku.OnBinderReceivedListener {
         Timber.d("Shizuku binder received")
-        app.pwhs.core.telemetry.AnalyticsHelper.logPrivilegedServiceStatusChanged(activeBackendTelemetryName(), app.pwhs.core.telemetry.TelemetryEvents.SHIZUKU_CONNECTED)
+        app.pwhs.core.telemetry.AnalyticsHelper.logShizukuStatusChanged(app.pwhs.core.telemetry.TelemetryEvents.SHIZUKU_CONNECTED)
         updateShizukuState()
     }
 
     private val binderDeadListener = Shizuku.OnBinderDeadListener {
         Timber.d("Shizuku binder dead")
-        app.pwhs.core.telemetry.AnalyticsHelper.logPrivilegedServiceStatusChanged(activeBackendTelemetryName(), app.pwhs.core.telemetry.TelemetryEvents.SHIZUKU_SERVICE_DEAD)
+        app.pwhs.core.telemetry.AnalyticsHelper.logShizukuStatusChanged(app.pwhs.core.telemetry.TelemetryEvents.SHIZUKU_SERVICE_DEAD)
         updateShizukuState()
     }
 
@@ -96,66 +101,52 @@ class SettingPrivilegeDelegate(
             if (requestCode != SHIZUKU_PERMISSION_REQ_CODE) return@OnRequestPermissionResultListener
             updateShizukuState()
             if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                app.pwhs.core.telemetry.AnalyticsHelper.logPrivilegedServiceStatusChanged(activeBackendTelemetryName(), app.pwhs.core.telemetry.TelemetryEvents.SHIZUKU_CONNECTED)
+                app.pwhs.core.telemetry.AnalyticsHelper.logShizukuStatusChanged(app.pwhs.core.telemetry.TelemetryEvents.SHIZUKU_CONNECTED)
                 scope.launch {
                     dataStore.edit { prefs ->
+                        val keepDhizuku = prefs[PreferencesKeys.USE_DHIZUKU] ?: false
                         prefs[PreferencesKeys.USE_ROOT] = false
-                        prefs[PreferencesKeys.USE_DHIZUKU] = false
                         prefs[PreferencesKeys.USE_CUSTOM_AUTHORIZER] = false
                         prefs[PreferencesKeys.USE_MICROG] = false
                         prefs[PreferencesKeys.USE_SHIZUKU] = true
+                        prefs[PreferencesKeys.USE_DHIZUKU] = keepDhizuku
                     }
                 }
             } else {
-                app.pwhs.core.telemetry.AnalyticsHelper.logPrivilegedServiceStatusChanged(activeBackendTelemetryName(), app.pwhs.core.telemetry.TelemetryEvents.SHIZUKU_PERMISSION_DENIED)
+                app.pwhs.core.telemetry.AnalyticsHelper.logShizukuStatusChanged(app.pwhs.core.telemetry.TelemetryEvents.SHIZUKU_PERMISSION_DENIED)
                 emitEvent(R.string.setting_shizuku_permission_denied)
             }
         }
-
-    /** Returns the backend that is active for the current process. */
-    private fun readActivePrivilegedServiceBackend(): PrivilegedServiceBackend = try {
-        when (PorterClient.getActiveBackend(application)) {
-            PorterClient.Backend.PORTER -> PrivilegedServiceBackend.PORTER
-            PorterClient.Backend.SHIZUKU -> PrivilegedServiceBackend.SHIZUKU
-            PorterClient.Backend.AUTO -> PrivilegedServiceBackend.AUTO
-        }
-    } catch (t: Throwable) {
-        Timber.w(t, "Unable to determine active Porter backend")
-        PrivilegedServiceBackend.AUTO
-    }
-
-    /** Persists the selected backend and applies it to the next process launch. */
-    fun setPrivilegedServiceBackend(backend: PrivilegedServiceBackend) {
-        scope.launch(Dispatchers.IO) {
-            val selected = when (backend) {
-                PrivilegedServiceBackend.AUTO -> PorterClient.Backend.AUTO
-                PrivilegedServiceBackend.PORTER -> PorterClient.Backend.PORTER
-                PrivilegedServiceBackend.SHIZUKU -> PorterClient.Backend.SHIZUKU
-            }
-            try {
-                val saved = PorterClient.setBackendForNextProcess(application, selected)
-                if (saved) {
-                    dataStore.edit { it[PreferencesKeys.PRIVILEGED_SERVICE_BACKEND] = backend.name }
-                    emitEvent(R.string.setting_privileged_service_restart_required)
-                } else {
-                    emitEvent(R.string.setting_privileged_service_save_failed)
-                }
-            } catch (t: Throwable) {
-                Timber.w(t, "Unable to save privileged service backend")
-                emitEvent(R.string.setting_privileged_service_save_failed)
-            }
-        }
-    }
 
     init {
         updateShizukuState()
         Shizuku.addBinderReceivedListener(binderReceivedListener)
         Shizuku.addBinderDeadListener(binderDeadListener)
         Shizuku.addRequestPermissionResultListener(requestPermissionResultListener)
+        scope.launch {
+            kotlinx.coroutines.delay(400)
+            updateShizukuState()
+            kotlinx.coroutines.delay(1000)
+            updateShizukuState()
+        }
 
         if (backendFactory.rootSupportCompiledIn) {
             scope.launch {
-                _rootState.value = backendFactory.probeRootState()
+                val probed = backendFactory.probeRootState()
+                _rootState.value = probed
+                val prefs = dataStore.data.first()
+                val useRoot = prefs[PreferencesKeys.USE_ROOT] ?: false
+                if (useRoot && (probed == RootState.UNKNOWN || probed == RootState.READY)) {
+                    _rootState.value = backendFactory.requestRoot()
+                }
+            }
+            scope.launch {
+                dataStore.data.collect { prefs ->
+                    val useRoot = prefs[PreferencesKeys.USE_ROOT] ?: false
+                    if (useRoot && _rootState.value == RootState.UNKNOWN) {
+                        _rootState.value = backendFactory.requestRoot()
+                    }
+                }
             }
         }
         scope.launch {
@@ -173,7 +164,8 @@ class SettingPrivilegeDelegate(
                 }
             }
         }
-        updateDefaultInstallerStatus()
+        defaultRoleDelegate.updateDefaultInstallerStatus()
+        defaultRoleDelegate.updateDefaultUninstallerStatus()
     }
 
     fun cleanUp() {
@@ -182,33 +174,27 @@ class SettingPrivilegeDelegate(
         Shizuku.removeRequestPermissionResultListener(requestPermissionResultListener)
     }
 
-    /** Refreshes the privileged-service availability state exposed to the settings UI. */
+    private fun isShizukuInstalled(): Boolean {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                application.packageManager.getPackageInfo(
+                    "moe.shizuku.privileged.api",
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                application.packageManager.getPackageInfo("moe.shizuku.privileged.api", 0)
+            }
+            true
+        } catch (_: PackageManager.NameNotFoundException) {
+            false
+        }
+    }
+
     fun updateShizukuState() {
-        val selectedBackend = try {
-            PorterClient.getActiveBackend(application)
-        } catch (_: Throwable) {
-            PorterClient.Backend.AUTO
-        }
-
-        val managerInstalled = when (selectedBackend) {
-            PorterClient.Backend.PORTER -> try {
-                PorterClient.getPorterPackage(application) != null
-            } catch (_: Throwable) {
-                false
-            }
-            PorterClient.Backend.SHIZUKU -> isPackageInstalled("moe.shizuku.privileged.api")
-            PorterClient.Backend.AUTO -> {
-                val porterInstalled = try {
-                    PorterClient.getPorterPackage(application) != null
-                } catch (_: Throwable) {
-                    false
-                }
-                porterInstalled || isPackageInstalled("moe.shizuku.privileged.api")
-            }
-        }
-
+        val isInstalled = isShizukuInstalled()
         _shizukuState.value = when {
-            !managerInstalled -> ShizukuState.NOT_INSTALLED
+            !Shizuku.pingBinder() && !isInstalled -> ShizukuState.NOT_INSTALLED
             !Shizuku.pingBinder() -> ShizukuState.NOT_RUNNING
             Shizuku.getVersion() < 11 -> ShizukuState.UNSUPPORTED
             Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED -> ShizukuState.NO_PERMISSION
@@ -216,22 +202,6 @@ class SettingPrivilegeDelegate(
         }
     }
 
-    /** Returns the telemetry identifier for the active privileged-service backend. */
-    private fun activeBackendTelemetryName(): String = when (PorterClient.getActiveBackend(application)) {
-        PorterClient.Backend.PORTER -> app.pwhs.core.telemetry.TelemetryEvents.BACKEND_PORTER
-        PorterClient.Backend.SHIZUKU -> app.pwhs.core.telemetry.TelemetryEvents.BACKEND_SHIZUKU
-        PorterClient.Backend.AUTO -> app.pwhs.core.telemetry.TelemetryEvents.BACKEND_AUTO
-    }
-
-    /** Returns whether an application package is installed on the device. */
-    private fun isPackageInstalled(packageName: String): Boolean = try {
-        application.packageManager.getApplicationInfo(packageName, 0)
-        true
-    } catch (_: PackageManager.NameNotFoundException) {
-        false
-    }
-
-    /** Applies the selected installer mode and updates the related privilege state. */
     fun setInstallMode(mode: InstallMode) {
         when (mode) {
             InstallMode.DEFAULT -> scope.launch {
@@ -291,7 +261,6 @@ class SettingPrivilegeDelegate(
         }
     }
 
-    /** Enables or disables Shizuku-based installation. */
     fun setUseShizuku(enabled: Boolean) {
         if (!enabled) {
             scope.launch {
@@ -301,45 +270,78 @@ class SettingPrivilegeDelegate(
         }
         updateShizukuState()
         when (_shizukuState.value) {
-            ShizukuState.READY -> scope.launch {
-                dataStore.edit { prefs ->
-                    prefs[PreferencesKeys.USE_ROOT] = false
-                    prefs[PreferencesKeys.USE_DHIZUKU] = false
-                    prefs[PreferencesKeys.USE_CUSTOM_AUTHORIZER] = false
-                    prefs[PreferencesKeys.USE_MICROG] = false
-                    prefs[PreferencesKeys.USE_SHIZUKU] = true
+            ShizukuState.READY -> {
+                scope.launch {
+                    dataStore.edit { prefs -> prefs[PreferencesKeys.USE_SHIZUKU] = true }
                 }
             }
             ShizukuState.NO_PERMISSION -> requestShizukuPermission()
-            ShizukuState.NOT_RUNNING -> emitEvent(
-                if (activePrivilegedServiceBackend.value == PrivilegedServiceBackend.PORTER)
-                    R.string.setting_porter_start_service_hint
-                else
-                    R.string.setting_shizuku_start_service_hint
-            )
-            ShizukuState.NOT_INSTALLED -> emitEvent(
-                if (activePrivilegedServiceBackend.value == PrivilegedServiceBackend.PORTER)
-                    R.string.setting_porter_install_hint
-                else
-                    R.string.setting_shizuku_install_hint
-            )
+            ShizukuState.NOT_RUNNING -> {
+                startShizukuService()
+            }
+            ShizukuState.NOT_INSTALLED -> {
+                emitEvent(R.string.setting_shizuku_install_hint)
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api")
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                runCatching { application.startActivity(intent) }
+            }
             ShizukuState.UNSUPPORTED -> emitEvent(R.string.setting_shizuku_unsupported)
         }
     }
 
-    /** Requests Shizuku permission and reports the resulting state to the UI. */
-    private fun requestShizukuPermission() {
+    fun startShizukuService() {
+        scope.launch {
+            if (!isShizukuInstalled()) {
+                emitEvent(R.string.setting_shizuku_install_hint)
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api")
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                runCatching { application.startActivity(intent) }
+                return@launch
+            }
+            if (backendFactory.rootSupportCompiledIn && _rootState.value == RootState.READY) {
+                backendFactory.startShizukuViaRoot()
+                kotlinx.coroutines.delay(1200)
+                updateShizukuState()
+                if (_shizukuState.value == ShizukuState.NO_PERMISSION) {
+                    requestShizukuPermission()
+                }
+                if (_shizukuState.value == ShizukuState.READY) {
+                    dataStore.edit { prefs -> prefs[PreferencesKeys.USE_SHIZUKU] = true }
+                    return@launch
+                }
+            }
+            emitEvent(R.string.setting_shizuku_start_service_hint)
+            val launchIntent = application.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
+            if (launchIntent != null) {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                runCatching { application.startActivity(launchIntent) }
+            }
+        }
+    }
+
+    fun requestShizukuPermission() {
         try {
             Shizuku.requestPermission(SHIZUKU_PERMISSION_REQ_CODE)
         } catch (t: Throwable) {
             Timber.w(t, "Shizuku.requestPermission threw")
-            emitEvent(
-                if (activePrivilegedServiceBackend.value == PrivilegedServiceBackend.PORTER)
-                    R.string.setting_porter_start_service_hint
-                else
-                    R.string.setting_shizuku_start_service_hint
-            )
+            emitEvent(R.string.setting_shizuku_start_service_hint)
         }
+    }
+
+    fun updateDhizukuState(state: DhizukuState) {
+        _dhizukuState.value = state
+    }
+
+    fun updateRootState(state: RootState) {
+        _rootState.value = state
     }
 
     fun setUseRoot(enabled: Boolean) {
@@ -365,6 +367,8 @@ class SettingPrivilegeDelegate(
     fun retryRoot() {
         scope.launch {
             _rootState.value = RootState.UNKNOWN
+            backendFactory.resetCachedShell()
+            _rootState.value = backendFactory.requestRoot()
         }
     }
 
@@ -390,10 +394,8 @@ class SettingPrivilegeDelegate(
         }
     }
 
-    /** Commits Dhizuku as the active installation backend. */
     private fun commitDhizukuMode() = scope.launch {
         dataStore.edit { p ->
-            p[PreferencesKeys.USE_SHIZUKU] = false
             p[PreferencesKeys.USE_ROOT] = false
             p[PreferencesKeys.USE_CUSTOM_AUTHORIZER] = false
             p[PreferencesKeys.USE_MICROG] = false
@@ -401,7 +403,6 @@ class SettingPrivilegeDelegate(
         }
     }
 
-    /** Stores the custom authorizer command used for installation. */
     fun setCustomAuthorizerCommand(command: String) = scope.launch {
         dataStore.edit { p ->
             p[PreferencesKeys.CUSTOM_AUTHORIZER_COMMAND] = command
@@ -429,7 +430,6 @@ class SettingPrivilegeDelegate(
         }
     }
 
-    /** Sets the package name used by privileged installer operations. */
     fun setInstallerPackageName(packageName: String) {
         scope.launch {
             dataStore.edit { p ->
@@ -439,86 +439,8 @@ class SettingPrivilegeDelegate(
         }
     }
 
-    /** Enables or disables the app as the default package installer. */
-    fun toggleDefaultInstaller(enabled: Boolean) {
-        updateShizukuState()
-        val shizukuReady = _shizukuState.value == ShizukuState.READY
-        val rootReady = _rootState.value == RootState.READY
-
-        if (!shizukuReady && !rootReady) {
-            reportDefaultInstaller("none", enabled, TelemetryEvents.RESULT_BLOCKED)
-            when (_shizukuState.value) {
-                ShizukuState.NO_PERMISSION -> requestShizukuPermission()
-                ShizukuState.NOT_RUNNING -> emitEvent(R.string.setting_shizuku_start_service_hint)
-                else -> emitEvent(R.string.setting_default_installer_needs_backend)
-            }
-            return
-        }
-
-        val component = defaultInstallerComponent()
-        val method = if (shizukuReady) "shizuku" else "root"
-        scope.launch(Dispatchers.IO) {
-            val result = if (shizukuReady) {
-                app.pwhs.universalinstaller.util.ShizukuDefaultInstaller
-                    .setDefaultInstaller(component, enabled)
-            } else {
-                backendFactory.setDefaultInstallerViaRoot(application, component, enabled)
-            }
-            result
-                .onSuccess {
-                    reportDefaultInstaller(method, enabled, TelemetryEvents.RESULT_SUCCESS)
-                    updateDefaultInstallerStatus()
-                    emitEvent(
-                        if (enabled) R.string.setting_default_installer_enabled
-                        else R.string.setting_default_installer_disabled,
-                    )
-                }
-                .onFailure { e ->
-                    Timber.e(e, "Failed to toggle default installer")
-                    reportDefaultInstaller(method, enabled, TelemetryEvents.RESULT_FAILURE)
-                    emitEvent(R.string.setting_default_installer_failed)
-                }
-        }
-    }
-
-    private fun reportDefaultInstaller(method: String, enabled: Boolean, result: String) {
-        Telemetry.event(
-            TelemetryEvents.DEFAULT_INSTALLER_SET,
-            TelemetryEvents.PARAM_METHOD to method,
-            TelemetryEvents.PARAM_ENABLED to enabled,
-            TelemetryEvents.PARAM_RESULT to result,
-        )
-        val action = if (result == TelemetryEvents.RESULT_SUCCESS) {
-            app.pwhs.core.telemetry.TelemetryEvents.DEFAULT_INSTALLER_SET_SUCCESS
-        } else {
-            app.pwhs.core.telemetry.TelemetryEvents.DEFAULT_INSTALLER_CANCELLED
-        }
-        app.pwhs.core.telemetry.AnalyticsHelper.logDefaultInstallerAction(action)
-        app.pwhs.core.telemetry.AnalyticsHelper.updateIsDefaultInstaller(enabled && result == TelemetryEvents.RESULT_SUCCESS)
-    }
-
-    private fun defaultInstallerComponent(): ComponentName =
-        ComponentName(
-            application,
-            "app.pwhs.universalinstaller.presentation.install.DialogInstallActivity",
-        )
-
-    fun updateDefaultInstallerStatus() {
-        scope.launch(Dispatchers.IO) {
-            val probe = Intent(Intent.ACTION_VIEW).apply {
-                addCategory(Intent.CATEGORY_DEFAULT)
-                setDataAndType(
-                    android.net.Uri.parse("content://storage/emulated/0/test.apk"),
-                    "application/vnd.android.package-archive",
-                )
-            }
-            val resolved = try {
-                application.packageManager.resolveActivity(probe, PackageManager.MATCH_DEFAULT_ONLY)
-            } catch (t: Throwable) {
-                Timber.w(t, "resolveActivity failed")
-                null
-            }
-            _isDefaultInstaller.value = resolved?.activityInfo?.packageName == application.packageName
-        }
-    }
+    fun toggleDefaultInstaller(enabled: Boolean) = defaultRoleDelegate.toggleDefaultInstaller(enabled)
+    fun updateDefaultInstallerStatus() = defaultRoleDelegate.updateDefaultInstallerStatus()
+    fun toggleDefaultUninstaller(enabled: Boolean) = defaultRoleDelegate.toggleDefaultUninstaller(enabled)
+    fun updateDefaultUninstallerStatus() = defaultRoleDelegate.updateDefaultUninstallerStatus()
 }

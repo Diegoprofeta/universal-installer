@@ -24,9 +24,11 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.lifecycleScope
+import app.pwhs.universalinstaller.presentation.install.util.InstallSessionManager
 import app.pwhs.core.data.local.dataStore
 import app.pwhs.core.domain.AppThemePreset
 import app.pwhs.core.domain.ThemeMode
@@ -34,11 +36,13 @@ import app.pwhs.core.util.PermissionMonitor
 import app.pwhs.universalinstaller.IntentHandoff
 import app.pwhs.universalinstaller.domain.model.ExternalOpenMode
 import app.pwhs.universalinstaller.domain.model.InstallUiStyle
+import app.pwhs.universalinstaller.domain.model.VtStatus
 import app.pwhs.universalinstaller.presentation.install.dialog.detectInstallRisks
 import app.pwhs.universalinstaller.presentation.install.dialog.DialogInstallContent
 import app.pwhs.universalinstaller.presentation.install.dialog.DialogInstallUriHelper
 import app.pwhs.universalinstaller.presentation.install.dialog.InsufficientStorageDialog
 import app.pwhs.universalinstaller.presentation.install.dialog.HeadlessNotificationInstall
+import app.pwhs.universalinstaller.presentation.install.dialog.InstallRisk
 import app.pwhs.universalinstaller.presentation.install.util.SourceFileDeleter
 import app.pwhs.universalinstaller.presentation.install.util.CallerAppDetector
 import app.pwhs.universalinstaller.domain.manager.AutoApproveApps
@@ -97,9 +101,12 @@ class DialogInstallActivity : FragmentActivity() {
         }
     }
 
-    private fun canInstallPackages(): Boolean =
+    private fun canInstallPackages(
+        prefs: Preferences?,
+        profileId: String? = null,
+    ): Boolean = !InstallSessionManager.requiresInstallPermission(this, prefs, profileId) ||
         Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
-            packageManager.canRequestPackageInstalls()
+        packageManager.canRequestPackageInstalls()
 
     private fun openInstallPermissionSettings() {
         PermissionMonitor.start(this) { packageManager.canRequestPackageInstalls() }
@@ -140,13 +147,11 @@ class DialogInstallActivity : FragmentActivity() {
         }
     }
 
-    private suspend fun readInstallUiStyle(): InstallUiStyle = runCatching {
-        InstallUiStyle.from(dataStore.data.first()[PreferencesKeys.INSTALL_UI_STYLE])
-    }.getOrDefault(InstallUiStyle.Dialog)
+    private suspend fun readInstallUiStyle(): InstallUiStyle =
+        runCatching { InstallUiStyle.from(dataStore.data.first()[PreferencesKeys.INSTALL_UI_STYLE]) }.getOrDefault(InstallUiStyle.Dialog)
 
-    private suspend fun readExternalOpenMode(): ExternalOpenMode = runCatching {
-        ExternalOpenMode.from(dataStore.data.first()[PreferencesKeys.EXTERNAL_OPEN_MODE])
-    }.getOrDefault(ExternalOpenMode.Dialog)
+    private suspend fun readExternalOpenMode(): ExternalOpenMode =
+        runCatching { ExternalOpenMode.from(dataStore.data.first()[PreferencesKeys.EXTERNAL_OPEN_MODE]) }.getOrDefault(ExternalOpenMode.Dialog)
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrap(newBase))
@@ -184,7 +189,8 @@ class DialogInstallActivity : FragmentActivity() {
             return
         }
 
-        if (incomingUris.size > 1) {
+        val hasWebUrl = incomingUris.any { it.scheme == "http" || it.scheme == "https" }
+        if (incomingUris.size > 1 && !hasWebUrl) {
             IntentHandoff.postBatch(incomingUris)
             val targetIntent = Intent(this, InstallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -195,7 +201,11 @@ class DialogInstallActivity : FragmentActivity() {
             return
         }
 
-        val incomingUri = incomingUris.first()
+        val incomingUri = if (hasWebUrl) {
+            incomingUris.first { it.scheme == "http" || it.scheme == "https" }
+        } else {
+            incomingUris.first()
+        }
         viewModel.dialogStartLoading()
         skipInitialParse = restoredEntry != null
 
@@ -269,6 +279,8 @@ class DialogInstallActivity : FragmentActivity() {
             val autoConfirmExternalInstall = prefs?.get(PreferencesKeys.AUTO_CONFIRM_EXTERNAL_INSTALL) ?: false
             val isCallerAutoApproved = AutoApproveApps.isAutoApproved(prefs, callerPackage)
             val deleteApkAfterInstall = prefs?.get(PreferencesKeys.DELETE_APK_AFTER_INSTALL) ?: false
+            val blockOnTrackers = prefs?.get(PreferencesKeys.AUTO_APPROVE_BLOCK_TRACKERS) ?: false
+            var autoBlockedRisks by remember { mutableStateOf<List<InstallRisk>>(emptyList()) }
             var keepApk by remember(dialogTarget?.sessionId) { mutableStateOf(false) }
             val strictVirusTotalCheck = SecurityLevel.from(
                 stored = prefs?.get(PreferencesKeys.SECURITY_LEVEL),
@@ -312,6 +324,7 @@ class DialogInstallActivity : FragmentActivity() {
 
             val finishAfterSuccess: (Boolean, String?) -> Unit = { keepApk, _ ->
                 val target = dialogTarget
+                target?.sessionId?.let { installNotifier.untrack(it) }
                 lifecycleScope.launch {
                     if (target?.deleteAfterInstall == true && !keepApk) {
                         target.apkUri?.let { SourceFileDeleter.deleteSourceFileAndWarn(context, it) }
@@ -324,11 +337,17 @@ class DialogInstallActivity : FragmentActivity() {
 
             LaunchedEffect(uiState.dialogStage, autoConfirmExternalInstall, isCallerAutoApproved, autoOpenAfterInstall, uiState.pendingApkInfo) {
                 val apkInfo = uiState.pendingApkInfo
-                val risks = if (apkInfo != null) detectInstallRisks(apkInfo, strictVirusTotalCheck) else emptyList()
+                val isScanning = apkInfo?.vtResult?.status == VtStatus.SCANNING || (blockOnTrackers && apkInfo?.isScanningTrackers == true)
+                if (isScanning) return@LaunchedEffect
+
+                val risks = if (apkInfo != null) detectInstallRisks(apkInfo, strictVirusTotalCheck, blockOnTrackers) else emptyList()
                 val hasSecurityFlags = risks.isNotEmpty() || (apkInfo?.vtResult?.let { it.malicious > 0 || it.suspicious > 0 } == true)
                 val shouldAutoInstall = (autoConfirmExternalInstall || isCallerAutoApproved) && !securityGate.isPinRequired && !hasSecurityFlags
                 if (hasSecurityFlags && (autoConfirmExternalInstall || isCallerAutoApproved)) {
                     Timber.w("Auto-approve install blocked: security risks/VT flags present ($risks, vt=${apkInfo?.vtResult?.status})")
+                    if (uiState.dialogStage == DialogStage.Prepare && autoBlockedRisks.isEmpty()) {
+                        autoBlockedRisks = risks
+                    }
                 }
                 if (uiState.dialogStage == DialogStage.Prepare && shouldAutoInstall) {
                     Timber.i("Auto-approving install: autoConfirm=$autoConfirmExternalInstall, callerApproved=$isCallerAutoApproved (caller=$callerPackage)")
@@ -358,7 +377,7 @@ class DialogInstallActivity : FragmentActivity() {
             val handoffInstall = {
                 val t = dialogTarget
                 val stage = uiState.dialogStage
-                if (t != null && (stage is DialogStage.Installing || stage is DialogStage.None)) {
+                if (t != null && stage is DialogStage.Installing) {
                     installNotifier.track(
                         sessionId = t.sessionId,
                         packageName = t.packageName,
@@ -408,7 +427,9 @@ class DialogInstallActivity : FragmentActivity() {
                 keepApk = keepApk,
                 onKeepApkChanged = { keepApk = it },
                 strictVirusTotalCheck = strictVirusTotalCheck,
-                canInstallPackages = ::canInstallPackages,
+                blockOnTrackers = blockOnTrackers,
+                autoBlockedRisks = autoBlockedRisks,
+                canInstallPackages = { canInstallPackages(prefs, uiState.selectedProfileId) },
                 viewModel = viewModel,
                 onOpenInstallPermissionSettings = ::openInstallPermissionSettings,
                 onProceedInstall = proceedInstall,
@@ -432,7 +453,8 @@ class DialogInstallActivity : FragmentActivity() {
         val uris = DialogInstallUriHelper.collectIncomingUris(intent)
         if (uris.isEmpty()) return
 
-        if (uris.size > 1) {
+        val hasWebUrl = uris.any { it.scheme == "http" || it.scheme == "https" }
+        if (uris.size > 1 && !hasWebUrl) {
             IntentHandoff.postBatch(uris)
             val targetIntent = Intent(this, InstallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -443,7 +465,11 @@ class DialogInstallActivity : FragmentActivity() {
             return
         }
 
-        val uri = uris.first()
+        val uri = if (hasWebUrl) {
+            uris.first { it.scheme == "http" || it.scheme == "https" }
+        } else {
+            uris.first()
+        }
         viewModel.dismissPendingInstall()
         viewModel.dialogStartLoading()
         val context = this

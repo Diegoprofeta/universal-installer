@@ -32,15 +32,17 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Shield
-import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -53,13 +55,12 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.TrackerInfo
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun TrackersDetailDialog(
+fun TrackersDetailSheet(
     trackers: List<TrackerInfo>,
     onDismiss: () -> Unit,
 ) {
@@ -73,24 +74,18 @@ fun TrackersDetailDialog(
             .sortedByDescending { it.second }
     }
 
-    BasicAlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-            .widthIn(max = 440.dp),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
-        Surface(
-            shape = RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 6.dp,
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-            ) {
                 // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -295,8 +290,18 @@ fun TrackersDetailDialog(
                     Text(stringResource(android.R.string.ok))
                 }
             }
-        }
     }
+}
+
+/**
+ * Backward compatibility alias for [TrackersDetailSheet].
+ */
+@Composable
+fun TrackersDetailDialog(
+    trackers: List<TrackerInfo>,
+    onDismiss: () -> Unit,
+) {
+    TrackersDetailSheet(trackers = trackers, onDismiss = onDismiss)
 }
 
 @Composable

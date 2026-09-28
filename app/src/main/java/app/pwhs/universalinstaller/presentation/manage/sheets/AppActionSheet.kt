@@ -11,10 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.CallMerge
 import androidx.compose.material.icons.automirrored.rounded.Launch
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.Block
-import androidx.compose.material.icons.rounded.CloudUpload
+import androidx.compose.material.icons.rounded.WifiTethering
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.DirectionsCar
@@ -53,6 +54,8 @@ import app.pwhs.universalinstaller.presentation.manage.StorageChip
 import app.pwhs.universalinstaller.presentation.manage.permissions.AppPermissionsActivity
 import app.pwhs.universalinstaller.presentation.manage.resolveInstallerInfo
 import app.pwhs.universalinstaller.util.AndroidAutoCompat
+import app.pwhs.universalinstaller.bridge.AntiSplitBridge
+import app.pwhs.universalinstaller.presentation.composable.AntiSplitPromptDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,6 +87,7 @@ internal fun AppActionSheet(
     }
     var storage by remember(app.packageName) { mutableStateOf<StorageBreakdown?>(null) }
     var usage by remember(app.packageName) { mutableStateOf<List<UsageBucket>>(emptyList()) }
+    var showAntiSplitPrompt by remember { mutableStateOf(false) }
 
     LaunchedEffect(app.packageName) {
         storage = queryStorage(app.packageName)
@@ -116,14 +120,14 @@ internal fun AppActionSheet(
                 )
             }
 
-            // Storage breakdown (from UsageStatsManager/StorageStatsManager or fallback to APK size)
+            // Storage breakdown (from UsageStatsManager/StorageStatsManager)
             if (storage != null) {
                 storage?.let { s ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            .padding(horizontal = 20.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         StorageChip(
                             label = stringResource(R.string.manage_storage_app),
@@ -142,31 +146,12 @@ internal fun AppActionSheet(
                         )
                     }
                 }
-            } else if (app.sizeBytes > 0) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    StorageChip(
-                        label = stringResource(R.string.manage_storage_app),
-                        value = android.text.format.Formatter.formatShortFileSize(context, app.sizeBytes),
-                        weight = 1f,
-                    )
-                }
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
 
-            // Primary Actions Grid
-            val storeInfo = remember(app.installerPackage, app.packageName) {
-                resolveInstallerInfo(app.installerPackage, app.packageName)
-            }
-            val isAaApp = app.isAndroidAutoSupported
-            val isAaInstalled = remember { AndroidAutoCompat.isAndroidAutoInstalled(context) }
-
-            val primaryActions = buildList {
+            // Quick Actions Hero Row
+            val quickActions = buildList {
                 if (launchable) {
                     add(
                         AppActionItem(
@@ -177,6 +162,46 @@ internal fun AppActionSheet(
                         )
                     )
                 }
+                add(
+                    AppActionItem(
+                        icon = if (app.hasSplits) Icons.Rounded.FolderZip else Icons.Rounded.Inventory2,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        label = stringResource(R.string.extract_action),
+                        enabled = !extractInProgress,
+                        onClick = onExtract,
+                    )
+                )
+                add(
+                    AppActionItem(
+                        icon = Icons.Rounded.Share,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        label = stringResource(R.string.manage_action_share),
+                        enabled = !extractInProgress,
+                        onClick = onShare,
+                    )
+                )
+                add(
+                    AppActionItem(
+                        icon = Icons.Rounded.Info,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        label = stringResource(R.string.manage_action_app_info),
+                        onClick = onOpenAppInfo,
+                    )
+                )
+            }
+
+            AppQuickActionsRow(items = quickActions)
+
+            Spacer(Modifier.height(4.dp))
+
+            // Utilities & Tools Grid
+            val storeInfo = remember(app.installerPackage, app.packageName) {
+                resolveInstallerInfo(app.installerPackage, app.packageName)
+            }
+            val isAaApp = app.isAndroidAutoSupported
+            val isAaInstalled = remember { AndroidAutoCompat.isAndroidAutoInstalled(context) }
+
+            val utilityActions = buildList {
                 storeInfo?.let { info ->
                     if (info.intent != null) {
                         add(
@@ -207,10 +232,11 @@ internal fun AppActionSheet(
                 }
                 add(
                     AppActionItem(
-                        icon = Icons.Rounded.Info,
+                        icon = Icons.Rounded.Refresh,
                         iconTint = MaterialTheme.colorScheme.primary,
-                        label = stringResource(R.string.manage_action_app_info),
-                        onClick = onOpenAppInfo,
+                        label = stringResource(R.string.manage_action_reinstall),
+                        enabled = !extractInProgress,
+                        onClick = onReinstall,
                     )
                 )
                 add(
@@ -228,13 +254,52 @@ internal fun AppActionSheet(
                 )
                 add(
                     AppActionItem(
-                        icon = Icons.Rounded.Share,
+                        icon = Icons.Rounded.Search,
                         iconTint = MaterialTheme.colorScheme.primary,
-                        label = stringResource(R.string.manage_action_share),
-                        enabled = !extractInProgress,
-                        onClick = onShare,
+                        label = stringResource(R.string.manage_action_check_vt),
+                        onClick = {
+                            onCheckVirusTotal()
+                            onDismiss()
+                        },
                     )
                 )
+                add(
+                    AppActionItem(
+                        icon = Icons.Rounded.WifiTethering,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        label = stringResource(R.string.manage_action_add_to_server),
+                        subtitle = stringResource(R.string.manage_action_add_to_server_sub),
+                        enabled = !extractInProgress,
+                        onClick = onAddToServer,
+                    )
+                )
+                if (app.hasSplits) {
+                    add(
+                        AppActionItem(
+                            icon = Icons.AutoMirrored.Rounded.CallMerge,
+                            iconTint = MaterialTheme.colorScheme.primary,
+                            label = stringResource(R.string.manage_action_merge_antisplit),
+                            subtitle = stringResource(R.string.manage_action_merge_antisplit_desc),
+                            onClick = {
+                                val intent = AntiSplitBridge.createMergeInstalledAppIntent(
+                                    app.packageName,
+                                    autoStart = false,
+                                    newTask = true,
+                                )
+                                if (!AntiSplitBridge.canResolveIntent(context, intent)) {
+                                    showAntiSplitPrompt = true
+                                } else {
+                                    runCatching {
+                                        context.startActivity(intent)
+                                        onDismiss()
+                                    }.onFailure {
+                                        showAntiSplitPrompt = true
+                                    }
+                                }
+                            },
+                        )
+                    )
+                }
                 if (isAaApp && app.installerPackage != "com.android.vending" && isAaInstalled) {
                     add(
                         AppActionItem(
@@ -251,59 +316,21 @@ internal fun AppActionSheet(
                         )
                     )
                 }
-                add(
-                    AppActionItem(
-                        icon = Icons.Rounded.Refresh,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        label = stringResource(R.string.manage_action_reinstall),
-                        enabled = !extractInProgress,
-                        onClick = onReinstall,
-                    )
-                )
-                add(
-                    AppActionItem(
-                        icon = Icons.Rounded.Search,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        label = stringResource(R.string.manage_action_check_vt),
-                        onClick = {
-                            onCheckVirusTotal()
-                            onDismiss()
-                        },
-                    )
-                )
-                add(
-                    AppActionItem(
-                        icon = Icons.Rounded.CloudUpload,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        label = "Add to Server",
-                        enabled = !extractInProgress,
-                        onClick = onAddToServer,
-                    )
-                )
-                add(
-                    AppActionItem(
-                        icon = if (app.hasSplits) Icons.Rounded.FolderZip else Icons.Rounded.Inventory2,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        label = stringResource(R.string.extract_action),
-                        enabled = !extractInProgress,
-                        onClick = onExtract,
-                    )
-                )
             }
 
-            AppActionGrid(items = primaryActions, columns = 4)
+            AppActionCardGrid(items = utilityActions)
 
             // Advanced Actions (Privileged)
             if (privilegedReady) {
                 HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                 )
                 Text(
                     text = stringResource(R.string.manage_section_advanced),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
                 )
 
                 val advancedActions = listOf(
@@ -336,39 +363,29 @@ internal fun AppActionSheet(
                     ),
                 )
 
-                AppActionGrid(items = advancedActions, columns = 4)
+                AppActionCardGrid(items = advancedActions)
             }
 
             // Danger Section (Uninstall, Block)
             HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             )
 
-            val dangerActions = listOf(
-                AppActionItem(
-                    icon = Icons.Rounded.DeleteOutline,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    label = stringResource(R.string.uninstall),
-                    onClick = onUninstall,
-                ),
-                AppActionItem(
-                    icon = Icons.Rounded.Block,
-                    iconTint = if (isBlocked) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.error
-                    },
-                    label = stringResource(
-                        if (isBlocked) R.string.manage_action_unblock else R.string.manage_action_block
-                    ),
-                    onClick = onBlockPackage,
-                ),
+            AppActionDangerCard(
+                onUninstall = onUninstall,
+                onBlockPackage = onBlockPackage,
+                isBlocked = isBlocked,
             )
-
-            AppActionGrid(items = dangerActions, columns = 4)
 
             Spacer(Modifier.height(16.dp))
         }
+    }
+
+    if (showAntiSplitPrompt) {
+        AntiSplitPromptDialog(
+            onDismiss = { showAntiSplitPrompt = false },
+            onDownload = { AntiSplitBridge.openDownloadPage(context) },
+        )
     }
 }

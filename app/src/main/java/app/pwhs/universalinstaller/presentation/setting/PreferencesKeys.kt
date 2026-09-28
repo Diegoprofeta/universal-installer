@@ -19,6 +19,7 @@ object PreferencesKeys {
     val STRICT_VIRUSTOTAL_CHECK = booleanPreferencesKey("strict_virustotal_check")
     val SECURITY_LEVEL = stringPreferencesKey("security_level")
     val DELETE_APK_AFTER_INSTALL = booleanPreferencesKey("delete_apk_after_install")
+    val DISMISS_SHIZUKU_PROMO_BANNER = booleanPreferencesKey("dismiss_shizuku_promo_banner")
 
     /** Open the app automatically after a successful install (with a 3-second cancellable countdown). */
     val AUTO_OPEN_AFTER_INSTALL = booleanPreferencesKey("auto_open_after_install")
@@ -55,6 +56,7 @@ object PreferencesKeys {
     val DHIZUKU_REQUEST_DOWNGRADE = booleanPreferencesKey("dhizuku_request_downgrade")
     val USE_CUSTOM_AUTHORIZER = booleanPreferencesKey("use_custom_authorizer")
     val USE_MICROG = booleanPreferencesKey("use_microg")
+    val INSTALL_BACKEND_PRIORITY = stringPreferencesKey("install_backend_priority")
     val CUSTOM_AUTHORIZER_COMMAND = stringPreferencesKey("custom_authorizer_command")
     const val DEFAULT_CUSTOM_AUTHORIZER_COMMAND = "su -c {command}"
     val SHIZUKU_GRANT_ALL_PERMISSIONS = booleanPreferencesKey("shizuku_grant_all_permissions")
@@ -68,9 +70,10 @@ object PreferencesKeys {
     val SHIZUKU_ENABLE_ROLLBACK = booleanPreferencesKey("shizuku_enable_rollback")
     val SHIZUKU_REQUEST_UPDATE_OWNERSHIP = booleanPreferencesKey("shizuku_request_update_ownership")
 
-    // Shizuku uninstall options (pm uninstall -k / --user all)
+    // Shizuku & Root uninstall options (pm uninstall -k / --user all / delete system app)
     val SHIZUKU_UNINSTALL_KEEP_DATA = booleanPreferencesKey("shizuku_uninstall_keep_data")
     val SHIZUKU_UNINSTALL_ALL_USERS = booleanPreferencesKey("shizuku_uninstall_all_users")
+    val PRIVILEGED_UNINSTALL_DELETE_SYSTEM_APP = booleanPreferencesKey("privileged_uninstall_delete_system_app")
 
     // Post-install optimization (cmd package compile -m speed)
     val DEX2OAT_OPTIMIZATION = booleanPreferencesKey("dex2oat_optimization_after_install")
@@ -126,6 +129,12 @@ object PreferencesKeys {
      * Set of package names permitted to trigger auto-approved installs.
      */
     val AUTO_APPROVE_PACKAGES = stringSetPreferencesKey("auto_approve_packages")
+
+    /**
+     * Whether to block auto-install and ask for manual confirmation when Exodus Privacy
+     * detects trackers in the APK.
+     */
+    val AUTO_APPROVE_BLOCK_TRACKERS = booleanPreferencesKey("auto_approve_block_trackers")
 
     /** Whether to show the "Download" tab in the source picker on the main screen. */
     val SHOW_DOWNLOAD_TAB = booleanPreferencesKey("show_download_tab")

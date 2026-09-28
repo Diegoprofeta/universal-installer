@@ -17,7 +17,6 @@ import app.pwhs.universalinstaller.util.BiometricGate
 
 object SettingUiStateBuilder {
 
-    /** Builds the immutable settings UI state from the combined preference flows. */
     fun build(
         application: Application,
         backendFactory: InstallerBackendFactory,
@@ -42,6 +41,7 @@ object SettingUiStateBuilder {
         val autoConfirm = interfaceFlags[2]
         val showDownload = interfaceFlags[3]
         val autoApprove = interfaceFlags.getOrElse(5) { false }
+        val autoApproveBlockTrackers = interfaceFlags.getOrElse(6) { false }
         @Suppress("UNCHECKED_CAST")
         val extractorAndProfiles = flows[12] as List<String>
         val extractorPath = extractorAndProfiles[0]
@@ -54,10 +54,10 @@ object SettingUiStateBuilder {
         val useCustomAuthorizer = flows.getOrNull(15) as? Boolean ?: false
         val customAuthorizerCommand = flows.getOrNull(16) as? String ?: ""
         val useMicroG = flows.getOrNull(17) as? Boolean ?: false
-        val privilegedServiceBackend = flows.getOrNull(18) as? app.pwhs.universalinstaller.presentation.setting.PrivilegedServiceBackend
-            ?: app.pwhs.universalinstaller.presentation.setting.PrivilegedServiceBackend.AUTO
-        val activePrivilegedServiceBackend = flows.getOrNull(19) as? app.pwhs.universalinstaller.presentation.setting.PrivilegedServiceBackend
-            ?: app.pwhs.universalinstaller.presentation.setting.PrivilegedServiceBackend.AUTO
+        val isDefaultUninstaller = flows.getOrNull(18) as? Boolean ?: false
+        @Suppress("UNCHECKED_CAST")
+        val backendPriority = flows.getOrNull(19) as? List<app.pwhs.universalinstaller.domain.model.InstallBackend>
+            ?: app.pwhs.universalinstaller.domain.model.InstallBackend.DEFAULT_ORDER
 
         val versionName = try {
             application.packageManager
@@ -73,7 +73,7 @@ object SettingUiStateBuilder {
             dynamicColor = themeState.dynamicColor,
             amoledMode = themeState.amoledMode,
             themePreset = themeState.themePreset,
-            useShizuku = useShizuku,
+            useShizuku = useShizuku && (shizukuState == ShizukuState.READY),
             useRoot = useRoot && (rootState == RootState.READY || rootState == RootState.UNKNOWN),
             virusTotalApiKey = vtKey,
             deleteApkAfterInstall = deleteApk,
@@ -94,6 +94,7 @@ object SettingUiStateBuilder {
             autoConfirmExternalInstall = autoConfirm,
             autoApproveCallerApps = autoApprove,
             autoApproveCount = autoApproveCount,
+            autoApproveBlockTrackers = autoApproveBlockTrackers,
             showDownloadTab = showDownload,
             extractorOutputPath = extractorPath,
             extractorFilenameTemplate = extractorTemplate,
@@ -101,11 +102,11 @@ object SettingUiStateBuilder {
             appProfileMapping = ProfileManager.parseMapping(mappingJson),
             selectedLanguage = selectedLang,
             isDefaultInstaller = isDefault,
+            isDefaultUninstaller = isDefaultUninstaller,
             useCustomAuthorizer = useCustomAuthorizer,
             customAuthorizerCommand = customAuthorizerCommand,
-            useMicroG = useMicroG,
-            privilegedServiceBackend = privilegedServiceBackend,
-            activePrivilegedServiceBackend = activePrivilegedServiceBackend,
+            useMicroG = useMicroG && app.pwhs.universalinstaller.util.MicroGCompat.isAvailable(application),
+            backendPriority = backendPriority,
         )
     }
 }
