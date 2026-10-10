@@ -3,11 +3,13 @@ package app.pwhs.universalinstaller.presentation.install
 import android.app.Application
 import android.content.Context
 import app.pwhs.universalinstaller.presentation.install.util.InstallScanHelper
+import android.os.SystemClock
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.core.data.local.dataStore
 import app.pwhs.core.util.StorageUtil
+import timber.log.Timber
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.data.local.DownloadHistoryDao
 import app.pwhs.universalinstaller.data.local.InstallHistoryDao
@@ -130,6 +132,14 @@ class InstallViewModel(
     private val wearDelegate = InstallWearDelegate(application, viewModelScope)
 
     val dialogTarget: StateFlow<DialogTarget?> = dialogDelegate.dialogTarget
+    val dialogRetryCount: StateFlow<Int> = dialogDelegate.retryCount
+
+    private var lastInstallTriggerTime = 0L
+
+    private companion object {
+        const val INSTALL_TRIGGER_DEBOUNCE_MS = 1000L
+        const val MAX_DIALOG_RETRIES = 3
+    }
 
     private val _mergeSplits = MutableStateFlow(false)
     private val _selectedProfileId = MutableStateFlow<String?>(null)
@@ -304,6 +314,12 @@ class InstallViewModel(
     fun scanVirusTotal(context: Context) = parseDelegate.scanVirusTotal(context)
 
     fun confirmInstall(trackDialogTarget: Boolean = false, keepApk: Boolean = false) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastInstallTriggerTime < INSTALL_TRIGGER_DEBOUNCE_MS) {
+            Timber.w("confirmInstall debounced (too rapid)")
+            return
+        }
+        lastInstallTriggerTime = now
         scanDelegate.resetScanState()
         val apkInfo = parseDelegate.pendingApkInfo.value
         val uris = if (apkInfo != null && apkInfo.splitEntries.isNotEmpty()) {
@@ -453,12 +469,29 @@ class InstallViewModel(
     }
 
     fun retrySession(id: UUID) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastInstallTriggerTime < INSTALL_TRIGGER_DEBOUNCE_MS) {
+            Timber.w("retrySession debounced (too rapid)")
+            return
+        }
+        lastInstallTriggerTime = now
         viewModelScope.launch {
             activeController().retry(id, viewModelScope, application)
         }
     }
 
     fun retryDialogInstall() {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastInstallTriggerTime < INSTALL_TRIGGER_DEBOUNCE_MS) {
+            Timber.w("retryDialogInstall debounced (too rapid)")
+            return
+        }
+        lastInstallTriggerTime = now
+        if (dialogDelegate.retryCount.value >= MAX_DIALOG_RETRIES) {
+            Timber.w("retryDialogInstall dropped: reached max retry cap ($MAX_DIALOG_RETRIES)")
+            return
+        }
+        dialogDelegate.incrementRetryCount()
         val target = dialogDelegate.dialogTarget.value ?: return
         dialogDelegate.startInstalling()
         viewModelScope.launch {

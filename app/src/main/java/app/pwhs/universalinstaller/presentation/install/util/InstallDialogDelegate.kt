@@ -17,6 +17,9 @@ class InstallDialogDelegate {
     private val _downloadProgress = MutableStateFlow<app.pwhs.core.network.DownloadProgress?>(null)
     val downloadProgress: StateFlow<app.pwhs.core.network.DownloadProgress?> = _downloadProgress.asStateFlow()
 
+    private val _retryCount = MutableStateFlow(0)
+    val retryCount: StateFlow<Int> = _retryCount.asStateFlow()
+
     fun updateDownloadProgress(progress: app.pwhs.core.network.DownloadProgress?) {
         _downloadProgress.value = progress
     }
@@ -28,6 +31,15 @@ class InstallDialogDelegate {
     fun clearTarget() {
         _dialogTarget.value = null
         _downloadProgress.value = null
+        _retryCount.value = 0
+    }
+
+    fun incrementRetryCount() {
+        _retryCount.value += 1
+    }
+
+    fun resetRetryCount() {
+        _retryCount.value = 0
     }
 
     fun startLoading() {
@@ -37,6 +49,7 @@ class InstallDialogDelegate {
     fun showPrepare() {
         _dialogStage.value = DialogStage.Prepare
         _downloadProgress.value = null
+        _retryCount.value = 0
     }
 
     fun showMenu() {
@@ -77,6 +90,7 @@ class InstallDialogDelegate {
     fun close() {
         _dialogStage.value = DialogStage.None
         _downloadProgress.value = null
+        _retryCount.value = 0
     }
 
     fun cancelDownload(context: android.content.Context) {

@@ -58,7 +58,7 @@ fun generateDialogParams(
     onBackground: () -> Unit,
     onOpenInstalledApp: (String, Boolean) -> Unit,
     onCloseAfterResult: (Boolean) -> Unit,
-    onRetry: () -> Unit,
+    onRetry: (() -> Unit)? = null,
     onToggleAllUsers: (Boolean) -> Unit,
     onSelectUserId: (Int?) -> Unit,
     onSkipParse: (() -> Unit)? = null,

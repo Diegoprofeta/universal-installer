@@ -318,7 +318,9 @@ fun DialogInstallContent(
                                 onFinishAfterSuccess(keepApk, pkg)
                             },
                             onCloseAfterResult = { keepApk -> onFinishAfterSuccess(keepApk, null) },
-                            onRetry = { viewModel.retryDialogInstall() },
+                            onRetry = if (viewModel.dialogRetryCount.value < 3) {
+                                { viewModel.retryDialogInstall() }
+                            } else null,
                             onToggleAllUsers = viewModel::setAllUsers,
                             onSelectUserId = { viewModel.setUserId(it) },
                             onSkipParse = if (isApk) {

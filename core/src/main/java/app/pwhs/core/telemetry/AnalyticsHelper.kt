@@ -127,6 +127,9 @@ object AnalyticsHelper {
         updateInstallerMode(safeMode)
     }
 
+    private val recentFailureEvents = java.util.concurrent.ConcurrentHashMap<String, Long>()
+    private const val FAILURE_EVENT_COOLDOWN_MS = 15_000L
+
     fun logInstallResult(
         fileType: String = "apk",
         status: String,
@@ -139,6 +142,26 @@ object AnalyticsHelper {
         val safeMode = installMode.ifBlank { "default" }
         val safeStatus = status.ifBlank { TelemetryEvents.RESULT_FAILURE }
         val safeFileType = fileType.normalizeFileType().ifBlank { "apk" }
+
+        // Cooldown throttling for failure events to prevent telemetry floods (issue #162)
+        if (safeStatus != TelemetryEvents.RESULT_SUCCESS) {
+            val throttleKey = "$safeFileType:$safeMode:${errorCode.orEmpty()}:${errorType.orEmpty()}"
+            val now = System.currentTimeMillis()
+            val lastLogged = recentFailureEvents[throttleKey] ?: 0L
+            if (now - lastLogged < FAILURE_EVENT_COOLDOWN_MS) {
+                return
+            }
+            recentFailureEvents[throttleKey] = now
+            if (recentFailureEvents.size > 50) {
+                val cutoff = now - FAILURE_EVENT_COOLDOWN_MS * 2
+                val iterator = recentFailureEvents.entries.iterator()
+                while (iterator.hasNext()) {
+                    if (iterator.next().value < cutoff) {
+                        iterator.remove()
+                    }
+                }
+            }
+        }
         val params = mutableMapOf<String, Any?>(
             TelemetryEvents.PARAM_FILE_TYPE to safeFileType,
             TelemetryEvents.PARAM_STATUS to safeStatus,

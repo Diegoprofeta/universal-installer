@@ -332,6 +332,11 @@ abstract class BaseInstallController(
                         // the plain diagnosis.
                         val shown = InstallErrorHelper.withDeviceHint(context, errorInfo, result.failure)
                         handleError("${shown.title}\n${shown.guidance}", session.id)
+                        activeSessions.remove(session.id)
+                        sessionUris.remove(session.id)
+                        originalFileUris.remove(session.id)
+                        deleteFlags.remove(session.id)
+                        successHooks.remove(session.id)
                     }
                 }
             } catch (e: CancellationException) {
@@ -376,6 +381,11 @@ abstract class BaseInstallController(
                 }
                 saveHistory(sessionData, success = false, errorMessage = userMessage)
                 handleError(userMessage, session.id)
+                activeSessions.remove(session.id)
+                sessionUris.remove(session.id)
+                originalFileUris.remove(session.id)
+                deleteFlags.remove(session.id)
+                successHooks.remove(session.id)
                 Timber.e(e, "Session error")
             }
         }
