@@ -26,7 +26,7 @@ object WearApkReceiver {
 
     private const val TAG = "WearApkReceiver"
     private const val CHANNEL_ID = "wear_apk_received"
-    private const val BUFFER_SIZE = 8192
+    private const val BUFFER_SIZE = 32768
     private const val WAKE_LOCK_TAG = "UniversalInstaller:WearReceiver"
     private const val WAKE_LOCK_TIMEOUT_MS = 10 * 60 * 1000L
 
@@ -63,8 +63,8 @@ object WearApkReceiver {
                 return@withContext
             }
 
-            if (expectedBytes > 0 && written != expectedBytes) {
-                Log.e(TAG, "Truncated transfer: got $written of $expectedBytes bytes")
+            if (written <= 0L || (expectedBytes > 0 && written != expectedBytes)) {
+                Log.e(TAG, "Truncated or empty transfer: got $written of $expectedBytes bytes")
                 target.delete()
                 WearReceiveProgress.update(WearReceiveState.Failed(fileName))
                 return@withContext

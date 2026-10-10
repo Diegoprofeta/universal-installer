@@ -63,37 +63,49 @@ class WearTransferService : Service() {
     }
 
     private suspend fun runTransfer(uri: Uri, fileName: String) {
-        WearTransferState.update(WatchSendState.CheckingWatch)
-        // Parsing the icon reads the whole archive, so it runs beside the transfer rather than
-        // delaying it; the watch shows a placeholder until the icon lands.
-        scope.launch { WearApkSender.sendIcon(applicationContext, uri, fileName) }
-        val result = WearApkSender.send(
-            context = applicationContext,
-            apkUri = uri,
-            fileName = fileName,
-            onProgress = { p ->
-                WearTransferState.update(
-                    WatchSendState.Sending(
-                        progress = p.progress,
-                        bytesSent = p.bytesSent,
-                        totalBytes = p.totalBytes,
-                        speedBytesPerSec = p.speedBytesPerSec,
-                        etaSeconds = p.etaSeconds,
+        val powerManager = getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+        val wakeLock = powerManager?.newWakeLock(
+            android.os.PowerManager.PARTIAL_WAKE_LOCK,
+            "UniversalInstaller:WearTransferSender",
+        )
+        wakeLock?.acquire(15 * 60 * 1000L) // 15 mins max
+        try {
+            WearTransferState.update(WatchSendState.CheckingWatch)
+            // Parsing the icon reads the whole archive, so it runs beside the transfer rather than
+            // delaying it; the watch shows a placeholder until the icon lands.
+            scope.launch { WearApkSender.sendIcon(applicationContext, uri, fileName) }
+            val result = WearApkSender.send(
+                context = applicationContext,
+                apkUri = uri,
+                fileName = fileName,
+                onProgress = { p ->
+                    WearTransferState.update(
+                        WatchSendState.Sending(
+                            progress = p.progress,
+                            bytesSent = p.bytesSent,
+                            totalBytes = p.totalBytes,
+                            speedBytesPerSec = p.speedBytesPerSec,
+                            etaSeconds = p.etaSeconds,
+                        )
                     )
-                )
-                updateNotification(p.progress, p.etaSeconds)
-            },
-        )
-        if (!scope.isActive) return
-        WearTransferState.update(
-            when (result) {
-                is WearApkSender.SendResult.Success -> WatchSendState.Success
-                is WearApkSender.SendResult.NoWatchFound -> WatchSendState.NoWatch
-                is WearApkSender.SendResult.Unsupported -> WatchSendState.Unsupported(result.reason)
-                is WearApkSender.SendResult.Error -> WatchSendState.Error(result.message)
+                    updateNotification(p.progress, p.etaSeconds)
+                },
+            )
+            if (!scope.isActive) return
+            WearTransferState.update(
+                when (result) {
+                    is WearApkSender.SendResult.Success -> WatchSendState.Success
+                    is WearApkSender.SendResult.NoWatchFound -> WatchSendState.NoWatch
+                    is WearApkSender.SendResult.Unsupported -> WatchSendState.Unsupported(result.reason)
+                    is WearApkSender.SendResult.Error -> WatchSendState.Error(result.message)
+                }
+            )
+        } finally {
+            if (wakeLock?.isHeld == true) {
+                wakeLock.release()
             }
-        )
-        stopSelf()
+            stopSelf()
+        }
     }
 
     override fun onDestroy() {

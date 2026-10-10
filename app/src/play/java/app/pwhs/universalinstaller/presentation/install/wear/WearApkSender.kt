@@ -49,7 +49,7 @@ object WearApkSender {
     /** Icon channel, paired with [CHANNEL_PATH_PREFIX] by file name. */
     const val META_PATH_PREFIX = "/apk-meta/"
 
-    private const val BUFFER_SIZE = 8192
+    private const val BUFFER_SIZE = 32768
 
     /** Opening a channel talks to a watch over Bluetooth; slow is normal, forever is not. */
     private const val OPEN_TIMEOUT_SECONDS = 30L
@@ -110,6 +110,9 @@ object WearApkSender {
                 out.use { stream ->
                     input.use { copyWatched(channelClient, channel, it, stream, totalBytes, onProgress) }
                 }
+                // Allow the watch receiver a brief grace period to flush its buffer to storage
+                // before sending the channel close control packet.
+                delay(1500L)
             }.fold(
                 onSuccess = { SendResult.Success },
                 onFailure = { e ->
@@ -181,20 +184,70 @@ object WearApkSender {
             Unit
         }
 
-    private fun findReceiverNode(context: Context): Node? = runCatching {
-        val info = Tasks.await(
-            Wearable.getCapabilityClient(context)
-                .getCapability(CAPABILITY_APK_RECEIVER, CapabilityClient.FILTER_REACHABLE)
-        )
-        info.nodes.firstOrNull { it.isNearby } ?: info.nodes.firstOrNull()
-    }.getOrElse { e ->
-        Log.e(TAG, "Capability lookup failed: ${e.message}", e)
-        null
+    private fun findReceiverNode(context: Context): Node? {
+        val capabilityNodes = runCatching {
+            val info = Tasks.await(
+                Wearable.getCapabilityClient(context)
+                    .getCapability(CAPABILITY_APK_RECEIVER, CapabilityClient.FILTER_REACHABLE)
+            )
+            info.nodes
+        }.getOrNull()
+
+        if (!capabilityNodes.isNullOrEmpty()) {
+            return capabilityNodes.firstOrNull { it.isNearby } ?: capabilityNodes.firstOrNull()
+        }
+
+        // Fallback: Check connected nodes directly if capability advertisement hasn't synced
+        return runCatching {
+            val connected = Tasks.await(Wearable.getNodeClient(context).connectedNodes)
+            connected.firstOrNull { it.isNearby } ?: connected.firstOrNull()
+        }.getOrElse { e ->
+            Log.e(TAG, "Connected nodes lookup failed: ${e.message}", e)
+            null
+        }
     }
 
-    private fun readSize(context: Context, uri: Uri): Long = runCatching {
-        context.contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: 0L
-    }.getOrDefault(0L).coerceAtLeast(0L)
+    private fun readSize(context: Context, uri: Uri): Long {
+        // 1. ContentResolver OpenableColumns.SIZE
+        if (uri.scheme == "content") {
+            runCatching {
+                context.contentResolver.query(
+                    uri,
+                    arrayOf(android.provider.OpenableColumns.SIZE),
+                    null,
+                    null,
+                    null,
+                )?.use { cursor ->
+                    val sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
+                    if (sizeIndex != -1 && cursor.moveToFirst() && !cursor.isNull(sizeIndex)) {
+                        val size = cursor.getLong(sizeIndex)
+                        if (size > 0L) return size
+                    }
+                }
+            }
+        }
+
+        // 2. Direct File length
+        if (uri.scheme == "file" || !uri.path.isNullOrEmpty()) {
+            val file = runCatching { java.io.File(uri.path.orEmpty()) }.getOrNull()
+            if (file != null && file.exists() && file.length() > 0L) {
+                return file.length()
+            }
+        }
+
+        // 3. OpenFileDescriptor statSize
+        val fdSize = runCatching {
+            context.contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
+        }.getOrNull()
+        if (fdSize != null && fdSize > 0L) {
+            return fdSize
+        }
+
+        // 4. Stream available fallback
+        return runCatching {
+            context.contentResolver.openInputStream(uri)?.use { it.available().toLong() }
+        }.getOrDefault(0L)?.coerceAtLeast(0L) ?: 0L
+    }
 
     private suspend fun copyWithProgress(
         input: java.io.InputStream,
@@ -236,5 +289,12 @@ object WearApkSender {
         output.flush()
     }
 
-    private fun sanitize(fileName: String) = fileName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+    private fun sanitize(fileName: String): String {
+        val cleaned = fileName.trim().replace(Regex("[^a-zA-Z0-9._-]"), "_").trimStart('.')
+        return when {
+            cleaned.isBlank() || cleaned.equals("apk", ignoreCase = true) -> "package.apk"
+            !cleaned.contains('.') -> "$cleaned.apk"
+            else -> cleaned
+        }
+    }
 }
