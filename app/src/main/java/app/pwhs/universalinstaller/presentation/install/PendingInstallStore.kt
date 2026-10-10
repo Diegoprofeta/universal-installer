@@ -86,6 +86,11 @@ object PendingInstallStore {
         return entry
     }
 
+    fun put(entry: Entry): Entry {
+        entries[entry.id] = entry
+        return entry
+    }
+
     fun get(id: String): Entry? = entries[id]
 
     /** Takes the entry out — the install is starting, or the user said no. */

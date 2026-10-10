@@ -57,6 +57,23 @@ object InstallExecutionCoordinator {
         val iconPath = InstallSessionManager.cacheIcon(application, apkInfo)
         val deleteAfterInstall = InstallSessionManager.readDeleteApkPref(application) && !keepApk
         val controller = resolveActiveController(currentProfileId)
+        val configuredBackend = profile?.preferredBackend ?: when {
+            prefs?.get(PreferencesKeys.USE_SHIZUKU) == true || prefs?.get(PreferencesKeys.SHIZUKU_SET_INSTALL_SOURCE) == true -> "Shizuku"
+            prefs?.get(PreferencesKeys.USE_ROOT) == true || prefs?.get(PreferencesKeys.ROOT_SET_INSTALL_SOURCE) == true -> "Root"
+            prefs?.get(PreferencesKeys.USE_DHIZUKU) == true -> "Dhizuku"
+            prefs?.get(PreferencesKeys.USE_CUSTOM_AUTHORIZER) == true -> "Custom"
+            prefs?.get(PreferencesKeys.USE_MICROG) == true -> "MicroG"
+            else -> "Default"
+        }
+        if (configuredBackend != "Default" && controller is app.pwhs.universalinstaller.presentation.install.controller.DefaultInstallController) {
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(
+                    application,
+                    application.getString(R.string.install_engine_fallback_toast, configuredBackend),
+                    android.widget.Toast.LENGTH_LONG,
+                ).show()
+            }
+        }
         val backendName = profile?.preferredBackend ?: when (controller) {
             rootController -> "Root"
             is app.pwhs.universalinstaller.presentation.install.controller.ShizukuInstallController -> "Shizuku"

@@ -57,6 +57,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import app.pwhs.universalinstaller.presentation.install.dialog.DialogInstallActivityHelper
+import app.pwhs.universalinstaller.presentation.install.dialog.DialogInstallFallbackDialog
+import app.pwhs.universalinstaller.domain.manager.ProfileManager
+import app.pwhs.universalinstaller.util.DhizukuCompat
+import app.pwhs.universalinstaller.util.MicroGCompat
+import app.pwhs.universalinstaller.util.ShizukuServices
 import androidx.fragment.app.FragmentActivity
 import timber.log.Timber
 import java.io.FileNotFoundException
@@ -89,40 +95,16 @@ class DialogInstallActivity : FragmentActivity() {
         }
     }
 
-    private fun reportParseProblem(cause: Throwable) {
-        val unreadable = cause is SecurityException ||
-            cause is FileNotFoundException ||
-            cause is IOException
-        val detail = cause.message.orEmpty()
-        if (unreadable) {
-            viewModel.dialogReadFailed(detail)
-        } else {
-            viewModel.dialogParseFailed(detail)
-        }
-    }
+    private fun reportParseProblem(cause: Throwable) =
+        DialogInstallActivityHelper.reportParseProblem(cause, viewModel)
 
     private fun canInstallPackages(
         prefs: Preferences?,
         profileId: String? = null,
-    ): Boolean = !InstallSessionManager.requiresInstallPermission(this, prefs, profileId) ||
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
-        packageManager.canRequestPackageInstalls()
+    ): Boolean = DialogInstallActivityHelper.canInstallPackages(this, prefs, profileId)
 
-    private fun openInstallPermissionSettings() {
-        PermissionMonitor.start(this) { packageManager.canRequestPackageInstalls() }
-        runCatching {
-            startActivity(
-                Intent(
-                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                    Uri.parse("package:$packageName"),
-                ),
-            )
-        }.recoverCatching {
-            startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
-        }.recoverCatching {
-            startActivity(Intent(Settings.ACTION_SETTINGS))
-        }
-    }
+    private fun openInstallPermissionSettings() =
+        DialogInstallActivityHelper.openInstallPermissionSettings(this)
 
     private var skipInitialParse = false
     private val forceDialogUi = MutableStateFlow(false)
@@ -154,10 +136,10 @@ class DialogInstallActivity : FragmentActivity() {
     }
 
     private suspend fun readInstallUiStyle(): InstallUiStyle =
-        runCatching { InstallUiStyle.from(dataStore.data.first()[PreferencesKeys.INSTALL_UI_STYLE]) }.getOrDefault(InstallUiStyle.Dialog)
+        DialogInstallActivityHelper.readInstallUiStyle(this)
 
     private suspend fun readExternalOpenMode(): ExternalOpenMode =
-        runCatching { ExternalOpenMode.from(dataStore.data.first()[PreferencesKeys.EXTERNAL_OPEN_MODE]) }.getOrDefault(ExternalOpenMode.Dialog)
+        DialogInstallActivityHelper.readExternalOpenMode(this)
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrap(newBase))
@@ -310,14 +292,36 @@ class DialogInstallActivity : FragmentActivity() {
                 }
             }
 
+            var pendingFallbackBackend by remember { mutableStateOf<String?>(null) }
+
             val proceedInstall = {
                 val apkSize = uiState.pendingApkInfo?.fileSizeBytes ?: 0L
                 if (!StorageUtil.hasSufficientStorage(apkSize)) {
                     viewModel.showStorageWarning(apkSize)
                 } else {
-                    securityGate.authenticate {
-                        viewModel.dialogStartInstalling()
-                        viewModel.confirmInstall(trackDialogTarget = true, keepApk = keepApk)
+                    val profiles = ProfileManager.parseProfiles(prefs?.get(PreferencesKeys.INSTALLER_PROFILES))
+                    val profile = profiles.find { it.id == uiState.selectedProfileId }
+                    val configuredBackend = profile?.preferredBackend ?: when {
+                        prefs?.get(PreferencesKeys.USE_SHIZUKU) == true -> "Shizuku"
+                        prefs?.get(PreferencesKeys.USE_ROOT) == true -> "Root"
+                        prefs?.get(PreferencesKeys.USE_DHIZUKU) == true -> "Dhizuku"
+                        prefs?.get(PreferencesKeys.USE_CUSTOM_AUTHORIZER) == true -> "Custom"
+                        prefs?.get(PreferencesKeys.USE_MICROG) == true -> "MicroG"
+                        else -> "Default"
+                    }
+                    val isBackendReady = when (configuredBackend) {
+                        "Shizuku" -> InstallSessionManager.isShizukuReadyForInstall()
+                        "Dhizuku" -> DhizukuCompat.isReady(context)
+                        "MicroG" -> MicroGCompat.isAvailable(context)
+                        else -> true
+                    }
+                    if (configuredBackend != "Default" && !isBackendReady) {
+                        pendingFallbackBackend = configuredBackend
+                    } else {
+                        securityGate.authenticate {
+                            viewModel.dialogStartInstalling()
+                            viewModel.confirmInstall(trackDialogTarget = true, keepApk = keepApk)
+                        }
                     }
                 }
             }
@@ -451,50 +455,37 @@ class DialogInstallActivity : FragmentActivity() {
                     onDismiss = viewModel::dismissStorageWarning,
                 )
             }
+
+            pendingFallbackBackend?.let { backendName ->
+                DialogInstallFallbackDialog(
+                    backendName = backendName,
+                    onContinueWithDefault = {
+                        pendingFallbackBackend = null
+                        securityGate.authenticate {
+                            viewModel.dialogStartInstalling()
+                            viewModel.confirmInstall(trackDialogTarget = true, keepApk = keepApk)
+                        }
+                    },
+                    onOpenApp = if (backendName == "Shizuku") {
+                        {
+                            pendingFallbackBackend = null
+                            context.packageManager.getLaunchIntentForPackage(ShizukuServices.SHIZUKU_PACKAGE)?.let {
+                                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                runCatching { context.startActivity(it) }
+                            }
+                        }
+                    } else null,
+                    onDismiss = {
+                        pendingFallbackBackend = null
+                    },
+                )
+            }
         }
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        val uris = DialogInstallUriHelper.collectIncomingUris(intent)
-        if (uris.isEmpty()) return
-
-        val hasWebUrl = uris.any { it.scheme == "http" || it.scheme == "https" }
-        if (uris.size > 1 && !hasWebUrl) {
-            IntentHandoff.postBatch(uris)
-            val targetIntent = Intent(this, InstallActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            DialogInstallUriHelper.forwardIncomingUris(intent, targetIntent)
-            startActivity(targetIntent)
-            finish()
-            return
-        }
-
-        val uri = if (hasWebUrl) {
-            uris.first { it.scheme == "http" || it.scheme == "https" }
-        } else {
-            uris.first()
-        }
-        viewModel.dismissPendingInstall()
-        viewModel.dialogStartLoading()
-        val context = this
-        if (uri.scheme == "http" || uri.scheme == "https") {
-            viewModel.startDialogNetworkDownload(context, uri) { file, fileName ->
-                lifecycleScope.launch {
-                    DialogInstallUriHelper.parseAndPushFile(context, file, fileName, viewModel)
-                }
-            }
-        } else {
-            lifecycleScope.launch {
-                runCatching {
-                    DialogInstallUriHelper.parseAndPush(context, uri, viewModel)
-                }.onFailure { e ->
-                    Timber.e(e, "Parse failed for new intent $uri")
-                    reportParseProblem(e)
-                }
-            }
-        }
+        DialogInstallActivityHelper.handleNewIntent(this, intent, viewModel, lifecycleScope)
     }
 
     override fun finish() {

@@ -52,10 +52,7 @@ object BackendSelfHeal {
                 state != RootState.DENIED
             reportHealth("root", healthy)
             if (!healthy) {
-                Timber.i("BackendSelfHeal: USE_ROOT on but root definitively unavailable ($state) — disabling pref")
-                runCatching {
-                    application.dataStore.edit { it[PreferencesKeys.USE_ROOT] = false }
-                }
+                Timber.i("BackendSelfHeal: USE_ROOT on but root not currently ready ($state) — keeping pref, runtime will fall back if needed")
             }
         }
 
@@ -64,10 +61,7 @@ object BackendSelfHeal {
             val healthy = awaitShizukuReady()
             reportHealth("shizuku", healthy)
             if (!healthy) {
-                Timber.i("BackendSelfHeal: USE_SHIZUKU on but Shizuku not ready — disabling pref")
-                runCatching {
-                    application.dataStore.edit { it[PreferencesKeys.USE_SHIZUKU] = false }
-                }
+                Timber.i("BackendSelfHeal: USE_SHIZUKU on but Shizuku not ready within probe window — keeping pref, runtime will fall back if needed")
             }
         }
     }

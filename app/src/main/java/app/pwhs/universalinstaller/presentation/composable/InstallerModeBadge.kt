@@ -64,6 +64,7 @@ fun InstallerModeBadge(modifier: Modifier = Modifier) {
     }
 
     LifecycleResumeEffect(Unit) {
+        settingViewModel.updateShizukuState()
         isSystemInstallerFrozen = SystemInstallerManager.isSystemPackageInstallerDisabled(context)
         canInstallPackages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.packageManager.canRequestPackageInstalls()
@@ -106,19 +107,19 @@ fun InstallerModeBadge(modifier: Modifier = Modifier) {
         for (backend in settingState.backendPriority) {
             when (backend) {
                 InstallBackend.SHIZUKU -> {
-                    if (settingState.useShizuku && settingState.shizukuState == ShizukuState.READY) {
+                    if (settingState.useShizuku) {
                         resolved = backend
                         break
                     }
                 }
                 InstallBackend.DHIZUKU -> {
-                    if (useDhizuku && dhizukuState == DhizukuState.READY) {
+                    if (useDhizuku) {
                         resolved = backend
                         break
                     }
                 }
                 InstallBackend.ROOT -> {
-                    if (settingState.useRoot && (settingState.rootState == RootState.READY || settingState.rootState == RootState.UNKNOWN)) {
+                    if (settingState.useRoot) {
                         resolved = backend
                         break
                     }
@@ -144,9 +145,9 @@ fun InstallerModeBadge(modifier: Modifier = Modifier) {
             }
         }
         resolved ?: if (!isSystemInstallerFrozen) InstallBackend.DEFAULT
-        else if (settingState.shizukuState == ShizukuState.READY) InstallBackend.SHIZUKU
-        else if (settingState.rootState == RootState.READY || settingState.rootState == RootState.UNKNOWN) InstallBackend.ROOT
-        else if (dhizukuState == DhizukuState.READY) InstallBackend.DHIZUKU
+        else if (settingState.useShizuku) InstallBackend.SHIZUKU
+        else if (settingState.useRoot) InstallBackend.ROOT
+        else if (useDhizuku) InstallBackend.DHIZUKU
         else InstallBackend.DEFAULT
     }
 

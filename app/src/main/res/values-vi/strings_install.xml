@@ -378,4 +378,9 @@
     <string name="install_abi_incompatible_dialog_title">Kiến trúc không tương thích</string>
     <string name="install_abi_incompatible_dialog_message">APK này yêu cầu kiến trúc %1$s, nhưng thiết bị của bạn chỉ hỗ trợ %2$s.\n\nAndroid sẽ từ chối cài đặt với mã lỗi INSTALL_FAILED_NO_MATCHING_ABIS.\n\nLời khuyên: Hãy tìm tải phiên bản APK %3$s hoặc bản Universal của ứng dụng này.</string>
     <string name="install_abi_incompatible_dialog_install_anyway">Vẫn cài đặt</string>
+    <string name="install_fallback_dialog_title">%1$s không khả dụng</string>
+    <string name="install_fallback_dialog_message">Bạn đã chọn cài đặt qua %1$s, nhưng dịch vụ chưa hoạt động hoặc chưa được cấp quyền. Bạn có muốn tiếp tục bằng Trình cài đặt hệ thống không?</string>
+    <string name="install_fallback_dialog_continue">Dùng Trình cài đặt hệ thống</string>
+    <string name="install_fallback_dialog_open_app">Mở %1$s</string>
+    <string name="install_engine_fallback_toast">%1$s không hoạt động. Đang chuyển sang Trình cài đặt hệ thống.</string>
 </resources>
