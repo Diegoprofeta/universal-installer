@@ -110,12 +110,18 @@ class DialogInstallActivity : FragmentActivity() {
 
     private fun openInstallPermissionSettings() {
         PermissionMonitor.start(this) { packageManager.canRequestPackageInstalls() }
-        startActivity(
-            Intent(
-                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                Uri.parse("package:$packageName"),
-            ),
-        )
+        runCatching {
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:$packageName"),
+                ),
+            )
+        }.recoverCatching {
+            startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+        }.recoverCatching {
+            startActivity(Intent(Settings.ACTION_SETTINGS))
+        }
     }
 
     private var skipInitialParse = false

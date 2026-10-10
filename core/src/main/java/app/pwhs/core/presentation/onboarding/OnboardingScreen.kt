@@ -1,5 +1,6 @@
 package app.pwhs.core.presentation.onboarding
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -319,10 +320,13 @@ fun OnboardingScreen(
                                 permissionName = TelemetryEvents.PERM_INSTALL_UNKNOWN_APPS,
                                 source = TelemetryEvents.SOURCE_ONBOARDING
                             )
-                            val intent = Intent(
-                                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                                Uri.parse("package:${context.packageName}")
-                            )
+                            val pkg = context.packageName.takeIf { it.isNotBlank() }
+                                ?: context.applicationContext?.packageName?.takeIf { it.isNotBlank() }
+                            val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                                if (!pkg.isNullOrBlank()) {
+                                    data = Uri.parse("package:$pkg")
+                                }
+                            }
                             if (activity != null) {
                                 PermissionMonitor.start(activity) {
                                     val granted = context.packageManager.canRequestPackageInstalls()
@@ -335,7 +339,17 @@ fun OnboardingScreen(
                                     granted
                                 }
                             }
-                            context.startActivity(intent)
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: ActivityNotFoundException) {
+                                try {
+                                    context.startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                                } catch (_: ActivityNotFoundException) {
+                                    runCatching {
+                                        context.startActivity(Intent(Settings.ACTION_SETTINGS))
+                                    }
+                                }
+                            }
                         }
                     },
                 )

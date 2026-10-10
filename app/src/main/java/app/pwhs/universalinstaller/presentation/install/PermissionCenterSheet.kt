@@ -275,7 +275,11 @@ internal fun PermissionCenterSheet(
                                                 granted
                                             }
                                         }
-                                        settingsLauncher.launch(intent)
+                                        runCatching {
+                                            settingsLauncher.launch(intent)
+                                        }.recoverCatching {
+                                            settingsLauncher.launch(Intent(Settings.ACTION_SETTINGS))
+                                        }
                                     }
                                 }
                             }

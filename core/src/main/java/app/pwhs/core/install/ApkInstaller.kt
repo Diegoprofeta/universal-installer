@@ -206,7 +206,12 @@ class ApkInstaller(private val context: Context) {
                         if (confirm != null) {
                             // Remediate Google Play Intent Redirection:
                             // 1. Strip URI grant flags so private content providers cannot be accessed
-                            confirm.removeFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                            val uriGrantFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                confirm.removeFlags(uriGrantFlags)
+                            } else {
+                                confirm.flags = confirm.flags and uriGrantFlags.inv()
+                            }
 
                             // 2. Verify target is not an internal component of our own app
                             val resolved = confirm.resolveActivity(context.packageManager)
