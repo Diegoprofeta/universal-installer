@@ -386,4 +386,5 @@
     <string name="install_fallback_dialog_continue">Use Package Installer</string>
     <string name="install_fallback_dialog_open_app">Open %1$s</string>
     <string name="install_engine_fallback_toast">%1$s is unavailable. Falling back to system installer.</string>
+    <string name="install_running_in_background">Installing in the background…</string>
 </resources>

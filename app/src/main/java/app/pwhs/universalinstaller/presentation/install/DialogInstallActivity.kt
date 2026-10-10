@@ -384,32 +384,17 @@ class DialogInstallActivity : FragmentActivity() {
                 }
             }
 
-            val handoffInstall = {
-                val t = dialogTarget
-                val stage = uiState.dialogStage
-                if (t != null && stage is DialogStage.Installing) {
-                    installNotifier.track(
-                        sessionId = t.sessionId,
-                        packageName = t.packageName,
-                        appName = t.appName,
-                        iconPath = t.iconPath,
-                    )
-                }
-            }
-
             val dismissAndFinish = {
-                if (uiState.dialogStage == DialogStage.Success) {
-                    finishAfterSuccess(false, null)
-                } else {
-                    handoffInstall()
-                    val isDownloading = uiState.dialogDownloadProgress != null
-                    if (!isDownloading) {
-                        viewModel.dismissPendingInstall()
-                        viewModel.dialogClose()
-                        viewModel.clearDialogTarget()
-                    }
-                    finish()
-                }
+                DialogInstallActivityHelper.handleDismiss(
+                    activity = this,
+                    viewModel = viewModel,
+                    dialogTarget = dialogTarget,
+                    dialogStage = uiState.dialogStage,
+                    promptNotifier = promptNotifier,
+                    installNotifier = installNotifier,
+                    scope = lifecycleScope,
+                    finishAfterSuccess = finishAfterSuccess,
+                )
             }
 
             BackHandler {
@@ -490,6 +475,8 @@ class DialogInstallActivity : FragmentActivity() {
 
     override fun finish() {
         super.finish()
-        finishAndRemoveTask()
+        if (viewModel.uiState.value.dialogStage !is DialogStage.Installing && viewModel.dialogTarget.value == null) {
+            finishAndRemoveTask()
+        }
     }
 }

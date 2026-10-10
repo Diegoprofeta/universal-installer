@@ -11,8 +11,11 @@ import app.pwhs.universalinstaller.presentation.install.InstallViewModel
 import app.pwhs.core.util.PermissionMonitor
 import app.pwhs.universalinstaller.presentation.install.util.InstallSessionManager
 import app.pwhs.core.data.local.dataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -112,6 +115,69 @@ object DialogInstallActivityHelper {
                     timber.log.Timber.e(e, "Parse failed for new intent $uri")
                     reportParseProblem(e, viewModel)
                 }
+            }
+        }
+    }
+
+    fun handleDismiss(
+        activity: Activity,
+        viewModel: InstallViewModel,
+        dialogTarget: app.pwhs.universalinstaller.presentation.install.DialogTarget?,
+        dialogStage: app.pwhs.universalinstaller.presentation.install.DialogStage,
+        promptNotifier: app.pwhs.universalinstaller.presentation.install.InstallPromptNotifier,
+        installNotifier: app.pwhs.universalinstaller.presentation.install.InstallProgressNotifier,
+        scope: kotlinx.coroutines.CoroutineScope,
+        finishAfterSuccess: (Boolean, String?) -> Unit,
+    ) {
+        when {
+            dialogStage == app.pwhs.universalinstaller.presentation.install.DialogStage.Success -> {
+                finishAfterSuccess(false, null)
+            }
+            dialogStage is app.pwhs.universalinstaller.presentation.install.DialogStage.Installing -> {
+                scope.launch {
+                    val target = dialogTarget ?: withTimeoutOrNull(2000L) {
+                        viewModel.dialogTarget.filterNotNull().first()
+                    }
+                    if (target != null) {
+                        installNotifier.track(
+                            sessionId = target.sessionId,
+                            packageName = target.packageName,
+                            appName = target.appName,
+                            iconPath = target.iconPath,
+                        )
+                    }
+                    android.widget.Toast.makeText(
+                        activity,
+                        activity.getString(app.pwhs.universalinstaller.R.string.install_running_in_background),
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
+                    activity.finish()
+                }
+            }
+            dialogStage == app.pwhs.universalinstaller.presentation.install.DialogStage.Prepare ||
+            dialogStage == app.pwhs.universalinstaller.presentation.install.DialogStage.Menu ||
+            viewModel.uiState.value.pendingApkInfo != null -> {
+                scope.launch {
+                    val canPost = promptNotifier.canPost()
+                    val entry = if (canPost) viewModel.stashPendingInstall() else null
+                    if (entry != null && promptNotifier.prompt(entry)) {
+                        activity.finish()
+                    } else {
+                        viewModel.dismissPendingInstall()
+                        viewModel.dialogClose()
+                        viewModel.clearDialogTarget()
+                        activity.finish()
+                    }
+                }
+            }
+            else -> {
+                val isDownloading = viewModel.uiState.value.dialogDownloadProgress != null
+                if (!isDownloading) {
+                    viewModel.dismissPendingInstall()
+                    viewModel.dialogClose()
+                    viewModel.clearDialogTarget()
+                }
+                activity.finish()
             }
         }
     }

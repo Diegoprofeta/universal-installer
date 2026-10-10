@@ -356,10 +356,11 @@ class InstallViewModel(
         val attachedObbs = obbDelegate.attachedObbFiles.value
         dismissPendingInstall()
 
-        viewModelScope.launch {
+        val installScope = if (trackDialogTarget) appScope else viewModelScope
+        installScope.launch {
             InstallExecutionCoordinator.executeSingleInstall(
                 application = application,
-                scope = viewModelScope,
+                scope = installScope,
                 appScope = appScope,
                 trackDialogTarget = trackDialogTarget,
                 keepApk = keepApk,

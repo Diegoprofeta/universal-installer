@@ -383,4 +383,5 @@
     <string name="install_fallback_dialog_continue">Dùng Trình cài đặt hệ thống</string>
     <string name="install_fallback_dialog_open_app">Mở %1$s</string>
     <string name="install_engine_fallback_toast">%1$s không hoạt động. Đang chuyển sang Trình cài đặt hệ thống.</string>
+    <string name="install_running_in_background">Đang tiếp tục cài đặt dưới nền…</string>
 </resources>
