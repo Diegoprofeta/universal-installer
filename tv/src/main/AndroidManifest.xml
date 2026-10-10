@@ -75,6 +75,25 @@
             android:noHistory="true"
             android:taskAffinity=""
             android:theme="@style/Theme.UniversalInstaller.TvDialog">
+            <!-- Package files opened with explicit package MIME types -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.INSTALL_PACKAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+
+                <data android:mimeType="application/vnd.android.package-archive" />
+                <data android:mimeType="application/vnd.apkm" />
+                <data android:mimeType="application/xapk-package-archive" />
+                <data android:mimeType="application/x-xapk" />
+                <data android:mimeType="application/apks" />
+            </intent-filter>
+
+            <!-- Package and split archive files with generic/zip MIME types, restricted by extension -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.INSTALL_PACKAGE" />
@@ -85,15 +104,68 @@
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:host="*" />
-                <data android:pathPattern=".*" />
 
-                <data android:mimeType="application/vnd.android.package-archive" />
-                <data android:mimeType="application/vnd.apkm" />
-                <data android:mimeType="application/xapk-package-archive" />
                 <data android:mimeType="application/octet-stream" />
-                <data android:mimeType="*/*" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/x-zip" />
+
+                <data android:pathSuffix=".apk" />
+                <data android:pathSuffix=".APK" />
+                <data android:pathSuffix=".apks" />
+                <data android:pathSuffix=".APKS" />
+                <data android:pathSuffix=".xapk" />
+                <data android:pathSuffix=".XAPK" />
+                <data android:pathSuffix=".apkm" />
+                <data android:pathSuffix=".APKM" />
+                <data android:pathSuffix=".zip" />
+                <data android:pathSuffix=".ZIP" />
+                <data android:pathPattern=".*\\.apk" />
+                <data android:pathPattern=".*\\.APK" />
+                <data android:pathPattern=".*\\.apks" />
+                <data android:pathPattern=".*\\.APKS" />
+                <data android:pathPattern=".*\\.xapk" />
+                <data android:pathPattern=".*\\.XAPK" />
+                <data android:pathPattern=".*\\.apkm" />
+                <data android:pathPattern=".*\\.APKM" />
+                <data android:pathPattern=".*\\.zip" />
+                <data android:pathPattern=".*\\.ZIP" />
             </intent-filter>
 
+            <!-- Package files opened by extension without explicit MIME type -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+
+                <data android:pathSuffix=".apk" />
+                <data android:pathSuffix=".APK" />
+                <data android:pathSuffix=".apks" />
+                <data android:pathSuffix=".APKS" />
+                <data android:pathSuffix=".xapk" />
+                <data android:pathSuffix=".XAPK" />
+                <data android:pathSuffix=".apkm" />
+                <data android:pathSuffix=".APKM" />
+                <data android:pathSuffix=".zip" />
+                <data android:pathSuffix=".ZIP" />
+                <data android:pathPattern=".*\\.apk" />
+                <data android:pathPattern=".*\\.APK" />
+                <data android:pathPattern=".*\\.apks" />
+                <data android:pathPattern=".*\\.APKS" />
+                <data android:pathPattern=".*\\.xapk" />
+                <data android:pathPattern=".*\\.XAPK" />
+                <data android:pathPattern=".*\\.apkm" />
+                <data android:pathPattern=".*\\.APKM" />
+                <data android:pathPattern=".*\\.zip" />
+                <data android:pathPattern=".*\\.ZIP" />
+            </intent-filter>
+
+            <!-- Share intents from file managers and other apps for package formats only. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
@@ -103,9 +175,11 @@
                 <data android:mimeType="application/vnd.android.package-archive" />
                 <data android:mimeType="application/vnd.apkm" />
                 <data android:mimeType="application/xapk-package-archive" />
-                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/x-xapk" />
+                <data android:mimeType="application/apks" />
                 <data android:mimeType="application/zip" />
-                <data android:mimeType="*/*" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/x-zip" />
             </intent-filter>
         </activity>
 

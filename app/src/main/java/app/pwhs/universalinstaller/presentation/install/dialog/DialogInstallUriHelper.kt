@@ -16,14 +16,14 @@ object DialogInstallUriHelper {
         val out = mutableListOf<Uri>()
 
         // 1. Data URI (VIEW / INSTALL_PACKAGE)
-        source.data?.takeIf { isSupportedScheme(it.scheme) }?.let(out::add)
+        source.data?.takeIf { isPotentiallySupportedUri(it) }?.let(out::add)
 
         // 2. EXTRA_STREAM or EXTRA_TEXT (SEND / SEND_MULTIPLE)
         @Suppress("DEPRECATION")
         when (source.action) {
             Intent.ACTION_SEND -> {
                 (source.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri)
-                    ?.takeIf { isSupportedScheme(it.scheme) }
+                    ?.takeIf { isPotentiallySupportedUri(it) }
                     ?.let(out::add)
 
                 val text = source.getStringExtra(Intent.EXTRA_TEXT)?.trim()
@@ -34,7 +34,7 @@ object DialogInstallUriHelper {
             Intent.ACTION_SEND_MULTIPLE ->
                 source.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
                     ?.filterNotNull()
-                    ?.filter { isSupportedScheme(it.scheme) }
+                    ?.filter { isPotentiallySupportedUri(it) }
                     ?.let(out::addAll)
         }
 
@@ -43,7 +43,7 @@ object DialogInstallUriHelper {
             for (i in 0 until clip.itemCount) {
                 val item = clip.getItemAt(i)
                 val u = item.uri
-                if (u != null && isSupportedScheme(u.scheme)) {
+                if (u != null && isPotentiallySupportedUri(u)) {
                     out.add(u)
                 } else {
                     val text = item.text?.toString()?.trim()
@@ -72,6 +72,17 @@ object DialogInstallUriHelper {
 
     private fun isSupportedScheme(scheme: String?): Boolean =
         scheme == "content" || scheme == "file" || scheme == "http" || scheme == "https"
+
+    private fun isPotentiallySupportedUri(uri: Uri): Boolean {
+        if (!isSupportedScheme(uri.scheme)) return false
+        if (uri.scheme == "http" || uri.scheme == "https") return true
+        val segment = uri.lastPathSegment ?: uri.path.orEmpty()
+        val ext = segment.substringAfterLast('.', "").lowercase()
+        if (ext.isNotEmpty() && app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isKnownNonPackageExtension(ext)) {
+            return false
+        }
+        return true
+    }
 
     fun forwardIncomingUris(source: Intent?, target: Intent) {
         if (source == null) return

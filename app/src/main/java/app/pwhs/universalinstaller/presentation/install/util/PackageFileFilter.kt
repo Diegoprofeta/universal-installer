@@ -43,6 +43,11 @@ object PackageFileFilter {
         return extension.lowercase() in SUPPORTED_PACKAGE_EXTENSIONS
     }
 
+    fun isKnownNonPackageExtension(extension: String?): Boolean {
+        if (extension.isNullOrBlank()) return false
+        return extension.lowercase() in KNOWN_NON_PACKAGE_EXTENSIONS
+    }
+
     /**
      * Validates whether [uri] points to a supported Android package format by checking:
      * 1. Known invalid extensions (immediately rejected).
