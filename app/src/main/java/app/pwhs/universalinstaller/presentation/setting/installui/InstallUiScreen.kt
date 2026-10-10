@@ -212,40 +212,43 @@ private fun InstallUiContent(
 
             item {
                 AnimatedVisibility(visible = autoApprove) {
-                    val context = LocalContext.current
-                    val subtitle = if (autoApproveCount > 0) {
-                        stringResource(R.string.setting_auto_approve_count, autoApproveCount)
-                    } else {
-                        stringResource(R.string.setting_auto_approve_none)
-                    }
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.setting_auto_approve_apps_title)) },
-                        supportingContent = { Text(subtitle) },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.TaskAlt,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = 24.dp)
-                            .clickable {
-                                context.startActivity(
-                                    android.content.Intent(
-                                        context,
-                                        app.pwhs.universalinstaller.presentation.setting.autoapprove.AutoApproveActivity::class.java,
-                                    )
+                    Column {
+                        val context = LocalContext.current
+                        val subtitle = if (autoApproveCount > 0) {
+                            stringResource(R.string.setting_auto_approve_count, autoApproveCount)
+                        } else {
+                            stringResource(R.string.setting_auto_approve_none)
+                        }
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.setting_auto_approve_apps_title)) },
+                            supportingContent = { Text(subtitle) },
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.Rounded.TaskAlt,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
                             },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                    SwitchRow(
-                        title = stringResource(R.string.setting_auto_approve_block_trackers_title),
-                        description = stringResource(R.string.setting_auto_approve_block_trackers_subtitle),
-                        checked = autoApproveBlockTrackers,
-                        onCheckedChange = onAutoApproveBlockTrackersChange,
-                    )
+                            modifier = Modifier
+                                .padding(horizontal = 24.dp)
+                                .clickable {
+                                    context.startActivity(
+                                        android.content.Intent(
+                                            context,
+                                            app.pwhs.universalinstaller.presentation.setting.autoapprove.AutoApproveActivity::class.java,
+                                        )
+                                    )
+                                },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                        )
+                        SwitchRow(
+                            title = stringResource(R.string.setting_auto_approve_block_trackers_title),
+                            description = stringResource(R.string.setting_auto_approve_block_trackers_subtitle),
+                            checked = autoApproveBlockTrackers,
+                            onCheckedChange = onAutoApproveBlockTrackersChange,
+                            indented = true,
+                        )
+                    }
                 }
             }
 
