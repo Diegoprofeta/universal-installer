@@ -44,7 +44,7 @@ object PendingInstallStager {
             apkInfo
         }
 
-        return PendingInstallStore.Entry(
+        val entry = PendingInstallStore.Entry(
             id = java.util.UUID.randomUUID().toString(),
             apkInfo = stagedInfo,
             fileName = fileName,
@@ -57,6 +57,7 @@ object PendingInstallStager {
             attachedObbs = attachedObbFiles,
             isDowngrade = isDowngrade(apkInfo),
         )
+        return PendingInstallStore.put(entry)
     }
 
     private suspend fun copyForLaterInstall(context: Context, uris: List<Uri>): List<Uri>? = withContext(Dispatchers.IO) {

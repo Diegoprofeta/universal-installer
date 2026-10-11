@@ -77,7 +77,7 @@ class DialogInstallActivity : FragmentActivity() {
     companion object {
         const val EXTRA_PENDING_ID = "pending_install_id"
         const val EXTRA_PENDING_SHOW_UI = "pending_install_show_ui"
-        private const val SESSION_ID_TIMEOUT_MS = 3_000L
+        private const val SESSION_ID_TIMEOUT_MS = 10_000L
         private const val LOG = "NotifInstall"
     }
 

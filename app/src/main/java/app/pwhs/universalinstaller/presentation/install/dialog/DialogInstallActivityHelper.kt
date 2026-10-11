@@ -135,7 +135,7 @@ object DialogInstallActivityHelper {
             }
             dialogStage is app.pwhs.universalinstaller.presentation.install.DialogStage.Installing -> {
                 scope.launch {
-                    val target = dialogTarget ?: withTimeoutOrNull(2000L) {
+                    val target = dialogTarget ?: withTimeoutOrNull(5000L) {
                         viewModel.dialogTarget.filterNotNull().first()
                     }
                     if (target != null) {
