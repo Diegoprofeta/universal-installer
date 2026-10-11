@@ -386,4 +386,24 @@
     <string name="install_fallback_dialog_open_app">%1$s\'i Aç</string>
     <string name="install_engine_fallback_toast">%1$s kullanılamıyor. Sistem yükleyicisine geçiliyor.</string>
     <string name="install_running_in_background">Arka planda yükleniyor…</string>
+    <string name="shizuku_promo_step_1_title">1. Adım: Hizmeti Ayarla</string>
+    <string name="shizuku_promo_step_2_title">2. Adım: Uygulamayı Bağla</string>
+    <string name="shizuku_promo_step_1_ready_desc">Shizuku hizmeti çalışıyor. Bağlanmak için kaydırın veya İleri\'ye dokunun.</string>
+    <string name="shizuku_promo_next_step">İleri</string>
+    <string name="tip_sync_server_title">Wi-Fi / PC ile Yükle</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Aynı Wi-Fi ağındaki bilgisayarınızın tarayıcısından kablosuz olarak doğrudan APK aktarın ve yükleyin.</string>
+    <string name="tip_sync_server_action">Web Sync\'i Aç</string>
+    <string name="tip_wear_os_title">Akıllı Saate Yükle</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Wear OS akıllı saatinize kablosuz olarak doğrudan APK uygulamaları bağlayın ve yükleyin.</string>
+    <string name="tip_wear_os_action">Saate Gönder</string>
+    <string name="tip_url_download_title">URL\'den İndir</string>
+    <string name="tip_url_download_badge">Doğrudan URL</string>
+    <string name="tip_url_download_desc">Otomatik olarak indirip yüklemek için APK veya XAPK dosyalarının doğrudan indirme bağlantısını yapıştırın.</string>
+    <string name="tip_url_download_action">Bağlantıyı Yapıştır</string>
+    <string name="tip_manage_apps_title">Yedekleme ve Uygulama Yöneticisi</string>
+    <string name="tip_manage_apps_badge">Yönet</string>
+    <string name="tip_manage_apps_desc">Yüklü uygulamaların APK yedeklerini çıkarın, toplu kaldırın ve yükleyici kaynaklarını inceleyin.</string>
+    <string name="tip_manage_apps_action">Yönet\'i Aç</string>
 </resources>

@@ -388,4 +388,24 @@
     <string name="install_fallback_dialog_open_app">Відкрити %1$s</string>
     <string name="install_engine_fallback_toast">%1$s недоступний. Перемикання на системний встановлювач.</string>
     <string name="install_running_in_background">Встановлення у фоновому режимі…</string>
+    <string name="shizuku_promo_step_1_title">Крок 1: Налаштування служби</string>
+    <string name="shizuku_promo_step_2_title">Крок 2: Підключення додатка</string>
+    <string name="shizuku_promo_step_1_ready_desc">Служба Shizuku працює. Проведіть або натисніть «Далі», щоб підключитися.</string>
+    <string name="shizuku_promo_next_step">Далі</string>
+    <string name="tip_sync_server_title">Встановлення через Wi-Fi / ПК</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Передавайте та встановлюйте APK безпосередньо з браузера на комп\'ютері в одній мережі Wi-Fi без кабелів.</string>
+    <string name="tip_sync_server_action">Відкрити Web Sync</string>
+    <string name="tip_wear_os_title">Встановлення на смартгодинник</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Підключайтеся та встановлюйте APK бездротово безпосередньо на смартгодинник Wear OS.</string>
+    <string name="tip_wear_os_action">Надіслати на годинник</string>
+    <string name="tip_url_download_title">Завантаження за посиланням</string>
+    <string name="tip_url_download_badge">Пряме посилання</string>
+    <string name="tip_url_download_desc">Вставте пряме посилання на файл APK чи XAPK для автоматичного завантаження та встановлення.</string>
+    <string name="tip_url_download_action">Вставити посилання</string>
+    <string name="tip_manage_apps_title">Резервне копіювання та керування</string>
+    <string name="tip_manage_apps_badge">Керувати</string>
+    <string name="tip_manage_apps_desc">Витягуйте резервні копії APK встановлених додатків, видаляйте пакетом і перевіряйте джерела встановлення.</string>
+    <string name="tip_manage_apps_action">Відкрити Керування</string>
 </resources>

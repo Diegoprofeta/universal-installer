@@ -385,4 +385,24 @@
     <string name="install_fallback_dialog_open_app">%1$s を開く</string>
     <string name="install_engine_fallback_toast">%1$s が利用できません。システムインストーラーにフォールバックします。</string>
     <string name="install_running_in_background">バックグラウンドでインストール中…</string>
+    <string name="shizuku_promo_step_1_title">ステップ 1: サービスのセットアップ</string>
+    <string name="shizuku_promo_step_2_title">ステップ 2: アプリと接続</string>
+    <string name="shizuku_promo_step_1_ready_desc">Shizuku サービスが実行中です。スワイプするか「次へ」をタップして接続してください。</string>
+    <string name="shizuku_promo_next_step">次へ</string>
+    <string name="tip_sync_server_title">Wi-Fi / PC 経由でインストール</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">同じ Wi-Fi ネットワーク上の PC ブラウザから、ケーブルなしで APK を直接転送してインストールできます。</string>
+    <string name="tip_sync_server_action">Web Sync を開く</string>
+    <string name="tip_wear_os_title">スマートウォッチにインストール</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Wear OS スマートウォッチとワイヤレスで接続し、APK アプリを直接インストールできます。</string>
+    <string name="tip_wear_os_action">ウォッチへ送信</string>
+    <string name="tip_url_download_title">URL からダウンロード</string>
+    <string name="tip_url_download_badge">直接 URL</string>
+    <string name="tip_url_download_desc">APK または XAPK ファイルの直接リンクを貼り付けると、自動的にダウンロードしてインストールします。</string>
+    <string name="tip_url_download_action">リンクを貼り付け</string>
+    <string name="tip_manage_apps_title">バックアップとアプリ管理</string>
+    <string name="tip_manage_apps_badge">管理</string>
+    <string name="tip_manage_apps_desc">インストール済みアプリの APK バックアップ抽出、一括アンインストール、インストール元パッケージの確認が可能です。</string>
+    <string name="tip_manage_apps_action">管理を開く</string>
 </resources>

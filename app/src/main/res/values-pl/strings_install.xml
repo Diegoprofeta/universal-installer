@@ -382,4 +382,24 @@
     <string name="install_fallback_dialog_open_app">Otwórz %1$s</string>
     <string name="install_engine_fallback_toast">%1$s jest niedostępny. Przełączanie na instalator systemowy.</string>
     <string name="install_running_in_background">Instalowanie w tle…</string>
+    <string name="shizuku_promo_step_1_title">Krok 1: Skonfiguruj usługę</string>
+    <string name="shizuku_promo_step_2_title">Krok 2: Połącz aplikację</string>
+    <string name="shizuku_promo_step_1_ready_desc">Usługa Shizuku jest uruchomiona. Przesuń lub kliknij Dalej, aby się połączyć.</string>
+    <string name="shizuku_promo_next_step">Dalej</string>
+    <string name="tip_sync_server_title">Instalacja przez Wi-Fi / PC</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Przesyłaj i instaluj pliki APK bezpośrednio z przeglądarki na komputerze w tej samej sieci Wi-Fi bez kabli.</string>
+    <string name="tip_sync_server_action">Otwórz Web Sync</string>
+    <string name="tip_wear_os_title">Zainstaluj na smartwatchu</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Połącz się i bezprzewodowo instaluj aplikacje APK bezpośrednio na smartwatchu z Wear OS.</string>
+    <string name="tip_wear_os_action">Wyślij na zegarek</string>
+    <string name="tip_url_download_title">Pobierz z linku URL</string>
+    <string name="tip_url_download_badge">Bezpośredni URL</string>
+    <string name="tip_url_download_desc">Wklej bezpośrednie łącze do pliku APK lub XAPK, aby automatycznie go pobrać i zainstalować.</string>
+    <string name="tip_url_download_action">Wklej link</string>
+    <string name="tip_manage_apps_title">Kopia zapasowa i menedżer aplikacji</string>
+    <string name="tip_manage_apps_badge">Zarządzaj</string>
+    <string name="tip_manage_apps_desc">Wyodrębniaj kopie zapasowe APK zainstalowanych aplikacji, odinstalowuj wsadowo i sprawdzaj źródła instalatorów.</string>
+    <string name="tip_manage_apps_action">Otwórz Zarządzaj</string>
 </resources>

@@ -380,4 +380,24 @@
     <string name="install_fallback_dialog_open_app">%1$s খুলুন</string>
     <string name="install_engine_fallback_toast">%1$s অনুপলব্ধ। সিস্টেম ইনস্টলারে ফিরে যাওয়া হচ্ছে।</string>
     <string name="install_running_in_background">ব্যাকগ্রাউন্ডে ইনস্টল হচ্ছে…</string>
+    <string name="shizuku_promo_step_1_title">ধাপ ১: পরিষেবা সেটআপ করুন</string>
+    <string name="shizuku_promo_step_2_title">ধাপ ২: অ্যাপ সংযোগ করুন</string>
+    <string name="shizuku_promo_step_1_ready_desc">Shizuku পরিষেবা চলছে। সংযোগ করতে সোয়াইপ করুন বা পরবর্তী চাপুন।</string>
+    <string name="shizuku_promo_next_step">পরবর্তী</string>
+    <string name="tip_sync_server_title">Wi-Fi / PC দিয়ে ইনস্টল করুন</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">তার ছাড়াই একই Wi-Fi নেটওয়ার্কে আপনার কম্পিউটারের ব্রাউজার থেকে সরাসরি APK স্থানান্তর ও ইনস্টল করুন।</string>
+    <string name="tip_sync_server_action">Web Sync খুলুন</string>
+    <string name="tip_wear_os_title">স্মার্টওয়াচে ইনস্টল করুন</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">ওয়্যারলেসভাবে আপনার Wear OS স্মার্টওয়াচে সরাসরি APK অ্যাপ সংযুক্ত এবং ইনস্টল করুন।</string>
+    <string name="tip_wear_os_action">ঘড়িতে পাঠান</string>
+    <string name="tip_url_download_title">URL থেকে ডাউনলোড করুন</string>
+    <string name="tip_url_download_badge">সরাসরি URL</string>
+    <string name="tip_url_download_desc">স্বয়ংক্রিয়ভাবে ডাউনলোড এবং ইনস্টল করতে APK বা XAPK ফাইলের সরাসরি লিঙ্ক পেস্ট করুন।</string>
+    <string name="tip_url_download_action">লিঙ্ক পেস্ট করুন</string>
+    <string name="tip_manage_apps_title">ব্যাকআপ ও অ্যাপ ম্যানেজার</string>
+    <string name="tip_manage_apps_badge">পরিচালনা</string>
+    <string name="tip_manage_apps_desc">ইনস্টল করা অ্যাপের APK ব্যাকআপ বের করুন, একসাথে আনইনস্টল করুন এবং ইনস্টলার প্যাকেজের উৎস দেখুন।</string>
+    <string name="tip_manage_apps_action">পরিচালনা খুলুন</string>
 </resources>

@@ -388,4 +388,24 @@
     <string name="install_fallback_dialog_open_app">Открыть %1$s</string>
     <string name="install_engine_fallback_toast">%1$s недоступен. Переключение на системный установщик.</string>
     <string name="install_running_in_background">Установка в фоновом режиме…</string>
+    <string name="shizuku_promo_step_1_title">Шаг 1: Настройка службы</string>
+    <string name="shizuku_promo_step_2_title">Шаг 2: Подключение приложения</string>
+    <string name="shizuku_promo_step_1_ready_desc">Служба Shizuku запущена. Смахните или нажмите «Далее» для подключения.</string>
+    <string name="shizuku_promo_next_step">Далее</string>
+    <string name="tip_sync_server_title">Установка по Wi-Fi / с ПК</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Передавайте и устанавливайте APK прямо из браузера на компьютере в одной сети Wi-Fi без проводов.</string>
+    <string name="tip_sync_server_action">Открыть Web Sync</string>
+    <string name="tip_wear_os_title">Установка на смарт-часы</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Подключайтесь и устанавливайте APK по беспроводной сети прямо на смарт-часы с Wear OS.</string>
+    <string name="tip_wear_os_action">Отправить на часы</string>
+    <string name="tip_url_download_title">Загрузка по ссылке</string>
+    <string name="tip_url_download_badge">Прямой URL</string>
+    <string name="tip_url_download_desc">Вставьте прямую ссылку на файл APK или XAPK для автоматической загрузки и установки.</string>
+    <string name="tip_url_download_action">Вставить ссылку</string>
+    <string name="tip_manage_apps_title">Резервные копии и управление</string>
+    <string name="tip_manage_apps_badge">Управление</string>
+    <string name="tip_manage_apps_desc">Извлекайте резервные копии APK установленных приложений, удаляйте пакетом и проверяйте источники установки.</string>
+    <string name="tip_manage_apps_action">Открыть Управление</string>
 </resources>

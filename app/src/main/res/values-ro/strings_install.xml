@@ -387,4 +387,24 @@
     <string name="install_fallback_dialog_open_app">Deschide %1$s</string>
     <string name="install_engine_fallback_toast">%1$s este indisponibil. Se revine la programul de instalare al sistemului.</string>
     <string name="install_running_in_background">Se instalează în fundal…</string>
+    <string name="shizuku_promo_step_1_title">Pasul 1: Configurare serviciu</string>
+    <string name="shizuku_promo_step_2_title">Pasul 2: Conectare aplicație</string>
+    <string name="shizuku_promo_step_1_ready_desc">Serviciul Shizuku rulează. Glisați sau atingeți Înainte pentru a vă conecta.</string>
+    <string name="shizuku_promo_next_step">Înainte</string>
+    <string name="tip_sync_server_title">Instalare prin Wi-Fi / PC</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Transferați și instalați fișiere APK direct din browserul computerului pe aceeași rețea Wi-Fi fără cabluri.</string>
+    <string name="tip_sync_server_action">Deschide Web Sync</string>
+    <string name="tip_wear_os_title">Instalare pe ceas inteligent</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Conectați și instalați aplicații APK fără fir direct pe ceasul dvs. inteligent Wear OS.</string>
+    <string name="tip_wear_os_action">Trimite pe ceas</string>
+    <string name="tip_url_download_title">Descărcare din URL</string>
+    <string name="tip_url_download_badge">URL direct</string>
+    <string name="tip_url_download_desc">Lipiți linkuri directe de descărcare pentru fișiere APK sau XAPK pentru a le descărca și instala automat.</string>
+    <string name="tip_url_download_action">Lipește linkul</string>
+    <string name="tip_manage_apps_title">Copie de rezervă și gestionare aplicații</string>
+    <string name="tip_manage_apps_badge">Gestionează</string>
+    <string name="tip_manage_apps_desc">Extrageți copii de rezervă APK ale aplicațiilor instalate, dezinstalați în lot și inspectați sursele pachetelor.</string>
+    <string name="tip_manage_apps_action">Deschide Gestionează</string>
 </resources>

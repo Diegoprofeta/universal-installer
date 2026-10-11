@@ -390,4 +390,24 @@
     <string name="install_fallback_dialog_open_app">فتح %1$s</string>
     <string name="install_engine_fallback_toast">%1$s غير متوفر. الرجوع إلى مثبت النظام.</string>
     <string name="install_running_in_background">جارٍ التثبيت في الخلفية…</string>
+    <string name="shizuku_promo_step_1_title">الخطوة 1: إعداد الخدمة</string>
+    <string name="shizuku_promo_step_2_title">الخطوة 2: توصيل التطبيق</string>
+    <string name="shizuku_promo_step_1_ready_desc">خدمة Shizuku قيد التشغيل. اسحب أو اضغط على «التالي» للاتصال.</string>
+    <string name="shizuku_promo_next_step">التالي</string>
+    <string name="tip_sync_server_title">التثبيت عبر Wi-Fi / الكمبيوتر</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">انقل وثبّت ملفات APK مباشرة من متصفح الكمبيوتر عبر نفس شبكة Wi-Fi بدون كابلات.</string>
+    <string name="tip_sync_server_action">فتح Web Sync</string>
+    <string name="tip_wear_os_title">التثبيت على الساعة الذكية</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">اتصل بساعة Wear OS الذكية وثبّت تطبيقات APK عليها لاسلكياً مباشرة.</string>
+    <string name="tip_wear_os_action">إرسال إلى الساعة</string>
+    <string name="tip_url_download_title">التنزيل من رابط</string>
+    <string name="tip_url_download_badge">رابط مباشر</string>
+    <string name="tip_url_download_desc">الصق روابط التنزيل المباشرة لملفات APK أو XAPK لتنزيلها وتثبيتها تلقائياً.</string>
+    <string name="tip_url_download_action">لصق الرابط</string>
+    <string name="tip_manage_apps_title">النسخ الاحتياطي وإدارة التطبيقات</string>
+    <string name="tip_manage_apps_badge">إدارة</string>
+    <string name="tip_manage_apps_desc">استخرج نسخاً احتياطية من ملفات APK للتطبيقات المثبتة، والغِ التثبيت جماعياً، وافحص مصادر التثبيت.</string>
+    <string name="tip_manage_apps_action">فتح الإدارة</string>
 </resources>

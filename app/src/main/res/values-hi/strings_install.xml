@@ -386,4 +386,24 @@
     <string name="install_fallback_dialog_open_app">%1$s खोलें</string>
     <string name="install_engine_fallback_toast">%1$s अनुपलब्ध है। सिस्टम इंस्टालर पर वापस जा रहे हैं।</string>
     <string name="install_running_in_background">बैकग्राउंड में इंस्टॉल हो रहा है…</string>
+    <string name="shizuku_promo_step_1_title">चरण 1: सेवा सेट करें</string>
+    <string name="shizuku_promo_step_2_title">चरण 2: ऐप कनेक्ट करें</string>
+    <string name="shizuku_promo_step_1_ready_desc">Shizuku सेवा चल रही है। कनेक्ट करने के लिए स्वाइप करें या आगे बढ़ें पर टैप करें।</string>
+    <string name="shizuku_promo_next_step">आगे बढ़ें</string>
+    <string name="tip_sync_server_title">Wi-Fi / PC से इंस्टॉल करें</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">बिना किसी केबल के एक ही Wi-Fi नेटवर्क पर अपने कंप्यूटर ब्राउज़र से सीधे APK ट्रांसफर और इंस्टॉल करें।</string>
+    <string name="tip_sync_server_action">Web Sync खोलें</string>
+    <string name="tip_wear_os_title">स्मार्टवॉच पर इंस्टॉल करें</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">अपनी Wear OS स्मार्टवॉच से वायरलेस तरीके से कनेक्ट करें और सीधे APK ऐप्स इंस्टॉल करें।</string>
+    <string name="tip_wear_os_action">वॉच पर भेजें</string>
+    <string name="tip_url_download_title">URL से डाउनलोड करें</string>
+    <string name="tip_url_download_badge">सीधा URL</string>
+    <string name="tip_url_download_desc">स्वचालित रूप से डाउनलोड और इंस्टॉल करने के लिए APK या XAPK फ़ाइलों के सीधे डाउनलोड लिंक पेस्ट करें।</string>
+    <string name="tip_url_download_action">लिंक पेस्ट करें</string>
+    <string name="tip_manage_apps_title">बैकअप और ऐप प्रबंधक</string>
+    <string name="tip_manage_apps_badge">प्रबंधित करें</string>
+    <string name="tip_manage_apps_desc">इंस्टॉल किए गए ऐप्स के APK बैकअप निकालें, एक साथ अनइंस्टॉल करें और पैकेज स्रोत की जांच करें।</string>
+    <string name="tip_manage_apps_action">प्रबंधन खोलें</string>
 </resources>

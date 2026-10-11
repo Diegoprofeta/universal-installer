@@ -387,4 +387,24 @@
     <string name="install_fallback_dialog_open_app">Ouvrir %1$s</string>
     <string name="install_engine_fallback_toast">%1$s est indisponible. Recours au programme d\'installation du système.</string>
     <string name="install_running_in_background">Installation en arrière-plan…</string>
+    <string name="shizuku_promo_step_1_title">Étape 1 : Configurer le service</string>
+    <string name="shizuku_promo_step_2_title">Étape 2 : Connecter l\'application</string>
+    <string name="shizuku_promo_step_1_ready_desc">Le service Shizuku est actif. Glissez ou appuyez sur Suivant pour vous connecter.</string>
+    <string name="shizuku_promo_next_step">Suivant</string>
+    <string name="tip_sync_server_title">Installer via Wi-Fi / PC</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Transférez et installez des APK directement depuis le navigateur de votre ordinateur sur le même réseau Wi-Fi sans câble.</string>
+    <string name="tip_sync_server_action">Ouvrir Web Sync</string>
+    <string name="tip_wear_os_title">Installer sur une montre connectée</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Connectez-vous et installez sans fil des applications APK directement sur votre montre connectée Wear OS.</string>
+    <string name="tip_wear_os_action">Envoyer à la montre</string>
+    <string name="tip_url_download_title">Télécharger depuis une URL</string>
+    <string name="tip_url_download_badge">URL directe</string>
+    <string name="tip_url_download_desc">Collez des liens de téléchargement directs de fichiers APK ou XAPK pour les télécharger et les installer automatiquement.</string>
+    <string name="tip_url_download_action">Coller le lien</string>
+    <string name="tip_manage_apps_title">Sauvegarde et gestion des applications</string>
+    <string name="tip_manage_apps_badge">Gérer</string>
+    <string name="tip_manage_apps_desc">Extrayez des sauvegardes APK de vos applications, désinstallez en masse et vérifiez la source des paquets.</string>
+    <string name="tip_manage_apps_action">Ouvrir Gérer</string>
 </resources>

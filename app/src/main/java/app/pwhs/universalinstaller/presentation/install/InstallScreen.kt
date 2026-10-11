@@ -66,6 +66,7 @@ import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.data.local.InstallHistoryEntity
 import app.pwhs.universalinstaller.presentation.composable.InstallerModeBadge
 import app.pwhs.universalinstaller.presentation.composable.SessionCard
+import app.pwhs.universalinstaller.presentation.install.components.InstallTipOverlay
 import app.pwhs.universalinstaller.presentation.install.components.ShizukuPromoBanner
 import app.pwhs.universalinstaller.util.extension.getDisplayName
 import org.koin.androidx.compose.koinViewModel
@@ -912,7 +913,14 @@ private fun InstallUi(
             }
         }
 
-        ShizukuPromoBanner(
+        InstallTipOverlay(
+            onOpenSyncServer = onOpenSyncServer,
+            onOpenWatchSheet = {
+                showWatchSheet = true
+                onRefreshWatch()
+                onScanApksForWatch(false)
+            },
+            onOpenDownloadTab = { selectedTab = SourceTab.Download },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 16.dp, vertical = 12.dp),

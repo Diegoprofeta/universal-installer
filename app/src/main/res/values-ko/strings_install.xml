@@ -385,4 +385,24 @@
     <string name="install_fallback_dialog_open_app">%1$s 열기</string>
     <string name="install_engine_fallback_toast">%1$s을(를) 사용할 수 없습니다. 시스템 설치 관리자로 대체합니다.</string>
     <string name="install_running_in_background">백그라운드에서 설치 중…</string>
+    <string name="shizuku_promo_step_1_title">1단계: 서비스 설정</string>
+    <string name="shizuku_promo_step_2_title">2단계: 앱 연결</string>
+    <string name="shizuku_promo_step_1_ready_desc">Shizuku 서비스가 실행 중입니다. 스와이프하거나 다음을 눌러 연결하세요.</string>
+    <string name="shizuku_promo_next_step">다음</string>
+    <string name="tip_sync_server_title">Wi-Fi / PC를 통한 설치</string>
+    <string name="tip_sync_server_badge">웹 동기화</string>
+    <string name="tip_sync_server_desc">케이블 없이 동일한 Wi-Fi 네트워크의 컴퓨터 브라우저에서 직접 APK를 전송하고 설치하세요.</string>
+    <string name="tip_sync_server_action">웹 동기화 열기</string>
+    <string name="tip_wear_os_title">스마트워치에 설치</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Wear OS 스마트워치에 무선으로 연결하여 APK 앱을 직접 설치하세요.</string>
+    <string name="tip_wear_os_action">시계로 보내기</string>
+    <string name="tip_url_download_title">URL에서 다운로드</string>
+    <string name="tip_url_download_badge">직접 URL</string>
+    <string name="tip_url_download_desc">APK 또는 XAPK 파일의 직접 다운로드 링크를 붙여넣어 자동으로 다운로드하고 설치하세요.</string>
+    <string name="tip_url_download_action">링크 붙여넣기</string>
+    <string name="tip_manage_apps_title">백업 및 앱 관리</string>
+    <string name="tip_manage_apps_badge">관리</string>
+    <string name="tip_manage_apps_desc">설치된 앱의 APK 백업 추출, 일괄 삭제 및 설치 패키지 출처를 확인하세요.</string>
+    <string name="tip_manage_apps_action">관리 열기</string>
 </resources>

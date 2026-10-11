@@ -387,4 +387,24 @@
     <string name="install_fallback_dialog_open_app">Abrir %1$s</string>
     <string name="install_engine_fallback_toast">%1$s no está disponible. Cambiando al instalador del sistema.</string>
     <string name="install_running_in_background">Instalando en segundo plano…</string>
+    <string name="shizuku_promo_step_1_title">Paso 1: Configurar servicio</string>
+    <string name="shizuku_promo_step_2_title">Paso 2: Conectar aplicación</string>
+    <string name="shizuku_promo_step_1_ready_desc">El servicio Shizuku se está ejecutando. Desliza o toca Siguiente para conectar.</string>
+    <string name="shizuku_promo_next_step">Siguiente</string>
+    <string name="tip_sync_server_title">Instalar mediante Wi-Fi / PC</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Transfiere e instala archivos APK directamente desde el navegador de tu computadora en la misma red Wi-Fi sin cables.</string>
+    <string name="tip_sync_server_action">Abrir Web Sync</string>
+    <string name="tip_wear_os_title">Instalar en reloj inteligente</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Conecta e instala archivos APK de forma inalámbrica directamente en tu reloj inteligente Wear OS.</string>
+    <string name="tip_wear_os_action">Enviar al reloj</string>
+    <string name="tip_url_download_title">Descargar desde enlace</string>
+    <string name="tip_url_download_badge">URL directa</string>
+    <string name="tip_url_download_desc">Pega enlaces de descarga directa de archivos APK o XAPK para descargarlos e instalarlos automáticamente.</string>
+    <string name="tip_url_download_action">Pegar enlace</string>
+    <string name="tip_manage_apps_title">Copia de seguridad y administrador de apps</string>
+    <string name="tip_manage_apps_badge">Administrar</string>
+    <string name="tip_manage_apps_desc">Extrae copias de seguridad APK de apps instaladas, desinstala por lotes y consulta el origen del instalador.</string>
+    <string name="tip_manage_apps_action">Abrir Administrar</string>
 </resources>

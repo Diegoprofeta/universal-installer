@@ -386,4 +386,24 @@
     <string name="install_fallback_dialog_open_app">%1$s öffnen</string>
     <string name="install_engine_fallback_toast">%1$s nicht verfügbar. Wechsle zum System-Installationsprogramm.</string>
     <string name="install_running_in_background">Wird im Hintergrund installiert…</string>
+    <string name="shizuku_promo_step_1_title">Schritt 1: Dienst einrichten</string>
+    <string name="shizuku_promo_step_2_title">Schritt 2: App verbinden</string>
+    <string name="shizuku_promo_step_1_ready_desc">Shizuku-Dienst läuft. Wischen Sie oder tippen Sie auf Weiter, um eine Verbindung herzustellen.</string>
+    <string name="shizuku_promo_next_step">Weiter</string>
+    <string name="tip_sync_server_title">Über WLAN / PC installieren</string>
+    <string name="tip_sync_server_badge">Web-Sync</string>
+    <string name="tip_sync_server_desc">Übertragen und installieren Sie APKs direkt über den Browser Ihres Computers im selben WLAN ohne Kabel.</string>
+    <string name="tip_sync_server_action">Web-Sync öffnen</string>
+    <string name="tip_wear_os_title">Auf Smartwatch installieren</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Verbinden Sie Ihre Wear OS-Smartwatch und installieren Sie APKs drahtlos.</string>
+    <string name="tip_wear_os_action">An Smartwatch senden</string>
+    <string name="tip_url_download_title">Von URL herunterladen</string>
+    <string name="tip_url_download_badge">Direkte URL</string>
+    <string name="tip_url_download_desc">Fügen Sie direkte Download-Links für APK- oder XAPK-Dateien ein, um sie automatisch herunterzuladen und zu installieren.</string>
+    <string name="tip_url_download_action">Link einfügen</string>
+    <string name="tip_manage_apps_title">Sicherung &amp; App-Verwaltung</string>
+    <string name="tip_manage_apps_badge">Verwalten</string>
+    <string name="tip_manage_apps_desc">Extrahieren Sie APK-Backups installierter Apps, deinstallieren Sie im Batch und überprüfen Sie Paketquellen.</string>
+    <string name="tip_manage_apps_action">Verwaltung öffnen</string>
 </resources>

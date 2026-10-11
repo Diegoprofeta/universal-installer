@@ -385,4 +385,24 @@
     <string name="install_fallback_dialog_open_app">打开 %1$s</string>
     <string name="install_engine_fallback_toast">%1$s 不可用。回退到系统安装程序。</string>
     <string name="install_running_in_background">正在后台安装…</string>
+    <string name="shizuku_promo_step_1_title">第 1 步：配置服务</string>
+    <string name="shizuku_promo_step_2_title">第 2 步：连接应用</string>
+    <string name="shizuku_promo_step_1_ready_desc">Shizuku 服务正在运行。滑动或点击下一步进行连接。</string>
+    <string name="shizuku_promo_next_step">下一步</string>
+    <string name="tip_sync_server_title">通过 Wi-Fi / 电脑安装</string>
+    <string name="tip_sync_server_badge">网页同步</string>
+    <string name="tip_sync_server_desc">无需数据线，在同一 Wi-Fi 网络下直接从电脑浏览器传输并安装 APK。</string>
+    <string name="tip_sync_server_action">打开网页同步</string>
+    <string name="tip_wear_os_title">安装到智能手表</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">无线连接并将 APK 应用直接安装到您的 Wear OS 智能手表上。</string>
+    <string name="tip_wear_os_action">发送到手表</string>
+    <string name="tip_url_download_title">从链接下载</string>
+    <string name="tip_url_download_badge">直接链接</string>
+    <string name="tip_url_download_desc">粘贴 APK 或 XAPK 文件的直接下载链接即可自动下载并安装。</string>
+    <string name="tip_url_download_action">粘贴链接</string>
+    <string name="tip_manage_apps_title">备份与应用管理</string>
+    <string name="tip_manage_apps_badge">管理</string>
+    <string name="tip_manage_apps_desc">提取已安装应用的 APK 备份、批量卸载以及查看安装包来源。</string>
+    <string name="tip_manage_apps_action">打开管理</string>
 </resources>

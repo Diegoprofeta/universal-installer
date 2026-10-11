@@ -386,4 +386,24 @@
     <string name="install_fallback_dialog_open_app">Άνοιγμα %1$s</string>
     <string name="install_engine_fallback_toast">Το %1$s δεν είναι διαθέσιμο. Επιστροφή στο πρόγραμμα εγκατάστασης συστήματος.</string>
     <string name="install_running_in_background">Εγκατάσταση στο παρασκήνιο…</string>
+    <string name="shizuku_promo_step_1_title">Βήμα 1: Ρύθμιση υπηρεσίας</string>
+    <string name="shizuku_promo_step_2_title">Βήμα 2: Σύνδεση εφαρμογής</string>
+    <string name="shizuku_promo_step_1_ready_desc">Η υπηρεσία Shizuku εκτελείται. Σύρετε ή πατήστε Επόμενο για σύνδεση.</string>
+    <string name="shizuku_promo_next_step">Επόμενο</string>
+    <string name="tip_sync_server_title">Εγκατάσταση μέσω Wi-Fi / PC</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Μεταφέρετε και εγκαταστήστε APK απευθείας από το πρόγραμμα περιήγησης του υπολογιστή σας στο ίδιο Wi-Fi χωρίς καλώδια.</string>
+    <string name="tip_sync_server_action">Άνοιγμα Web Sync</string>
+    <string name="tip_wear_os_title">Εγκατάσταση σε Smartwatch</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Συνδεθείτε και εγκαταστήστε ασύρματα εφαρμογές APK απευθείας στο Wear OS smartwatch σας.</string>
+    <string name="tip_wear_os_action">Αποστολή στο ρολόι</string>
+    <string name="tip_url_download_title">Λήψη από URL</string>
+    <string name="tip_url_download_badge">Άμεσο URL</string>
+    <string name="tip_url_download_desc">Επικολλήστε συνδέσμους άμεσης λήψης για αρχεία APK ή XAPK για αυτόματη λήψη και εγκατάσταση.</string>
+    <string name="tip_url_download_action">Επικόλληση συνδέσμου</string>
+    <string name="tip_manage_apps_title">Αντίγραφα ασφαλείας &amp; Διαχείριση</string>
+    <string name="tip_manage_apps_badge">Διαχείριση</string>
+    <string name="tip_manage_apps_desc">Εξαγάγετε αντίγραφα ασφαλείας APK εγκατεστημένων εφαρμογών, απεγκαταστήστε μαζικά και δείτε πηγές εγκατάστασης.</string>
+    <string name="tip_manage_apps_action">Άνοιγμα Διαχείρισης</string>
 </resources>

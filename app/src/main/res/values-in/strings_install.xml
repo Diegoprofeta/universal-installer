@@ -385,4 +385,24 @@
     <string name="install_fallback_dialog_open_app">Buka %1$s</string>
     <string name="install_engine_fallback_toast">%1$s tidak tersedia. Beralih ke penginstal sistem.</string>
     <string name="install_running_in_background">Memasang di latar belakang…</string>
+    <string name="shizuku_promo_step_1_title">Langkah 1: Siapkan Layanan</string>
+    <string name="shizuku_promo_step_2_title">Langkah 2: Hubungkan Aplikasi</string>
+    <string name="shizuku_promo_step_1_ready_desc">Layanan Shizuku sedang berjalan. Geser atau ketuk Berikutnya untuk menghubungkan.</string>
+    <string name="shizuku_promo_next_step">Berikutnya</string>
+    <string name="tip_sync_server_title">Pasang via Wi-Fi / PC</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Transfer dan pasang APK langsung dari browser komputer Anda di jaringan Wi-Fi yang sama tanpa kabel.</string>
+    <string name="tip_sync_server_action">Buka Web Sync</string>
+    <string name="tip_wear_os_title">Pasang ke Smartwatch</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Hubungkan dan pasang aplikasi APK secara nirkabel langsung ke smartwatch Wear OS Anda.</string>
+    <string name="tip_wear_os_action">Kirim ke Jam</string>
+    <string name="tip_url_download_title">Unduh dari URL</string>
+    <string name="tip_url_download_badge">URL Langsung</string>
+    <string name="tip_url_download_desc">Tempel tautan unduhan langsung berkas APK atau XAPK untuk mengunduh dan memasang secara otomatis.</string>
+    <string name="tip_url_download_action">Tempel Tautan</string>
+    <string name="tip_manage_apps_title">Cadangan &amp; Pengelola Aplikasi</string>
+    <string name="tip_manage_apps_badge">Kelola</string>
+    <string name="tip_manage_apps_desc">Ekstrak cadangan APK aplikasi terpasang, hapus instalan massal, dan periksa sumber pemasang paket.</string>
+    <string name="tip_manage_apps_action">Buka Kelola</string>
 </resources>

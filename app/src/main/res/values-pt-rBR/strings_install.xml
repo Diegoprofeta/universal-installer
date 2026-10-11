@@ -387,4 +387,24 @@
     <string name="install_fallback_dialog_open_app">Abrir %1$s</string>
     <string name="install_engine_fallback_toast">%1$s indisponível. Recorrendo ao instalador do sistema.</string>
     <string name="install_running_in_background">Instalando em segundo plano…</string>
+    <string name="shizuku_promo_step_1_title">Passo 1: Configurar serviço</string>
+    <string name="shizuku_promo_step_2_title">Passo 2: Conectar aplicativo</string>
+    <string name="shizuku_promo_step_1_ready_desc">O serviço Shizuku está em execução. Deslize ou toque em Avançar para conectar.</string>
+    <string name="shizuku_promo_next_step">Avançar</string>
+    <string name="tip_sync_server_title">Instalar via Wi-Fi / PC</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Transfira e instale APKs diretamente do navegador do computador na mesma rede Wi-Fi sem cabos.</string>
+    <string name="tip_sync_server_action">Abrir Web Sync</string>
+    <string name="tip_wear_os_title">Instalar no Smartwatch</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Conecte e instale aplicativos APK diretamente no seu smartwatch Wear OS sem fio.</string>
+    <string name="tip_wear_os_action">Enviar para o relógio</string>
+    <string name="tip_url_download_title">Baixar via URL</string>
+    <string name="tip_url_download_badge">URL direta</string>
+    <string name="tip_url_download_desc">Cole links diretos de arquivos APK ou XAPK para baixar e instalar automaticamente.</string>
+    <string name="tip_url_download_action">Colar link</string>
+    <string name="tip_manage_apps_title">Backup e Gerenciador de apps</string>
+    <string name="tip_manage_apps_badge">Gerenciar</string>
+    <string name="tip_manage_apps_desc">Extraia backups de APKs instalados, desinstale em lote e confira a origem dos pacotes.</string>
+    <string name="tip_manage_apps_action">Abrir Gerenciar</string>
 </resources>

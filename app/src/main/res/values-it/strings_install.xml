@@ -387,4 +387,24 @@
     <string name="install_fallback_dialog_open_app">Apri %1$s</string>
     <string name="install_engine_fallback_toast">%1$s non disponibile. Passaggio al programma di installazione di sistema.</string>
     <string name="install_running_in_background">Installazione in background…</string>
+    <string name="shizuku_promo_step_1_title">Passaggio 1: Configura servizio</string>
+    <string name="shizuku_promo_step_2_title">Passaggio 2: Connetti app</string>
+    <string name="shizuku_promo_step_1_ready_desc">Il servizio Shizuku è attivo. Scorri o tocca Avanti per connetterti.</string>
+    <string name="shizuku_promo_next_step">Avanti</string>
+    <string name="tip_sync_server_title">Installa tramite Wi-Fi / PC</string>
+    <string name="tip_sync_server_badge">Web Sync</string>
+    <string name="tip_sync_server_desc">Trasferisci e installa APK direttamente dal browser del tuo computer sulla stessa rete Wi-Fi senza cavi.</string>
+    <string name="tip_sync_server_action">Apri Web Sync</string>
+    <string name="tip_wear_os_title">Installa su Smartwatch</string>
+    <string name="tip_wear_os_badge">Wear OS</string>
+    <string name="tip_wear_os_desc">Collega e installa applicazioni APK in modalità wireless direttamente sul tuo smartwatch Wear OS.</string>
+    <string name="tip_wear_os_action">Invia allo smartwatch</string>
+    <string name="tip_url_download_title">Scarica da URL</string>
+    <string name="tip_url_download_badge">URL diretto</string>
+    <string name="tip_url_download_desc">Incolla link di download diretti per file APK o XAPK per scaricarli e installarli automaticamente.</string>
+    <string name="tip_url_download_action">Incolla link</string>
+    <string name="tip_manage_apps_title">Backup e gestione app</string>
+    <string name="tip_manage_apps_badge">Gestisci</string>
+    <string name="tip_manage_apps_desc">Estrai copie di backup degli APK installati, disinstalla in blocco e verifica le origini dei pacchetti.</string>
+    <string name="tip_manage_apps_action">Apri Gestisci</string>
 </resources>
