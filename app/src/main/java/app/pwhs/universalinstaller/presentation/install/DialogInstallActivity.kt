@@ -275,6 +275,7 @@ class DialogInstallActivity : FragmentActivity() {
                 legacyStrict = prefs?.get(PreferencesKeys.STRICT_VIRUSTOTAL_CHECK) ?: false,
             ) == SecurityLevel.Strict
 
+            val isRetry by viewModel.isRetry.collectAsState()
             var sessionEverSeen by remember(dialogTarget?.sessionId) { mutableStateOf(false) }
 
             LaunchedEffect(dialogTarget, uiState.sessions, uiState.dialogStage) {
@@ -339,6 +340,7 @@ class DialogInstallActivity : FragmentActivity() {
                     if (target?.deleteAfterInstall == true && !keepApk) {
                         target.apkUri?.let { SourceFileDeleter.deleteSourceFileAndWarn(context, it) }
                     }
+                    viewModel.dismissPendingInstall()
                     viewModel.dialogClose()
                     viewModel.clearDialogTarget()
                     finish()
@@ -352,7 +354,7 @@ class DialogInstallActivity : FragmentActivity() {
 
                 val risks = if (apkInfo != null) detectInstallRisks(apkInfo, strictVirusTotalCheck, blockOnTrackers) else emptyList()
                 val hasSecurityFlags = risks.isNotEmpty() || (apkInfo?.vtResult?.let { it.malicious > 0 || it.suspicious > 0 } == true)
-                val shouldAutoInstall = (autoConfirmExternalInstall || isCallerAutoApproved) && !securityGate.isPinRequired && !hasSecurityFlags
+                val shouldAutoInstall = (autoConfirmExternalInstall || isCallerAutoApproved) && !securityGate.isPinRequired && !hasSecurityFlags && !isRetry
                 if (hasSecurityFlags && (autoConfirmExternalInstall || isCallerAutoApproved)) {
                     Timber.w("Auto-approve install blocked: security risks/VT flags present ($risks, vt=${apkInfo?.vtResult?.status})")
                     if (uiState.dialogStage == DialogStage.Prepare && autoBlockedRisks.isEmpty()) {

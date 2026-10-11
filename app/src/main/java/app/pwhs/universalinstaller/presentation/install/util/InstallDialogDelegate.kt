@@ -20,6 +20,17 @@ class InstallDialogDelegate {
     private val _retryCount = MutableStateFlow(0)
     val retryCount: StateFlow<Int> = _retryCount.asStateFlow()
 
+    private val _isRetry = MutableStateFlow(false)
+    val isRetry: StateFlow<Boolean> = _isRetry.asStateFlow()
+
+    fun markRetry() {
+        _isRetry.value = true
+    }
+
+    fun resetRetry() {
+        _isRetry.value = false
+    }
+
     fun updateDownloadProgress(progress: app.pwhs.core.network.DownloadProgress?) {
         _downloadProgress.value = progress
     }

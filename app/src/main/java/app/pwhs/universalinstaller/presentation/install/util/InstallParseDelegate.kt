@@ -50,6 +50,30 @@ class InstallParseDelegate(
     var pendingOriginalUri: Uri? = null
         private set
 
+    private var lastParsedApkInfo: ApkInfo? = null
+    private var lastParsedApkUris: List<Uri>? = null
+    private var lastParsedFileName: String? = null
+    private var lastParsedOriginalUri: Uri? = null
+
+    fun stashCurrentParsed() {
+        _pendingApkInfo.value?.let {
+            lastParsedApkInfo = it
+            lastParsedApkUris = pendingApkUris
+            lastParsedFileName = pendingFileName
+            lastParsedOriginalUri = pendingOriginalUri
+        }
+    }
+
+    fun restoreLastParsedIfEmpty(): Boolean {
+        if (_pendingApkInfo.value != null) return true
+        val info = lastParsedApkInfo ?: return false
+        _pendingApkInfo.value = info
+        pendingApkUris = lastParsedApkUris
+        pendingFileName = lastParsedFileName
+        pendingOriginalUri = lastParsedOriginalUri
+        return true
+    }
+
     private var scanJob: Job? = null
     private var parseJob: Job? = null
     private var trackerScanJob: Job? = null
@@ -96,6 +120,7 @@ class InstallParseDelegate(
             pendingApkUris = result.splitUris
             obbDelegate.setPendingEntries(result.obbEntries)
             _pendingApkInfo.value = result.info
+            stashCurrentParsed()
             _isLoading.value = false
             if (result.matchingProfileId != null) {
                 onProfileMatched(result.matchingProfileId)
@@ -150,6 +175,7 @@ class InstallParseDelegate(
         pendingFileName = entry.fileName
         pendingOriginalUri = entry.originalUri
         obbDelegate.restore(entry.obbEntries, entry.attachedObbs)
+        stashCurrentParsed()
     }
 
     fun updatePendingApkInfo(transform: (ApkInfo) -> ApkInfo) {

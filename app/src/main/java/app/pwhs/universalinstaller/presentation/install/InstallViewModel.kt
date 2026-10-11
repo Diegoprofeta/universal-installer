@@ -133,6 +133,7 @@ class InstallViewModel(
 
     val dialogTarget: StateFlow<DialogTarget?> = dialogDelegate.dialogTarget
     val dialogRetryCount: StateFlow<Int> = dialogDelegate.retryCount
+    val isRetry: StateFlow<Boolean> = dialogDelegate.isRetry
 
     private var lastInstallTriggerTime = 0L
 
@@ -354,7 +355,11 @@ class InstallViewModel(
         val originalUri = parseDelegate.pendingOriginalUri
         val obbEntries = obbDelegate.pendingObbEntries
         val attachedObbs = obbDelegate.attachedObbFiles.value
-        dismissPendingInstall()
+        parseDelegate.stashCurrentParsed()
+        dialogDelegate.resetRetry()
+        if (!trackDialogTarget) {
+            dismissPendingInstall()
+        }
 
         val installScope = if (trackDialogTarget) appScope else viewModelScope
         installScope.launch {
@@ -476,6 +481,17 @@ class InstallViewModel(
             return
         }
         lastInstallTriggerTime = now
+        val session = sessionDataRepository.sessions.value.find { it.id == id }
+        val uri = session?.originalUri ?: session?.uris?.firstOrNull()
+        if (session != null && uri != null) {
+            sessionDataRepository.removeSessionData(id)
+            viewModelScope.launch {
+                val ext = session.name.substringAfterLast('.', "").lowercase()
+                val splitProvider = app.pwhs.universalinstaller.presentation.install.util.InstallApkSplitsHelper.buildSplitProvider(application, uri, ext)
+                parseApkInfo(application, uri, splitProvider, session.name)
+            }
+            return
+        }
         viewModelScope.launch {
             activeController().retry(id, viewModelScope, application)
         }
@@ -488,18 +504,17 @@ class InstallViewModel(
             return
         }
         lastInstallTriggerTime = now
-        if (dialogDelegate.retryCount.value >= MAX_DIALOG_RETRIES) {
-            Timber.w("retryDialogInstall dropped: reached max retry cap ($MAX_DIALOG_RETRIES)")
-            return
-        }
-        dialogDelegate.incrementRetryCount()
-        val target = dialogDelegate.dialogTarget.value ?: return
-        dialogDelegate.startInstalling()
-        viewModelScope.launch {
-            activeController().retry(target.sessionId, appScope, application) { newId ->
-                dialogDelegate.setTarget(target.copy(sessionId = newId))
+        val target = dialogDelegate.dialogTarget.value
+        if (target != null) {
+            viewModelScope.launch {
+                activeController().cancel(target.sessionId, appScope)
             }
+            sessionDataRepository.removeSessionData(target.sessionId)
         }
+        dialogDelegate.clearTarget()
+        parseDelegate.restoreLastParsedIfEmpty()
+        dialogDelegate.markRetry()
+        dialogDelegate.showPrepare()
     }
 
     fun unblockPackage(packageName: String) {
