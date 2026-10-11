@@ -61,6 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pwhs.universalinstaller.R
+import app.pwhs.universalinstaller.presentation.promo.promotedAppsSection
 
 @Composable
 fun AboutScreen(modifier: Modifier = Modifier) {
@@ -188,6 +189,10 @@ private fun AboutUi(
                     onClick = { uriHandler.openUri("https://github.com/sponsors/pass-with-high-score") },
                 )
             }
+            item { HorizontalDivider(modifier = Modifier.padding(top = 8.dp)) }
+
+            // ── MORE APPS ──
+            promotedAppsSection()
             item { HorizontalDivider(modifier = Modifier.padding(top = 8.dp)) }
 
             // ── COMMUNITY ──

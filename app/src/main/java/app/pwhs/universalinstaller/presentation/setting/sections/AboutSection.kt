@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
+import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.Info
@@ -54,6 +55,15 @@ internal fun LazyListScope.AboutSection(
                 headlineContent = { Text(stringResource(R.string.setting_section_about)) },
                 supportingContent = { Text("v$appVersion") },
                 leadingContent = { Icon(Icons.Rounded.Info, null, tint = MaterialTheme.colorScheme.primary) },
+                modifier = Modifier.clickable {
+                    context.startActivity(Intent(context, AboutActivity::class.java))
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+            )
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.setting_more_apps_title)) },
+                supportingContent = { Text(stringResource(R.string.setting_more_apps_subtitle)) },
+                leadingContent = { Icon(Icons.Rounded.Apps, null, tint = MaterialTheme.colorScheme.primary) },
                 modifier = Modifier.clickable {
                     context.startActivity(Intent(context, AboutActivity::class.java))
                 },
