@@ -183,16 +183,30 @@ fun PromotedAppCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    IconButton(
-                        onClick = { uriHandler.openUri(app.githubUrl) },
-                        modifier = Modifier.size(36.dp),
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_github),
-                            contentDescription = stringResource(R.string.promo_app_github),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp),
-                        )
+                    if (app.githubUrl != null) {
+                        IconButton(
+                            onClick = { uriHandler.openUri(app.githubUrl) },
+                            modifier = Modifier.size(36.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_github),
+                                contentDescription = stringResource(R.string.promo_app_github),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    } else if (app.playStoreUrl != null) {
+                        IconButton(
+                            onClick = { openAppStoreOrReleases(context, app) },
+                            modifier = Modifier.size(36.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_google_play_circle),
+                                contentDescription = stringResource(R.string.promo_app_play_store),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(22.dp),
+                            )
+                        }
                     }
 
                     if (isInstalled) {
@@ -248,7 +262,7 @@ private fun openAppStoreOrReleases(context: Context, app: PromotedApp) {
             return
         }
     }
-    val fallbackUrl = app.playStoreUrl ?: app.releasesUrl ?: app.githubUrl
+    val fallbackUrl = app.playStoreUrl ?: app.releasesUrl ?: app.githubUrl ?: return
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUrl)).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }

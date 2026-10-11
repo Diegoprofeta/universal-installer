@@ -12,7 +12,7 @@ data class PromotedApp(
     @StringRes val taglineRes: Int,
     @StringRes val descRes: Int,
     val packageName: String,
-    val githubUrl: String,
+    val githubUrl: String? = null,
     val playStoreUrl: String? = null,
     val releasesUrl: String? = null,
     @DrawableRes val iconRes: Int,
@@ -41,12 +41,12 @@ object PromotedApps {
         taglineRes = R.string.promo_crystal_scan_tagline,
         descRes = R.string.promo_crystal_scan_desc,
         packageName = "app.pwhs.crystalscan",
-        githubUrl = "https://github.com/pass-with-high-score/crystal-scan-android",
+        githubUrl = null,
         playStoreUrl = "https://play.google.com/store/apps/details?id=app.pwhs.crystalscan",
-        releasesUrl = "https://github.com/pass-with-high-score/crystal-scan-android/releases",
+        releasesUrl = null,
         iconRes = R.drawable.ic_promo_crystal_scan,
         accentColor = Color(0xFF1976D2),
-        tags = listOf("QR & Barcode", "OpenCV AI", "Material 3"),
+        tags = listOf("Google Play", "QR & Barcode", "OpenCV AI", "Material 3"),
     )
 
     val ANEKO = PromotedApp(
