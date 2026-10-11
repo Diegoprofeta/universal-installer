@@ -191,4 +191,22 @@
     <string name="backup_restore_action">Восстановить сейчас</string>
     <string name="backup_include_obb_title">Включить данные OBB и медиа</string>
     <string name="backup_include_obb_desc">Архивировать файлы расширения /Android/obb в резервную копию .xapk</string>
+    <string name="uninstaller_dialog_label">Деинсталлятор пакетов</string>
+    <string name="manage_action_install_secure_folder">Установить в защищенную папку</string>
+    <string name="manage_action_install_secure_folder_done">%s установлено в защищенную папку</string>
+    <string name="manage_action_install_secure_folder_failed">Ошибка установки в защищенную папку: %s</string>
+    <string name="manage_action_install_secure_folder_already">Установлено · Нажмите для переустановки</string>
+    <string name="manage_action_add_to_server">Синхронизация и обмен</string>
+    <string name="manage_action_add_to_server_sub">Поделиться по локальной сети Wi-Fi</string>
+    <string name="manage_action_added_to_server">%s добавлено в Синхронизацию и обмен</string>
+    <string name="manage_action_open_sync">Открыть Sync</string>
+    <string name="uninstall_app_title">Удалить приложение</string>
+    <string name="uninstall_option_keep_data">Сохранить данные</string>
+    <string name="uninstall_option_keep_data_desc">Данные и кэш приложения будут сохранены</string>
+    <string name="uninstall_option_all_users">Для всех пользователей</string>
+    <string name="uninstall_option_all_users_desc">Удалить это приложение для всех пользователей на этом устройстве</string>
+    <string name="uninstall_option_delete_system_app">Удалить системное приложение</string>
+    <string name="uninstall_option_delete_system_app_desc">Разрешить удаление системных приложений для текущего пользователя</string>
+    <string name="manage_action_merge_antisplit">Объединить через Anti-Split</string>
+    <string name="manage_action_merge_antisplit_desc">Извлечь и объединить split-приложение в один автономный APK</string>
 </resources>

@@ -191,4 +191,22 @@
     <string name="backup_restore_action">Şimdi Geri Yükle</string>
     <string name="backup_include_obb_title">OBB ve Medya Verilerini Dahil Et</string>
     <string name="backup_include_obb_desc">/Android/obb genişletme dosyalarını .xapk yedeğine arşivleyin</string>
+    <string name="uninstaller_dialog_label">Paket Kaldırıcı</string>
+    <string name="manage_action_install_secure_folder">Güvenli Klasöre Yükle</string>
+    <string name="manage_action_install_secure_folder_done">%s Güvenli Klasöre yüklendi</string>
+    <string name="manage_action_install_secure_folder_failed">Güvenli Klasöre yüklenemedi: %s</string>
+    <string name="manage_action_install_secure_folder_already">Yüklendi · Yeniden yüklemek için dokunun</string>
+    <string name="manage_action_add_to_server">Eşitle ve Paylaş</string>
+    <string name="manage_action_add_to_server_sub">Yerel Wi-Fi üzerinden paylaş</string>
+    <string name="manage_action_added_to_server">%s Eşitle ve Paylaş\'a eklendi</string>
+    <string name="manage_action_open_sync">Eşitlemeyi Aç</string>
+    <string name="uninstall_app_title">Uygulamayı Kaldır</string>
+    <string name="uninstall_option_keep_data">Verileri Koru</string>
+    <string name="uninstall_option_keep_data_desc">Uygulama verileri ve önbelleği korunur</string>
+    <string name="uninstall_option_all_users">Tüm Kullanıcılar İçin</string>
+    <string name="uninstall_option_all_users_desc">Bu uygulamayı bu cihazdaki tüm kullanıcılar için kaldırın</string>
+    <string name="uninstall_option_delete_system_app">Sistem Uygulamasını Sil</string>
+    <string name="uninstall_option_delete_system_app_desc">Geçerli kullanıcı için sistem uygulamalarının silinmesine izin ver</string>
+    <string name="manage_action_merge_antisplit">Anti-Split ile Birleştir</string>
+    <string name="manage_action_merge_antisplit_desc">Bölünmüş uygulamayı çıkarın ve tek bir bağımsız APK\'da birleştirin</string>
 </resources>

@@ -170,5 +170,6 @@
     <string name="tv_updates_add_url_hint">URL GitHub / GitLab / Пряме посилання на APK</string>
     <string name="tv_updates_add_submit">Додати</string>
     <string name="tv_updates_add_cancel">Скасувати</string>
+    <string name="tv_error_cannot_open_settings">Не вдалося відкрити налаштування системи на цьому пристрої</string>
 </resources>
     

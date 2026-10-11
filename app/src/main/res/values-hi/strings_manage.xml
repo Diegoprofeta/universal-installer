@@ -191,4 +191,22 @@
     <string name="backup_restore_action">अभी पुनर्स्थापित करें</string>
     <string name="backup_include_obb_title">OBB और मीडिया डेटा शामिल करें</string>
     <string name="backup_include_obb_desc">/Android/obb विस्तार फ़ाइलों को .xapk बैकअप में संग्रहीत करें</string>
+    <string name="uninstaller_dialog_label">पैकेज अनइंस्टालर</string>
+    <string name="manage_action_install_secure_folder">सिक्योर फ़ोल्डर में इंस्टॉल करें</string>
+    <string name="manage_action_install_secure_folder_done">सिक्योर फ़ोल्डर में %s इंस्टॉल किया गया</string>
+    <string name="manage_action_install_secure_folder_failed">सिक्योर फ़ोल्डर में इंस्टॉल करने में विफल: %s</string>
+    <string name="manage_action_install_secure_folder_already">इंस्टॉल है · पुनः इंस्टॉल करने के लिए टैप करें</string>
+    <string name="manage_action_add_to_server">सिंक और शेयर</string>
+    <string name="manage_action_add_to_server_sub">स्थानीय वाई-फ़ाई पर साझा करें</string>
+    <string name="manage_action_added_to_server">सिंक और शेयर में %s जोड़ा गया</string>
+    <string name="manage_action_open_sync">सिंक खोलें</string>
+    <string name="uninstall_app_title">ऐप अनइंस्टॉल करें</string>
+    <string name="uninstall_option_keep_data">डेटा रखें</string>
+    <string name="uninstall_option_keep_data_desc">ऐप डेटा और कैश बरकरार रहेगा</string>
+    <string name="uninstall_option_all_users">सभी उपयोगकर्ताओं के लिए</string>
+    <string name="uninstall_option_all_users_desc">इस डिवाइस पर सभी उपयोगकर्ताओं के लिए इस ऐप को अनइंस्टॉल करें</string>
+    <string name="uninstall_option_delete_system_app">सिस्टम ऐप हटाएं</string>
+    <string name="uninstall_option_delete_system_app_desc">वर्तमान उपयोगकर्ता के लिए सिस्टम ऐप्स हटाने की अनुमति दें</string>
+    <string name="manage_action_merge_antisplit">एंटी-स्प्लिट के साथ मर्ज करें</string>
+    <string name="manage_action_merge_antisplit_desc">स्प्लिट ऐप को एक स्टैंडअलोन एपीके में निकालें और मर्ज करें</string>
 </resources>

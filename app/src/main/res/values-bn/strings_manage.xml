@@ -190,4 +190,22 @@
     <string name="backup_restore_action">এখনই পুনরুদ্ধার করুন</string>
     <string name="backup_include_obb_title">OBB এবং মিডিয়া ডেটা অন্তর্ভুক্ত করুন</string>
     <string name="backup_include_obb_desc">/Android/obb সম্প্রসারণ ফাইল .xapk ব্যাকআপে সংরক্ষণ করুন</string>
+    <string name="uninstaller_dialog_label">প্যাকেজ আনইনস্টলার</string>
+    <string name="manage_action_install_secure_folder">সিকিউর ফোল্ডারে ইনস্টল করুন</string>
+    <string name="manage_action_install_secure_folder_done">সিকিউর ফোল্ডারে %s ইনস্টল করা হয়েছে</string>
+    <string name="manage_action_install_secure_folder_failed">সিকিউর ফোল্ডারে ইনস্টল করতে ব্যর্থ: %s</string>
+    <string name="manage_action_install_secure_folder_already">ইনস্টল করা আছে · পুনরায় ইনস্টল করতে আলতো চাপুন</string>
+    <string name="manage_action_add_to_server">সিঙ্ক ও শেয়ার</string>
+    <string name="manage_action_add_to_server_sub">স্থানীয় ওয়াই-ফাইতে শেয়ার করুন</string>
+    <string name="manage_action_added_to_server">সিঙ্ক ও শেয়ারে %s যোগ করা হয়েছে</string>
+    <string name="manage_action_open_sync">সিঙ্ক খুলুন</string>
+    <string name="uninstall_app_title">অ্যাপ আনইনস্টল করুন</string>
+    <string name="uninstall_option_keep_data">ডেটা রাখুন</string>
+    <string name="uninstall_option_keep_data_desc">অ্যাপ ডেটা এবং ক্যাশে সংরক্ষিত থাকবে</string>
+    <string name="uninstall_option_all_users">সকল ব্যবহারকারীর জন্য</string>
+    <string name="uninstall_option_all_users_desc">এই ডিভাইসের সকল ব্যবহারকারীর জন্য এই অ্যাপটি আনইনস্টল করুন</string>
+    <string name="uninstall_option_delete_system_app">সিস্টেম অ্যাপ মুছুন</string>
+    <string name="uninstall_option_delete_system_app_desc">বর্তমান ব্যবহারকারীর জন্য সিস্টেম অ্যাপ মোছার অনুমতি দিন</string>
+    <string name="manage_action_merge_antisplit">Anti-Split দিয়ে মার্জ করুন</string>
+    <string name="manage_action_merge_antisplit_desc">স্প্লিট অ্যাপ এক্সট্র্যাক্ট করে একক স্ট্যান্ডঅ্যালোন APK-তে মার্জ করুন</string>
 </resources>

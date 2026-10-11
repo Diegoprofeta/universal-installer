@@ -191,4 +191,22 @@
     <string name="backup_restore_action">지금 복원</string>
     <string name="backup_include_obb_title">OBB 및 미디어 데이터 포함</string>
     <string name="backup_include_obb_desc">/Android/obb 확장 파일을 .xapk 백업에 보관</string>
+    <string name="uninstaller_dialog_label">패키지 제거 프로그램</string>
+    <string name="manage_action_install_secure_folder">보안 폴더에 설치</string>
+    <string name="manage_action_install_secure_folder_done">%s을(를) 보안 폴더에 설치했습니다</string>
+    <string name="manage_action_install_secure_folder_failed">보안 폴더 설치 실패: %s</string>
+    <string name="manage_action_install_secure_folder_already">설치됨 · 탭하여 다시 설치</string>
+    <string name="manage_action_add_to_server">동기화 및 공유</string>
+    <string name="manage_action_add_to_server_sub">로컬 Wi-Fi에서 공유</string>
+    <string name="manage_action_added_to_server">%s을(를) 동기화 및 공유에 추가했습니다</string>
+    <string name="manage_action_open_sync">동기화 열기</string>
+    <string name="uninstall_app_title">앱 제거</string>
+    <string name="uninstall_option_keep_data">데이터 유지</string>
+    <string name="uninstall_option_keep_data_desc">앱 데이터와 캐시가 유지됩니다</string>
+    <string name="uninstall_option_all_users">모든 사용자 대상</string>
+    <string name="uninstall_option_all_users_desc">이 기기의 모든 사용자에 대해 이 앱을 제거합니다</string>
+    <string name="uninstall_option_delete_system_app">시스템 앱 삭제</string>
+    <string name="uninstall_option_delete_system_app_desc">현재 사용자에 대한 시스템 앱 삭제 허용</string>
+    <string name="manage_action_merge_antisplit">Anti-Split으로 병합</string>
+    <string name="manage_action_merge_antisplit_desc">분할 앱을 단일 독립 실행형 APK로 추출 및 병합</string>
 </resources>

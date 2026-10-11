@@ -385,4 +385,7 @@
     <string name="install_fallback_dialog_open_app">Mở %1$s</string>
     <string name="install_engine_fallback_toast">%1$s không hoạt động. Đang chuyển sang Trình cài đặt hệ thống.</string>
     <string name="install_running_in_background">Đang tiếp tục cài đặt dưới nền…</string>
+    <string name="porter_promo_desc_no_perm">Porter đang chạy. Kết nối ngay để cài đặt ngầm mượt mà không cần xác nhận hệ thống.</string>
+    <string name="porter_promo_desc_not_running">Porter đã được cài đặt. Khởi chạy dịch vụ để tăng tỷ lệ cài đặt thành công và bỏ qua các hạn chế hệ thống.</string>
+    <string name="porter_promo_action_open">Mở Porter</string>
 </resources>

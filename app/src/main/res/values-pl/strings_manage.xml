@@ -190,4 +190,22 @@
     <string name="backup_restore_action">Przywróć teraz</string>
     <string name="backup_include_obb_title">Dołącz dane OBB i multimedia</string>
     <string name="backup_include_obb_desc">Archiwizuj pliki rozszerzeń /Android/obb w kopii zapasowej .xapk</string>
+    <string name="uninstaller_dialog_label">Deinstalator pakietów</string>
+    <string name="manage_action_install_secure_folder">Zainstaluj w Bezpiecznym folderze</string>
+    <string name="manage_action_install_secure_folder_done">Zainstalowano %s w Bezpiecznym folderze</string>
+    <string name="manage_action_install_secure_folder_failed">Nie udało się zainstalować w Bezpiecznym folderze: %s</string>
+    <string name="manage_action_install_secure_folder_already">Zainstalowano · Dotknij, aby zainstalować ponownie</string>
+    <string name="manage_action_add_to_server">Synchronizuj i udostępniaj</string>
+    <string name="manage_action_add_to_server_sub">Udostępniaj w lokalnej sieci Wi-Fi</string>
+    <string name="manage_action_added_to_server">Dodano %s do Synchronizuj i udostępniaj</string>
+    <string name="manage_action_open_sync">Otwórz Sync</string>
+    <string name="uninstall_app_title">Odinstaluj aplikację</string>
+    <string name="uninstall_option_keep_data">Zachowaj dane</string>
+    <string name="uninstall_option_keep_data_desc">Dane aplikacji i pamięć podręczna zostaną zachowane</string>
+    <string name="uninstall_option_all_users">Dla wszystkich użytkowników</string>
+    <string name="uninstall_option_all_users_desc">Odinstaluj tę aplikację dla wszystkich użytkowników na tym urządzeniu</string>
+    <string name="uninstall_option_delete_system_app">Usuń aplikację systemową</string>
+    <string name="uninstall_option_delete_system_app_desc">Zezwalaj na usuwanie aplikacji systemowych dla bieżącego użytkownika</string>
+    <string name="manage_action_merge_antisplit">Scal z Anti-Split</string>
+    <string name="manage_action_merge_antisplit_desc">Wyodrębnij i scal aplikację split w pojedynczy samodzielny plik APK</string>
 </resources>

@@ -191,4 +191,22 @@
     <string name="backup_restore_action">Pulihkan Sekarang</string>
     <string name="backup_include_obb_title">Sertakan Data OBB &amp; Media</string>
     <string name="backup_include_obb_desc">Arsipkan file ekspansi /Android/obb ke dalam cadangan .xapk</string>
+    <string name="uninstaller_dialog_label">Pencopot Paket</string>
+    <string name="manage_action_install_secure_folder">Pasang ke Folder Aman</string>
+    <string name="manage_action_install_secure_folder_done">Berhasil memasang %s ke Folder Aman</string>
+    <string name="manage_action_install_secure_folder_failed">Gagal memasang ke Folder Aman: %s</string>
+    <string name="manage_action_install_secure_folder_already">Terpasang · Ketuk untuk memasang ulang</string>
+    <string name="manage_action_add_to_server">Sinkronisasi &amp; Bagikan</string>
+    <string name="manage_action_add_to_server_sub">Bagikan di Wi-Fi lokal</string>
+    <string name="manage_action_added_to_server">Menambahkan %s ke Sinkronisasi &amp; Bagikan</string>
+    <string name="manage_action_open_sync">Buka Sync</string>
+    <string name="uninstall_app_title">Copot Aplikasi</string>
+    <string name="uninstall_option_keep_data">Pertahankan Data</string>
+    <string name="uninstall_option_keep_data_desc">Data dan cache aplikasi akan dipertahankan</string>
+    <string name="uninstall_option_all_users">Untuk Semua Pengguna</string>
+    <string name="uninstall_option_all_users_desc">Copot aplikasi ini untuk semua pengguna di perangkat ini</string>
+    <string name="uninstall_option_delete_system_app">Hapus Aplikasi Sistem</string>
+    <string name="uninstall_option_delete_system_app_desc">Izinkan menghapus aplikasi sistem untuk pengguna saat ini</string>
+    <string name="manage_action_merge_antisplit">Gabungkan dengan Anti-Split</string>
+    <string name="manage_action_merge_antisplit_desc">Ekstrak dan gabungkan aplikasi split menjadi APK mandiri tunggal</string>
 </resources>

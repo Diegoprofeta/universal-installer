@@ -191,4 +191,22 @@
     <string name="backup_restore_action">立即恢复</string>
     <string name="backup_include_obb_title">包含 OBB 和媒体数据</string>
     <string name="backup_include_obb_desc">将 /Android/obb 扩展文件归档到 .xapk 备份中</string>
+    <string name="uninstaller_dialog_label">应用卸载程序</string>
+    <string name="manage_action_install_secure_folder">安装到安全文件夹</string>
+    <string name="manage_action_install_secure_folder_done">已将 %s 安装到安全文件夹</string>
+    <string name="manage_action_install_secure_folder_failed">安装到安全文件夹失败：%s</string>
+    <string name="manage_action_install_secure_folder_already">已安装 · 点击重新安装</string>
+    <string name="manage_action_add_to_server">同步与共享</string>
+    <string name="manage_action_add_to_server_sub">在局域网 Wi-Fi 上共享</string>
+    <string name="manage_action_added_to_server">已将 %s 添加到同步与共享</string>
+    <string name="manage_action_open_sync">打开同步</string>
+    <string name="uninstall_app_title">卸载应用</string>
+    <string name="uninstall_option_keep_data">保留数据</string>
+    <string name="uninstall_option_keep_data_desc">应用数据和缓存将被保留</string>
+    <string name="uninstall_option_all_users">为所有用户卸载</string>
+    <string name="uninstall_option_all_users_desc">为此设备上的所有用户卸载此应用</string>
+    <string name="uninstall_option_delete_system_app">删除系统应用</string>
+    <string name="uninstall_option_delete_system_app_desc">允许为当前用户删除系统应用</string>
+    <string name="manage_action_merge_antisplit">使用 Anti-Split 合并</string>
+    <string name="manage_action_merge_antisplit_desc">提取并合并 split 应用为单个独立 APK</string>
 </resources>

@@ -191,4 +191,22 @@
     <string name="backup_restore_action">Ripristina ora</string>
     <string name="backup_include_obb_title">Includi dati OBB e multimediali</string>
     <string name="backup_include_obb_desc">Archivia i file di espansione /Android/obb nel backup .xapk</string>
+    <string name="uninstaller_dialog_label">Disinstallatore pacchetti</string>
+    <string name="manage_action_install_secure_folder">Installa nell\'Area Personale</string>
+    <string name="manage_action_install_secure_folder_done">%s installato nell\'Area Personale</string>
+    <string name="manage_action_install_secure_folder_failed">Installazione nell\'Area Personale non riuscita: %s</string>
+    <string name="manage_action_install_secure_folder_already">Installato · Tocca per reinstallare</string>
+    <string name="manage_action_add_to_server">Sincronizza e condividi</string>
+    <string name="manage_action_add_to_server_sub">Condividi su Wi-Fi locale</string>
+    <string name="manage_action_added_to_server">%s aggiunto a Sincronizza e condividi</string>
+    <string name="manage_action_open_sync">Apri Sync</string>
+    <string name="uninstall_app_title">Disinstalla app</string>
+    <string name="uninstall_option_keep_data">Mantieni dati</string>
+    <string name="uninstall_option_keep_data_desc">I dati e la cache dell\'app saranno mantenuti</string>
+    <string name="uninstall_option_all_users">Per tutti gli utenti</string>
+    <string name="uninstall_option_all_users_desc">Disinstalla questa app per tutti gli utenti su questo dispositivo</string>
+    <string name="uninstall_option_delete_system_app">Elimina app di sistema</string>
+    <string name="uninstall_option_delete_system_app_desc">Consenti l\'eliminazione delle app di sistema per l\'utente corrente</string>
+    <string name="manage_action_merge_antisplit">Unisci con Anti-Split</string>
+    <string name="manage_action_merge_antisplit_desc">Estrai e unisci l\'app divisa in un singolo APK autonomo</string>
 </resources>

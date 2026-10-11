@@ -170,4 +170,5 @@
     <string name="tv_updates_add_url_hint">URL GitHub / GitLab / Άμεσο APK</string>
     <string name="tv_updates_add_submit">Προσθήκη</string>
     <string name="tv_updates_add_cancel">Ακύρωση</string>
+    <string name="tv_error_cannot_open_settings">Δεν είναι δυνατή η εκκίνηση των ρυθμίσεων συστήματος σε αυτή τη συσκευή</string>
 </resources>

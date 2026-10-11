@@ -191,4 +191,22 @@
     <string name="backup_restore_action">Restaurați acum</string>
     <string name="backup_include_obb_title">Includeți datele OBB și media</string>
     <string name="backup_include_obb_desc">Arhivați fișierele de extensie /Android/obb în backupul .xapk</string>
+    <string name="uninstaller_dialog_label">Dezinstalator de pachete</string>
+    <string name="manage_action_install_secure_folder">Instalează în Folderul Securizat</string>
+    <string name="manage_action_install_secure_folder_done">S-a instalat %s în Folderul Securizat</string>
+    <string name="manage_action_install_secure_folder_failed">Instalarea în Folderul Securizat a eșuat: %s</string>
+    <string name="manage_action_install_secure_folder_already">Instalat · Atingeți pentru reinstalare</string>
+    <string name="manage_action_add_to_server">Sincronizare și partajare</string>
+    <string name="manage_action_add_to_server_sub">Partajare pe Wi-Fi local</string>
+    <string name="manage_action_added_to_server">S-a adăugat %s la Sincronizare și partajare</string>
+    <string name="manage_action_open_sync">Deschide Sync</string>
+    <string name="uninstall_app_title">Dezinstalează aplicația</string>
+    <string name="uninstall_option_keep_data">Păstrează datele</string>
+    <string name="uninstall_option_keep_data_desc">Datele și memoria cache ale aplicației vor fi păstrate</string>
+    <string name="uninstall_option_all_users">Pentru toți utilizatorii</string>
+    <string name="uninstall_option_all_users_desc">Dezinstalează această aplicație pentru toți utilizatorii de pe dispozitiv</string>
+    <string name="uninstall_option_delete_system_app">Șterge aplicația de sistem</string>
+    <string name="uninstall_option_delete_system_app_desc">Permite ștergerea aplicațiilor de sistem pentru utilizatorul curent</string>
+    <string name="manage_action_merge_antisplit">Îmbină cu Anti-Split</string>
+    <string name="manage_action_merge_antisplit_desc">Extrage și îmbină aplicația split într-un APK de sine stătător</string>
 </resources>

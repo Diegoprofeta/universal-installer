@@ -170,4 +170,5 @@
     <string name="tv_updates_add_url_hint">URL GitHub / GitLab / link diretto all\'APK</string>
     <string name="tv_updates_add_submit">Aggiungi</string>
     <string name="tv_updates_add_cancel">Annulla</string>
+    <string name="tv_error_cannot_open_settings">Impossibile aprire le impostazioni di sistema su questo dispositivo</string>
 </resources>

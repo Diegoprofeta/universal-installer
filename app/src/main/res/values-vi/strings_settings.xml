@@ -356,4 +356,7 @@
     <string name="setting_backup_export_subtitle">Xuất cài đặt, token, ứng dụng theo dõi và nhật ký</string>
     <string name="setting_backup_restore_title">Khôi phục bản sao lưu</string>
     <string name="setting_backup_restore_subtitle">Khôi phục dữ liệu từ tệp sao lưu hoặc tệp xuất của Obtainium</string>
+    <string name="setting_install_mode_custom_sub">Cài đặt thông qua lệnh shell tùy chỉnh hoặc lệnh ủy quyền</string>
+    <string name="setting_porter_not_running">Porter đã cài đặt nhưng chưa chạy</string>
+    <string name="setting_porter_start_service_hint">Hãy mở Porter và khởi chạy dịch vụ trước</string>
 </resources>

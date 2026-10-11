@@ -170,4 +170,5 @@
     <string name="tv_updates_add_url_hint">GitHub / GitLab / Doğrudan APK URL\'si</string>
     <string name="tv_updates_add_submit">Ekle</string>
     <string name="tv_updates_add_cancel">İptal</string>
+    <string name="tv_error_cannot_open_settings">Bu cihazda sistem ayarları açılamıyor</string>
 </resources>

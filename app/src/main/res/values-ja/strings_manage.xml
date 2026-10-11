@@ -191,4 +191,22 @@
     <string name="backup_restore_action">今すぐ復元</string>
     <string name="backup_include_obb_title">OBBとメディアデータを含める</string>
     <string name="backup_include_obb_desc">/Android/obb 拡張ファイルを .xapk バックアップにアーカイブ</string>
+    <string name="uninstaller_dialog_label">パッケージアンインストーラー</string>
+    <string name="manage_action_install_secure_folder">セキュリティフォルダにインストール</string>
+    <string name="manage_action_install_secure_folder_done">%s をセキュリティフォルダにインストールしました</string>
+    <string name="manage_action_install_secure_folder_failed">セキュリティフォルダへのインストールに失敗しました: %s</string>
+    <string name="manage_action_install_secure_folder_already">インストール済み · タップして再インストール</string>
+    <string name="manage_action_add_to_server">同期と共有</string>
+    <string name="manage_action_add_to_server_sub">ローカルWi-Fiで共有</string>
+    <string name="manage_action_added_to_server">%s を同期と共有に追加しました</string>
+    <string name="manage_action_open_sync">同期を開く</string>
+    <string name="uninstall_app_title">アプリをアンインストール</string>
+    <string name="uninstall_option_keep_data">データを保持</string>
+    <string name="uninstall_option_keep_data_desc">アプリのデータとキャッシュは保持されます</string>
+    <string name="uninstall_option_all_users">すべてのユーザー向け</string>
+    <string name="uninstall_option_all_users_desc">このデバイスの全ユーザーからこのアプリをアンインストールします</string>
+    <string name="uninstall_option_delete_system_app">システムアプリを削除</string>
+    <string name="uninstall_option_delete_system_app_desc">現在のユーザーのシステムアプリ削除を許可します</string>
+    <string name="manage_action_merge_antisplit">Anti-Splitで結合</string>
+    <string name="manage_action_merge_antisplit_desc">splitアプリを抽出して単一のAPKに結合</string>
 </resources>

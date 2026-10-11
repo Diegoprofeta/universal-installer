@@ -170,4 +170,5 @@
     <string name="tv_updates_add_url_hint">URL GitHub / GitLab / Прямая ссылка на APK</string>
     <string name="tv_updates_add_submit">Добавить</string>
     <string name="tv_updates_add_cancel">Отмена</string>
+    <string name="tv_error_cannot_open_settings">Не удалось открыть системные настройки на этом устройстве</string>
 </resources>

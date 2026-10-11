@@ -191,4 +191,22 @@
     <string name="backup_restore_action">استعادة الآن</string>
     <string name="backup_include_obb_title">تضمين بيانات OBB والوسائط</string>
     <string name="backup_include_obb_desc">أرشفة ملفات توسعة /Android/obb في نسخة .xapk احتياطية</string>
+    <string name="uninstaller_dialog_label">أداة إلغاء تثبيت الحزم</string>
+    <string name="manage_action_install_secure_folder">تثبيت في المجلد الآمن</string>
+    <string name="manage_action_install_secure_folder_done">تم تثبيت %s في المجلد الآمن</string>
+    <string name="manage_action_install_secure_folder_failed">فشل التثبيت في المجلد الآمن: %s</string>
+    <string name="manage_action_install_secure_folder_already">مثبت · اضغط لإعادة التثبيت</string>
+    <string name="manage_action_add_to_server">المزامنة والمشاركة</string>
+    <string name="manage_action_add_to_server_sub">المشاركة عبر شبكة Wi-Fi المحلية</string>
+    <string name="manage_action_added_to_server">تمت إضافة %s إلى المزامنة والمشاركة</string>
+    <string name="manage_action_open_sync">فتح المزامنة</string>
+    <string name="uninstall_app_title">إلغاء تثبيت التطبيق</string>
+    <string name="uninstall_option_keep_data">الاحتفاظ بالبيانات</string>
+    <string name="uninstall_option_keep_data_desc">سيتم الاحتفاظ ببيانات التطبيق وذاكرة التخزين المؤقت</string>
+    <string name="uninstall_option_all_users">لجميع المستخدمين</string>
+    <string name="uninstall_option_all_users_desc">إلغاء تثبيت هذا التطبيق لجميع المستخدمين على هذا الجهاز</string>
+    <string name="uninstall_option_delete_system_app">حذف تطبيق النظام</string>
+    <string name="uninstall_option_delete_system_app_desc">السماح بحذف تطبيقات النظام للمستخدم الحالي</string>
+    <string name="manage_action_merge_antisplit">دمج باستخدام Anti-Split</string>
+    <string name="manage_action_merge_antisplit_desc">استخراج ودمج التطبيق المجزأ في ملف APK مستقل واحد</string>
 </resources>

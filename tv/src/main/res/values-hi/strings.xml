@@ -170,4 +170,5 @@
     <string name="tv_updates_add_url_hint">GitHub / GitLab / सीधा APK URL</string>
     <string name="tv_updates_add_submit">जोड़ें</string>
     <string name="tv_updates_add_cancel">रद्द करें</string>
+    <string name="tv_error_cannot_open_settings">इस डिवाइस पर सिस्टम सेटिंग खोलने में असमर्थ</string>
 </resources>

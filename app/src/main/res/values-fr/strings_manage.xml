@@ -191,4 +191,22 @@
     <string name="backup_restore_action">Restaurer maintenant</string>
     <string name="backup_include_obb_title">Inclure les données OBB et multimédias</string>
     <string name="backup_include_obb_desc">Archiver les fichiers d\'extension /Android/obb dans la sauvegarde .xapk</string>
+    <string name="uninstaller_dialog_label">Désinstallateur de paquets</string>
+    <string name="manage_action_install_secure_folder">Installer dans le Dossier Sécurisé</string>
+    <string name="manage_action_install_secure_folder_done">%s installé dans le Dossier Sécurisé</string>
+    <string name="manage_action_install_secure_folder_failed">Échec de l\'installation dans le Dossier Sécurisé : %s</string>
+    <string name="manage_action_install_secure_folder_already">Installé · Appuyer pour réinstaller</string>
+    <string name="manage_action_add_to_server">Synchroniser et partager</string>
+    <string name="manage_action_add_to_server_sub">Partager sur le Wi-Fi local</string>
+    <string name="manage_action_added_to_server">%s ajouté à Synchroniser et partager</string>
+    <string name="manage_action_open_sync">Ouvrir Sync</string>
+    <string name="uninstall_app_title">Désinstaller l\'application</string>
+    <string name="uninstall_option_keep_data">Conserver les données</string>
+    <string name="uninstall_option_keep_data_desc">Les données et le cache de l\'application seront conservés</string>
+    <string name="uninstall_option_all_users">Pour tous les utilisateurs</string>
+    <string name="uninstall_option_all_users_desc">Désinstaller cette application pour tous les utilisateurs sur cet appareil</string>
+    <string name="uninstall_option_delete_system_app">Supprimer l\'application système</string>
+    <string name="uninstall_option_delete_system_app_desc">Autoriser la suppression des applications système pour l\'utilisateur actuel</string>
+    <string name="manage_action_merge_antisplit">Fusionner avec Anti-Split</string>
+    <string name="manage_action_merge_antisplit_desc">Extraire et fusionner l\'application fractionnée en un seul APK autonome</string>
 </resources>
