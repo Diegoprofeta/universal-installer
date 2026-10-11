@@ -13,7 +13,8 @@ import timber.log.Timber
 enum class PrivilegedExecutor { Root, Shizuku }
 
 interface PrivilegedProvider {
-    suspend fun resolveExecutor(): PrivilegedExecutor?
+    suspend fun resolveExecutor(requestIfNeeded: Boolean = true): PrivilegedExecutor?
+    suspend fun isPrivilegedAvailable(): Boolean
     fun isShizukuReady(): Boolean
 }
 
@@ -22,7 +23,7 @@ class PrivilegedProviderImpl(
     private val backendFactory: InstallerBackendFactory
 ) : PrivilegedProvider {
 
-    override suspend fun resolveExecutor(): PrivilegedExecutor? {
+    override suspend fun resolveExecutor(requestIfNeeded: Boolean): PrivilegedExecutor? {
         val prefs = context.dataStore.data.first()
         val useRoot = prefs[PreferencesKeys.USE_ROOT] ?: false
         val useShizuku = prefs[PreferencesKeys.USE_SHIZUKU] ?: false
@@ -30,8 +31,8 @@ class PrivilegedProviderImpl(
         if (useRoot) {
             val state = backendFactory.probeRootState()
             if (state == RootState.READY) return PrivilegedExecutor.Root
-            
-            if (state == RootState.UNKNOWN || state == RootState.DENIED) {
+
+            if (requestIfNeeded && (state == RootState.UNKNOWN || state == RootState.DENIED)) {
                 val reqState = backendFactory.requestRoot()
                 if (reqState == RootState.READY) {
                     return PrivilegedExecutor.Root
@@ -46,6 +47,25 @@ class PrivilegedProviderImpl(
         }
 
         return null
+    }
+
+    override suspend fun isPrivilegedAvailable(): Boolean {
+        val prefs = context.dataStore.data.first()
+        val useRoot = prefs[PreferencesKeys.USE_ROOT] ?: false
+        val useShizuku = prefs[PreferencesKeys.USE_SHIZUKU] ?: false
+
+        if (useRoot && backendFactory.rootSupportCompiledIn) {
+            val state = backendFactory.probeRootState()
+            if (state == RootState.READY || state == RootState.UNKNOWN) {
+                return true
+            }
+        }
+
+        if (useShizuku && isShizukuReady()) {
+            return true
+        }
+
+        return false
     }
 
     override fun isShizukuReady(): Boolean = try {

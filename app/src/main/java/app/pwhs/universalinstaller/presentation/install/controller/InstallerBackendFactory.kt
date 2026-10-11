@@ -103,6 +103,7 @@ interface InstallerBackendFactory {
         context: android.content.Context,
         uris: List<android.net.Uri>,
         userId: Int,
+        packageName: String = "",
         onProgress: (Float) -> Unit = {},
     ): Result<Unit>
 

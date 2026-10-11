@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.FolderZip
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Refresh
@@ -47,6 +48,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.InstalledApp
+import app.pwhs.universalinstaller.presentation.install.rememberDeviceUserProfiles
+import app.pwhs.universalinstaller.presentation.install.isKnoxOrSecureFolder
 import app.pwhs.universalinstaller.presentation.manage.StorageBreakdown
 import app.pwhs.universalinstaller.presentation.manage.UsageBucket
 import app.pwhs.universalinstaller.presentation.manage.UsageChart
@@ -56,6 +59,8 @@ import app.pwhs.universalinstaller.presentation.manage.resolveInstallerInfo
 import app.pwhs.universalinstaller.util.AndroidAutoCompat
 import app.pwhs.universalinstaller.bridge.AntiSplitBridge
 import app.pwhs.universalinstaller.presentation.composable.AntiSplitPromptDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +83,7 @@ internal fun AppActionSheet(
     onUninstall: () -> Unit,
     onBlockPackage: () -> Unit,
     isBlocked: Boolean,
+    onInstallToSecureFolder: ((userId: Int) -> Unit)? = null,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -85,6 +91,11 @@ internal fun AppActionSheet(
     val launchable = remember(app.packageName) {
         context.packageManager.getLaunchIntentForPackage(app.packageName) != null
     }
+    val profiles = rememberDeviceUserProfiles()
+    val secureFolderProfile = remember(profiles) {
+        profiles.firstOrNull { it.isSecureFolder || isKnoxOrSecureFolder(it.id) }
+    }
+
     var storage by remember(app.packageName) { mutableStateOf<StorageBreakdown?>(null) }
     var usage by remember(app.packageName) { mutableStateOf<List<UsageBucket>>(emptyList()) }
     var showAntiSplitPrompt by remember { mutableStateOf(false) }
@@ -239,6 +250,20 @@ internal fun AppActionSheet(
                         onClick = onReinstall,
                     )
                 )
+                secureFolderProfile?.let { sf ->
+                    add(
+                        AppActionItem(
+                            icon = Icons.Rounded.Lock,
+                            iconTint = MaterialTheme.colorScheme.primary,
+                            label = stringResource(R.string.manage_action_install_secure_folder),
+                            subtitle = sf.displayName,
+                            onClick = {
+                                onInstallToSecureFolder?.invoke(sf.id)
+                                onDismiss()
+                            },
+                        )
+                    )
+                }
                 add(
                     AppActionItem(
                         icon = Icons.Rounded.Security,

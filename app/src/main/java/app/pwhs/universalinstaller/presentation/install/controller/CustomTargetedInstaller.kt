@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import app.pwhs.core.data.local.dataStore
+import app.pwhs.universalinstaller.presentation.install.isKnoxOrSecureFolder
 import app.pwhs.universalinstaller.presentation.install.dialog.InstallerOverrides
 import app.pwhs.universalinstaller.presentation.setting.DEFAULT_INSTALLER_PACKAGE_NAME
 import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
@@ -20,6 +21,10 @@ import java.util.UUID
  *
  * Counterpart of [RootTargetedInstaller] which routes through libsu Shell;
  * CustomTargetedInstaller routes through [CustomShellExecutor].
+ *
+ * For Samsung Knox / Secure Folder profiles, direct session streaming is blocked
+ * with INSTALL_FAILED_USER_RESTRICTED (PersonaServiceHelper blocks INSTALL_FROM_ADB).
+ * We handle this by staging to user 0 and cloning via `pm install-existing --user <id>`.
  */
 object CustomTargetedInstaller {
 
@@ -32,6 +37,7 @@ object CustomTargetedInstaller {
         onProgress: (Float) -> Unit = {},
     ): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
+            val isKnox = isKnoxOrSecureFolder(userId)
             val createArgs = buildCreateArgs(context, packageName, allowDowngrade)
             val stagingDir = File(context.cacheDir, "custom_install_${UUID.randomUUID()}").apply {
                 mkdirs()
@@ -55,20 +61,101 @@ object CustomTargetedInstaller {
             }
 
             try {
-                val sessionId = createSession(context, userId, createArgs)
-                onProgress(0.1f)
-
-                stagedFiles.forEachIndexed { idx, file ->
-                    writeSplit(context, sessionId, idx, file)
-                    onProgress(0.1f + 0.8f * ((idx + 1).toFloat() / stagedFiles.size))
+                val targetPkg = packageName.ifBlank {
+                    stagedFiles.firstNotNullOfOrNull { file ->
+                        extractPackageName(context, file)
+                    }.orEmpty()
                 }
 
-                commitSession(context, sessionId)
-                onProgress(1f)
+                if (isKnox && userId > 0 && targetPkg.isNotBlank()) {
+                    installForKnoxOrRestrictedUser(context, userId, targetPkg, createArgs, stagedFiles, onProgress)
+                } else {
+                    try {
+                        val sessionId = createSession(context, userId, createArgs)
+                        onProgress(0.1f)
+
+                        stagedFiles.forEachIndexed { idx, file ->
+                            writeSplit(context, sessionId, idx, file)
+                            onProgress(0.1f + 0.8f * ((idx + 1).toFloat() / stagedFiles.size))
+                        }
+
+                        commitSession(context, sessionId)
+                        onProgress(1f)
+                    } catch (e: Exception) {
+                        if (userId > 0 && targetPkg.isNotBlank() &&
+                            e.message?.contains("INSTALL_FAILED_USER_RESTRICTED", ignoreCase = true) == true
+                        ) {
+                            Timber.w("CustomTargetedInstaller: Direct session install into user $userId failed with user restriction; falling back to Knox / clone install flow")
+                            installForKnoxOrRestrictedUser(context, userId, targetPkg, createArgs, stagedFiles, onProgress)
+                        } else {
+                            throw e
+                        }
+                    }
+                }
             } finally {
                 stagingDir.deleteRecursively()
             }
         }
+    }
+
+    private fun extractPackageName(context: Context, file: File): String? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageArchiveInfo(
+                    file.absolutePath,
+                    android.content.pm.PackageManager.PackageInfoFlags.of(0)
+                )?.packageName
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageArchiveInfo(file.absolutePath, 0)?.packageName
+            }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    private suspend fun isPackageInstalledForUser(context: Context, userId: Int, packageName: String): Boolean {
+        val res = CustomShellExecutor.exec(context, "pm list packages --user $userId $packageName")
+        return res.isSuccess && res.out.any { it.trim() == "package:$packageName" }
+    }
+
+    private suspend fun installForKnoxOrRestrictedUser(
+        context: Context,
+        targetUserId: Int,
+        packageName: String,
+        createArgs: List<String>,
+        stagedFiles: List<File>,
+        onProgress: (Float) -> Unit,
+    ) {
+        Timber.i("CustomTargetedInstaller: Installing $packageName for restricted/Knox user $targetUserId via user 0 staging")
+        val isAlreadyOnUser0 = isPackageInstalledForUser(context, 0, packageName)
+
+        val session0 = createSession(context, userId = 0, createArgs)
+        onProgress(0.1f)
+        stagedFiles.forEachIndexed { idx, file ->
+            writeSplit(context, session0, idx, file)
+            onProgress(0.1f + 0.7f * ((idx + 1).toFloat() / stagedFiles.size))
+        }
+        commitSession(context, session0)
+        onProgress(0.85f)
+
+        val installExistingResult = CustomShellExecutor.exec(context, "pm install-existing --user $targetUserId $packageName")
+        val outText = installExistingResult.out.joinToString("\n")
+        if (!installExistingResult.isSuccess || !outText.contains("installed for user", ignoreCase = true)) {
+            if (!isAlreadyOnUser0) {
+                CustomShellExecutor.exec(context, "pm uninstall --user 0 $packageName")
+            }
+            throw RuntimeException(
+                "pm install-existing --user $targetUserId failed: ${joinErr(installExistingResult)}"
+            )
+        }
+        onProgress(0.95f)
+
+        if (!isAlreadyOnUser0) {
+            Timber.d("CustomTargetedInstaller: Package $packageName was not on user 0 before; removing from user 0")
+            CustomShellExecutor.exec(context, "pm uninstall --user 0 $packageName")
+        }
+        onProgress(1f)
     }
 
     private suspend fun buildCreateArgs(

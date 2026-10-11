@@ -151,4 +151,37 @@ object ManagePrivilegedActionHelper {
             )
         }
     }
+
+    suspend fun installToSecureFolder(
+        context: Context,
+        packageName: String,
+        appName: String,
+        userId: Int,
+        backendFactory: InstallerBackendFactory,
+    ): PrivilegedActionResult {
+        var rootReady = backendFactory.probeRootState() == app.pwhs.universalinstaller.presentation.install.controller.RootState.READY
+        if (!rootReady) {
+            rootReady = backendFactory.requestRoot() == app.pwhs.universalinstaller.presentation.install.controller.RootState.READY
+        }
+        if (!rootReady) {
+            return PrivilegedActionResult.Failure(
+                context.getString(R.string.install_targeted_knox_requires_root)
+            )
+        }
+        val result = com.topjohnwu.superuser.Shell.cmd("pm install-existing --user $userId $packageName").exec()
+        val outText = result.out.joinToString("\n")
+        return if (result.isSuccess && outText.contains("installed for user", ignoreCase = true)) {
+            PrivilegedActionResult.Success(
+                context.getString(R.string.manage_action_install_secure_folder_done, appName)
+            )
+        } else {
+            val err = result.err.joinToString("\n").ifBlank { outText }
+            PrivilegedActionResult.Failure(
+                context.getString(
+                    R.string.manage_action_install_secure_folder_failed,
+                    err.ifBlank { "unknown error" },
+                )
+            )
+        }
+    }
 }

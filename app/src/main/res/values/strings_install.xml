@@ -137,6 +137,7 @@
     <string name="vt_notif_queued">Queued on VirusTotal</string>
     <string name="vt_notif_analyzing">VirusTotal analyzing</string>
     <string name="install_targeted_no_backend">To install into a specific profile, enable Shizuku or Root in Settings</string>
+    <string name="install_targeted_knox_requires_root">Installing into Secure Folder requires Root access (Samsung Knox blocks ADB/Shizuku)</string>
     <string name="apk_info_permissions_empty">This app requests no permissions</string>
     <string name="apk_info_vt_error">Scan failed — tap to retry</string>
     <string name="apk_info_vt_network_error">Network connection failed — check connection and retry</string>

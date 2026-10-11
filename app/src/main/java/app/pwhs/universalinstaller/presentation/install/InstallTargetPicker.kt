@@ -89,9 +89,10 @@ fun InstallTargetPicker(
             otherProfiles.forEach { profile ->
                 TargetOptionRow(
                     icon = when {
+                        profile.isSecureFolder -> Icons.Rounded.Lock
                         profile.isWorkProfile -> Icons.Rounded.Work
                         profile.isOwner -> Icons.Rounded.Person
-                        else -> Icons.Rounded.Lock
+                        else -> Icons.Rounded.Person
                     },
                     title = profile.displayName,
                     subtitle = "User ID: ${profile.id}",

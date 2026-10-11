@@ -158,6 +158,7 @@ internal fun UninstallUi(
     onExtract: (String, String) -> Unit = { _, _ -> },
     onShare: (String, String) -> Unit = { _, _ -> },
     onReinstall: (String, String) -> Unit = { _, _ -> },
+    onInstallToSecureFolder: (String, String, Int) -> Unit = { _, _, _ -> },
     onCheckVirusTotal: (InstalledApp) -> Unit = {},
     onAddToServer: (String, String) -> Unit = { _, _ -> },
     onForceStop: (String, String) -> Unit = { _, _ -> },
@@ -318,6 +319,9 @@ internal fun UninstallUi(
                 onBlockPackage(target.packageName)
             },
             isBlocked = target.packageName in blockedPackages,
+            onInstallToSecureFolder = { userId ->
+                onInstallToSecureFolder(target.packageName, target.appName, userId)
+            },
             onDismiss = { actionTarget = null },
         )
     }

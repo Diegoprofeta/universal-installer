@@ -96,6 +96,7 @@ class ManualInstallController(
                     context = application,
                     uris = uris,
                     userId = userId,
+                    packageName = data.packageName,
                     onProgress = onProgress,
                 )
             }

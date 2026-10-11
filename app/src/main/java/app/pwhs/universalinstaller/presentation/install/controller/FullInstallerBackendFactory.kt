@@ -166,8 +166,15 @@ class FullInstallerBackendFactory : InstallerBackendFactory {
         context: android.content.Context,
         uris: List<android.net.Uri>,
         userId: Int,
+        packageName: String,
         onProgress: (Float) -> Unit,
-    ): Result<Unit> = RootTargetedInstaller.install(context, uris, userId, onProgress = onProgress)
+    ): Result<Unit> = RootTargetedInstaller.install(
+        context = context,
+        uris = uris,
+        userId = userId,
+        packageName = packageName,
+        onProgress = onProgress,
+    )
 
     override suspend fun installTargeted(
         context: android.content.Context,

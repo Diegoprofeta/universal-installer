@@ -19,6 +19,7 @@ import app.pwhs.universalinstaller.presentation.install.controller.InstallerBack
 import app.pwhs.universalinstaller.presentation.install.controller.ManualInstallController
 import app.pwhs.universalinstaller.presentation.install.controller.RootState
 import app.pwhs.universalinstaller.presentation.install.controller.ShizukuInstallController
+import app.pwhs.universalinstaller.presentation.install.isKnoxOrSecureFolder
 import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
 import app.pwhs.universalinstaller.presentation.setting.security.util.SystemInstallerManager
 import app.pwhs.universalinstaller.util.CustomShellExecutor
@@ -160,8 +161,10 @@ object InstallSessionManager {
         preferred: String?,
         rootController: BaseInstallController?,
         backendFactory: InstallerBackendFactory,
+        targetUserId: Int? = null,
     ): ManualInstallController.TargetedBackend? {
-        val shizukuReady = isShizukuReadyForInstall()
+        val isKnox = targetUserId != null && isKnoxOrSecureFolder(targetUserId)
+        val shizukuReady = !isKnox && isShizukuReadyForInstall()
         val rootReady = if (rootController != null) {
             val state = backendFactory.probeRootState()
             state == RootState.READY

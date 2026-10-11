@@ -166,6 +166,7 @@ fun ManageScreen(
         onExtract = viewModel::extractApp,
         onShare = viewModel::shareApp,
         onReinstall = viewModel::reinstallApp,
+        onInstallToSecureFolder = viewModel::installToSecureFolder,
         onCheckVirusTotal = { app -> viewModel.scanVirusTotal(context, app) },
         onAddToServer = viewModel::addToServer,
         onForceStop = viewModel::forceStop,

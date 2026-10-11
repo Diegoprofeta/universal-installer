@@ -175,15 +175,13 @@ class ManageViewModel(
         }
     }
 
-    fun dismissBatchExtractResult() {
-        _batchExtractState.value = BatchExtractState.Idle
-    }
+    fun dismissBatchExtractResult() { _batchExtractState.value = BatchExtractState.Idle }
 
     // ── Privileged Actions ──────────────────────────────────────────────────
 
     fun refreshPrivilegedReady() {
         viewModelScope.launch {
-            _privilegedReady.value = privilegedProvider.resolveExecutor() != null
+            _privilegedReady.value = privilegedProvider.isPrivilegedAvailable()
         }
     }
 
@@ -215,9 +213,15 @@ class ManageViewModel(
         }
     }
 
-    fun dismissPrivilegedActionResult() {
-        _privilegedActionResult.value = null
+    fun installToSecureFolder(packageName: String, appName: String, userId: Int) {
+        viewModelScope.launch {
+            _privilegedActionResult.value = ManagePrivilegedActionHelper.installToSecureFolder(
+                application, packageName, appName, userId, backendFactory
+            )
+        }
     }
+
+    fun dismissPrivilegedActionResult() { _privilegedActionResult.value = null }
 
     fun disableSelected() = runPrivilegedBatch(
         actionLabelRes = R.string.manage_batch_action_disable,
@@ -341,9 +345,7 @@ class ManageViewModel(
         _selectedPackages.value = if (packageName in current) current - packageName else current + packageName
     }
 
-    fun clearSelection() {
-        _selectedPackages.value = emptySet()
-    }
+    fun clearSelection() { _selectedPackages.value = emptySet() }
 
     fun toggleSelectAll() {
         val allPackages = uiState.value.filteredApps.map { it.packageName }.toSet()

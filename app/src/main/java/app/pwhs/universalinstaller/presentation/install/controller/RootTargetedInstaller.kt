@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import app.pwhs.core.data.local.dataStore
+import app.pwhs.universalinstaller.presentation.install.isKnoxOrSecureFolder
 import app.pwhs.universalinstaller.presentation.install.dialog.InstallerOverrides
 import app.pwhs.universalinstaller.presentation.setting.DEFAULT_INSTALLER_PACKAGE_NAME
 import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
@@ -22,6 +23,10 @@ import java.util.UUID
  *
  * Counterpart of [ManualTargetedInstaller] which uses the Shizuku binder; together
  * they cover the two privileged paths the app supports.
+ *
+ * For Samsung Knox / Secure Folder profiles, direct session streaming is blocked
+ * with INSTALL_FAILED_USER_RESTRICTED (PersonaServiceHelper blocks INSTALL_FROM_ADB).
+ * We handle this by staging to user 0 and cloning via `pm install-existing --user <id>`.
  */
 object RootTargetedInstaller {
 
@@ -39,6 +44,7 @@ object RootTargetedInstaller {
         onProgress: (Float) -> Unit = {},
     ): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
+            val isKnox = isKnoxOrSecureFolder(userId)
             val createArgs = buildCreateArgs(context, packageName, allowDowngrade)
             // Stage each input URI into the app's cache dir under a chmod-readable file so
             // the root shell can read it without SELinux drama on content:// URIs.
@@ -65,20 +71,100 @@ object RootTargetedInstaller {
             }
 
             try {
-                val sessionId = createSession(userId, createArgs)
-                onProgress(0.1f)
-
-                stagedFiles.forEachIndexed { idx, file ->
-                    writeSplit(sessionId, idx, file)
-                    onProgress(0.1f + 0.8f * ((idx + 1).toFloat() / stagedFiles.size))
+                val targetPkg = packageName.ifBlank {
+                    stagedFiles.firstNotNullOfOrNull { file ->
+                        extractPackageName(context, file)
+                    }.orEmpty()
                 }
 
-                commitSession(sessionId)
-                onProgress(1f)
+                if (isKnox && userId > 0 && targetPkg.isNotBlank()) {
+                    installForKnoxOrRestrictedUser(userId, targetPkg, createArgs, stagedFiles, onProgress)
+                } else {
+                    try {
+                        val sessionId = createSession(userId, createArgs)
+                        onProgress(0.1f)
+
+                        stagedFiles.forEachIndexed { idx, file ->
+                            writeSplit(sessionId, idx, file)
+                            onProgress(0.1f + 0.8f * ((idx + 1).toFloat() / stagedFiles.size))
+                        }
+
+                        commitSession(sessionId)
+                        onProgress(1f)
+                    } catch (e: Exception) {
+                        if (userId > 0 && targetPkg.isNotBlank() &&
+                            e.message?.contains("INSTALL_FAILED_USER_RESTRICTED", ignoreCase = true) == true
+                        ) {
+                            Timber.w("Direct session install into user $userId failed with user restriction; falling back to Knox / clone install flow")
+                            installForKnoxOrRestrictedUser(userId, targetPkg, createArgs, stagedFiles, onProgress)
+                        } else {
+                            throw e
+                        }
+                    }
+                }
             } finally {
                 stagingDir.deleteRecursively()
             }
         }
+    }
+
+    private fun extractPackageName(context: Context, file: File): String? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageArchiveInfo(
+                    file.absolutePath,
+                    android.content.pm.PackageManager.PackageInfoFlags.of(0)
+                )?.packageName
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageArchiveInfo(file.absolutePath, 0)?.packageName
+            }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    private fun isPackageInstalledForUser(userId: Int, packageName: String): Boolean {
+        val res = Shell.cmd("pm list packages --user $userId $packageName").exec()
+        return res.isSuccess && res.out.any { it.trim() == "package:$packageName" }
+    }
+
+    private fun installForKnoxOrRestrictedUser(
+        targetUserId: Int,
+        packageName: String,
+        createArgs: List<String>,
+        stagedFiles: List<File>,
+        onProgress: (Float) -> Unit,
+    ) {
+        Timber.i("RootTargetedInstaller: Installing $packageName for restricted/Knox user $targetUserId via user 0 staging")
+        val isAlreadyOnUser0 = isPackageInstalledForUser(0, packageName)
+
+        val session0 = createSession(userId = 0, createArgs)
+        onProgress(0.1f)
+        stagedFiles.forEachIndexed { idx, file ->
+            writeSplit(session0, idx, file)
+            onProgress(0.1f + 0.7f * ((idx + 1).toFloat() / stagedFiles.size))
+        }
+        commitSession(session0)
+        onProgress(0.85f)
+
+        val installExistingResult = Shell.cmd("pm install-existing --user $targetUserId $packageName").exec()
+        val outText = installExistingResult.out.joinToString("\n")
+        if (!installExistingResult.isSuccess || !outText.contains("installed for user", ignoreCase = true)) {
+            if (!isAlreadyOnUser0) {
+                Shell.cmd("pm uninstall --user 0 $packageName").exec()
+            }
+            throw RuntimeException(
+                "pm install-existing --user $targetUserId failed: ${joinErr(installExistingResult)}"
+            )
+        }
+        onProgress(0.95f)
+
+        if (!isAlreadyOnUser0) {
+            Timber.d("RootTargetedInstaller: Package $packageName was not on user 0 before; removing from user 0")
+            Shell.cmd("pm uninstall --user 0 $packageName").exec()
+        }
+        onProgress(1f)
     }
 
     /**

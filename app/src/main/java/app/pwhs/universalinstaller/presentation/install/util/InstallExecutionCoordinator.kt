@@ -129,9 +129,19 @@ object InstallExecutionCoordinator {
         val nameForTarget = apkInfo?.appName.orEmpty().ifBlank { fileName }
         val targetedUserId = profile?.targetUserId ?: prefs?.get(PreferencesKeys.INSTALL_USER_ID)
         if (targetedUserId != null) {
-            val targetedBackend = InstallSessionManager.resolveTargetedBackend(profile?.preferredBackend, rootController, backendFactory)
+            val targetedBackend = InstallSessionManager.resolveTargetedBackend(
+                preferred = profile?.preferredBackend,
+                rootController = rootController,
+                backendFactory = backendFactory,
+                targetUserId = targetedUserId,
+            )
             if (targetedBackend == null) {
-                android.widget.Toast.makeText(application, application.getString(R.string.install_targeted_no_backend), android.widget.Toast.LENGTH_LONG).show()
+                val errorRes = if (app.pwhs.universalinstaller.presentation.install.isKnoxOrSecureFolder(targetedUserId)) {
+                    R.string.install_targeted_knox_requires_root
+                } else {
+                    R.string.install_targeted_no_backend
+                }
+                android.widget.Toast.makeText(application, application.getString(errorRes), android.widget.Toast.LENGTH_LONG).show()
                 return
             }
             manualController.installTargeted(

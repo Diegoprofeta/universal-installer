@@ -29,7 +29,20 @@ data class DeviceUserProfile(
     val isOwner: Boolean,
     val isWorkProfile: Boolean,
     val isCurrent: Boolean = false,
+    val isSecureFolder: Boolean = false,
 )
+
+fun isKnoxOrSecureFolder(userId: Int): Boolean {
+    if (userId <= 0) return false
+    return try {
+        val clazz = Class.forName("com.samsung.android.knox.SemPersonaManager")
+        val isSecure = clazz.getMethod("isSecureFolderId", Int::class.javaPrimitiveType).invoke(null, userId) as? Boolean ?: false
+        val isKnox = clazz.getMethod("isKnoxId", Int::class.javaPrimitiveType).invoke(null, userId) as? Boolean ?: false
+        isSecure || isKnox
+    } catch (_: Throwable) {
+        userId in 150..160
+    }
+}
 
 @Composable
 fun rememberDeviceUserProfiles(): List<DeviceUserProfile> {
@@ -91,12 +104,14 @@ private fun getUsersFromShizuku(ownId: Int): List<DeviceUserProfile>? {
             val isWorkProfile = (info.flags and UserInfo.FLAG_MANAGED_PROFILE) != 0 ||
                 runCatching { info.isManagedProfile }.getOrDefault(false)
             val isOwner = info.id == 0 || runCatching { info.isPrimary }.getOrDefault(false)
+            val isSecureFolder = isKnoxOrSecureFolder(info.id) || (info.name?.contains("Secure Folder", ignoreCase = true) == true)
             DeviceUserProfile(
                 id = info.id,
                 displayName = info.name?.takeIf { it.isNotBlank() } ?: (if (isOwner) "Owner" else "User ${info.id}"),
                 isOwner = isOwner,
                 isWorkProfile = isWorkProfile,
                 isCurrent = info.id == ownId,
+                isSecureFolder = isSecureFolder,
             )
         }
     }.getOrNull()
@@ -104,9 +119,10 @@ private fun getUsersFromShizuku(ownId: Int): List<DeviceUserProfile>? {
 
 private fun getUsersFromRoot(ownId: Int): List<DeviceUserProfile>? {
     return runCatching {
-        if (Shell.isAppGrantedRoot() != true) return null
+        val shell = Shell.getCachedShell()
+        if (shell == null || !shell.isRoot) return null
         val out = mutableListOf<String>()
-        val res = Shell.cmd("pm list users").to(out).exec()
+        val res = shell.newJob().add("pm list users").to(out).exec()
         if (!res.isSuccess || out.isEmpty()) return null
         val regex = Regex("""UserInfo\{(\d+):([^:]+):([0-9a-fA-F]+)\}""")
         val list = out.mapNotNull { line ->
@@ -116,12 +132,14 @@ private fun getUsersFromRoot(ownId: Int): List<DeviceUserProfile>? {
                 val flags = match.groupValues[3].toIntOrNull(16) ?: 0
                 val isWorkProfile = (flags and 0x00000020) != 0
                 val isOwner = id == 0 || (flags and 0x00000001) != 0
+                val isSecureFolder = isKnoxOrSecureFolder(id) || name.contains("Secure Folder", ignoreCase = true)
                 DeviceUserProfile(
                     id = id,
                     displayName = name.takeIf { it.isNotBlank() } ?: (if (isOwner) "Owner" else "User $id"),
                     isOwner = isOwner,
                     isWorkProfile = isWorkProfile,
                     isCurrent = id == ownId,
+                    isSecureFolder = isSecureFolder,
                 )
             }
         }
@@ -138,8 +156,11 @@ private fun getUsersFromUserManager(context: Context, ownId: Int): List<DeviceUs
         val id = getUserId(handle)
         val isOwner = id == ownId
         val isCurrent = id == ownId
+        val isSecureFolder = isKnoxOrSecureFolder(id)
         val name = if (isCurrent) {
             ownName ?: "Owner"
+        } else if (isSecureFolder) {
+            "Secure Folder"
         } else {
             "Work profile ($id)"
         }
@@ -149,6 +170,7 @@ private fun getUsersFromUserManager(context: Context, ownId: Int): List<DeviceUs
             isOwner = isOwner,
             isWorkProfile = !isOwner,
             isCurrent = isCurrent,
+            isSecureFolder = isSecureFolder,
         )
     }
 }
