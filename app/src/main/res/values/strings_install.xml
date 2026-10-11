@@ -368,6 +368,10 @@
     <string name="porter_promo_action_open">Open Porter</string>
     <string name="shizuku_promo_action_learn_more">Get Shizuku</string>
     <string name="shizuku_promo_dismiss">Dismiss</string>
+    <string name="shizuku_promo_step_1_title">Step 1: Setup Service</string>
+    <string name="shizuku_promo_step_2_title">Step 2: Connect App</string>
+    <string name="shizuku_promo_step_1_ready_desc">Shizuku service is running. Swipe or tap Next to connect.</string>
+    <string name="shizuku_promo_next_step">Next</string>
     <string name="antisplit_action_merge">Merge into Single APK</string>
     <string name="antisplit_action_merge_desc">Merge split APK bundle into a standalone APK using Universal Anti-Split</string>
     <string name="antisplit_not_installed_title">Universal Anti-Split Required</string>

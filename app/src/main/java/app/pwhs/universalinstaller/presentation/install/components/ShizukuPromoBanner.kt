@@ -1,9 +1,7 @@
 package app.pwhs.universalinstaller.presentation.install.components
 
-import app.pwhs.universalinstaller.util.ShizukuServices
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -11,8 +9,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,10 +22,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -32,8 +35,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -57,8 +61,8 @@ import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
 import app.pwhs.universalinstaller.presentation.setting.SettingViewModel
 import app.pwhs.universalinstaller.presentation.setting.ShizukuState
 import app.pwhs.universalinstaller.presentation.setting.security.util.SystemInstallerManager
-import app.pwhs.universalinstaller.util.DhizukuCompat
 import app.pwhs.universalinstaller.util.MicroGCompat
+import app.pwhs.universalinstaller.util.ShizukuServices
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -152,20 +156,26 @@ fun ShizukuPromoBanner(
             }
         }
 
-        val descRes: Int
-        val actionTextRes: Int
-        val actionClick: () -> Unit
-        when (shizukuState) {
-            ShizukuState.NO_PERMISSION -> {
-                descRes = if (porterOnly || porterServing) R.string.porter_promo_desc_no_perm
-                else R.string.shizuku_promo_desc_no_perm
-                actionTextRes = R.string.shizuku_promo_action_connect
-                actionClick = { settingViewModel.setInstallMode(InstallMode.SHIZUKU) }
+        val initialPage = remember {
+            if (shizukuState == ShizukuState.NO_PERMISSION) 1 else 0
+        }
+        val pagerState = rememberPagerState(
+            initialPage = initialPage,
+            pageCount = { 2 },
+        )
+
+        LaunchedEffect(shizukuState) {
+            if (shizukuState == ShizukuState.NO_PERMISSION && pagerState.currentPage == 0) {
+                pagerState.animateScrollToPage(1)
             }
-            ShizukuState.NOT_RUNNING -> {
-                descRes = if (porterOnly) R.string.porter_promo_desc_not_running else R.string.shizuku_promo_desc_not_running
-                actionTextRes = if (porterOnly) R.string.porter_promo_action_open else R.string.shizuku_promo_action_open
-                actionClick = {
+        }
+
+        val step1ActionClick: () -> Unit = {
+            when (shizukuState) {
+                ShizukuState.NO_PERMISSION -> {
+                    scope.launch { pagerState.animateScrollToPage(1) }
+                }
+                ShizukuState.NOT_RUNNING -> {
                     val launchIntent = context.packageManager.getLaunchIntentForPackage(
                         if (porterOnly) ShizukuServices.PORTER_PACKAGE else SHIZUKU_PACKAGE_NAME
                     )
@@ -182,11 +192,7 @@ fun ShizukuPromoBanner(
                         runCatching { context.startActivity(browserIntent) }
                     }
                 }
-            }
-            else -> {
-                descRes = R.string.shizuku_promo_desc_not_installed
-                actionTextRes = R.string.shizuku_promo_action_learn_more
-                actionClick = {
+                else -> {
                     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(SHIZUKU_WEBSITE_URL)).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
@@ -196,6 +202,10 @@ fun ShizukuPromoBanner(
                         }
                 }
             }
+        }
+
+        val step2ActionClick: () -> Unit = {
+            settingViewModel.setInstallMode(InstallMode.SHIZUKU)
         }
 
         Card(
@@ -210,7 +220,7 @@ fun ShizukuPromoBanner(
             ),
         ) {
             Column(
-                modifier = Modifier.padding(14.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -220,36 +230,42 @@ fun ShizukuPromoBanner(
                         painter = painterResource(R.drawable.ic_shizuku_logo),
                         contentDescription = stringResource(R.string.installer_mode_shizuku),
                         modifier = Modifier
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(8.dp)),
+                            .size(24.dp)
+                            .clip(RoundedCornerShape(6.dp)),
                     )
 
-                    Spacer(Modifier.width(10.dp))
+                    Spacer(Modifier.width(8.dp))
 
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Text(
-                                text = stringResource(R.string.shizuku_promo_title),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Surface(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(4.dp),
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.shizuku_promo_badge_recommended),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
-                                )
-                            }
-                        }
+                    Text(
+                        text = if (pagerState.currentPage == 0) {
+                            stringResource(R.string.shizuku_promo_step_1_title)
+                        } else {
+                            stringResource(R.string.shizuku_promo_step_2_title)
+                        },
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+
+                    Spacer(Modifier.width(6.dp))
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(6.dp),
+                    ) {
+                        Text(
+                            text = "${pagerState.currentPage + 1}/2",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        )
                     }
+
+                    Spacer(Modifier.width(4.dp))
 
                     IconButton(
                         onClick = onDismiss,
@@ -264,44 +280,86 @@ fun ShizukuPromoBanner(
                     }
                 }
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
 
-                Text(
-                    text = stringResource(descRes),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                Spacer(Modifier.height(10.dp))
-
-                Row(
+                HorizontalPager(
+                    state = pagerState,
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextButton(
-                        onClick = onDismiss,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ),
+                ) { page ->
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
-                            text = stringResource(R.string.shizuku_promo_dismiss),
-                            style = MaterialTheme.typography.labelMedium,
+                            text = if (page == 0) {
+                                if (shizukuState == ShizukuState.NO_PERMISSION) {
+                                    stringResource(R.string.shizuku_promo_step_1_ready_desc)
+                                } else if (shizukuState == ShizukuState.NOT_RUNNING) {
+                                    stringResource(if (porterOnly) R.string.porter_promo_desc_not_running else R.string.shizuku_promo_desc_not_running)
+                                } else {
+                                    stringResource(R.string.shizuku_promo_desc_not_installed)
+                                }
+                            } else {
+                                stringResource(if (porterOnly || porterServing) R.string.porter_promo_desc_no_perm else R.string.shizuku_promo_desc_no_perm)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            minLines = 2,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                    }
 
-                    Spacer(Modifier.width(6.dp))
+                        Spacer(Modifier.height(8.dp))
 
-                    FilledTonalButton(
-                        onClick = actionClick,
-                        shape = RoundedCornerShape(10.dp),
-                    ) {
-                        Text(
-                            text = stringResource(actionTextRes),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Medium,
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                repeat(2) { index ->
+                                    val isSelected = pagerState.currentPage == index
+                                    Box(
+                                        modifier = Modifier
+                                            .height(6.dp)
+                                            .width(if (isSelected) 16.dp else 6.dp)
+                                            .clip(RoundedCornerShape(3.dp))
+                                            .background(
+                                                if (isSelected) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                            )
+                                            .clickable {
+                                                scope.launch { pagerState.animateScrollToPage(index) }
+                                            }
+                                    )
+                                }
+                            }
+
+                            FilledTonalButton(
+                                onClick = if (page == 0) step1ActionClick else step2ActionClick,
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                modifier = Modifier.height(32.dp),
+                            ) {
+                                Text(
+                                    text = if (page == 0) {
+                                        if (shizukuState == ShizukuState.NO_PERMISSION) {
+                                            stringResource(R.string.shizuku_promo_next_step)
+                                        } else if (shizukuState == ShizukuState.NOT_RUNNING) {
+                                            stringResource(if (porterOnly) R.string.porter_promo_action_open else R.string.shizuku_promo_action_open)
+                                        } else {
+                                            stringResource(R.string.shizuku_promo_action_learn_more)
+                                        }
+                                    } else {
+                                        stringResource(R.string.shizuku_promo_action_connect)
+                                    },
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                            }
+                        }
                     }
                 }
             }

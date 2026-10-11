@@ -365,6 +365,10 @@
     <string name="shizuku_promo_action_open">Mở Shizuku</string>
     <string name="shizuku_promo_action_learn_more">Cài đặt Shizuku</string>
     <string name="shizuku_promo_dismiss">Bỏ qua</string>
+    <string name="shizuku_promo_step_1_title">Bước 1: Khởi chạy dịch vụ</string>
+    <string name="shizuku_promo_step_2_title">Bước 2: Kết nối với ứng dụng</string>
+    <string name="shizuku_promo_step_1_ready_desc">Dịch vụ Shizuku đang chạy. Vuốt hoặc chọn Tiếp theo để kết nối.</string>
+    <string name="shizuku_promo_next_step">Tiếp theo</string>
     <string name="antisplit_action_merge">Gộp thành APK đơn</string>
     <string name="antisplit_action_merge_desc">Gộp gói Split APK thành một tệp APK độc lập bằng Universal Anti-Split</string>
     <string name="antisplit_not_installed_title">Cần cài đặt Universal Anti-Split</string>
