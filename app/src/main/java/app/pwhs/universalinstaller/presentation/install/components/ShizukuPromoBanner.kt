@@ -7,6 +7,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -145,8 +147,9 @@ fun ShizukuPromoBanner(
 
     AnimatedVisibility(
         visible = shouldShow,
-        enter = fadeIn(),
-        exit = fadeOut() + shrinkVertically(),
+        enter = fadeIn() + slideInVertically { it },
+        exit = fadeOut() + shrinkVertically() + slideOutVertically { it },
+        modifier = modifier,
     ) {
         val onDismiss: () -> Unit = {
             scope.launch {
@@ -209,10 +212,11 @@ fun ShizukuPromoBanner(
         }
 
         Card(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
             border = BorderStroke(
                 width = 1.dp,
