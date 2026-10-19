@@ -1,0 +1,3 @@
+• Improved Wear OS APK transfer reliability and phone connection stability
+• Watch UI responsiveness optimizations
+• Bug fixes and performance improvements

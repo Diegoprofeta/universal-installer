@@ -49,8 +49,8 @@ android {
         applicationId = "app.pwhs.universalinstaller"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 2032
-        versionName = "1.18.0"
+        versionCode = 2033
+        versionName = "1.19.0"
 
     }
 

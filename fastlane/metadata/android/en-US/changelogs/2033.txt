@@ -1,0 +1,4 @@
+• Fixed crash when requesting file permissions on Android TV
+• Added support for installing ZIP packages from home network drives and SMB shares
+• Enhanced TV remote navigation and UI responsiveness
+• Bug fixes and stability improvements

@@ -1,0 +1,7 @@
+• Enhanced installation error messages with actionable guidance and direct Shizuku retry option
+• Redesigned installer screen to emphasize primary Install action
+• Fixed APK deletion false warning after successful install
+• Supported direct installation from F-Droid and package stream handlers
+• Supported opening ZIP packages from network drives and SMB shares
+• Added Porter Shizuku bridge and Secure Folder installation support
+• Stability improvements
