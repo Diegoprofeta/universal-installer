@@ -109,11 +109,18 @@ object InstallErrorHelper {
                 } else {
                     "Universal"
                 }
+                val apkAbi = when {
+                    "ARM64" in raw || "AARCH64" in raw -> "arm64-v8a (64-bit)"
+                    "ARMEABI" in raw || "ARMV7" in raw -> "armeabi-v7a (32-bit)"
+                    "X86_64" in raw -> "x86_64"
+                    "X86" in raw -> "x86"
+                    else -> "a different"
+                }
                 ErrorInfo(
                     title = context.getString(R.string.install_error_incompatible_abi_title),
                     guidance = context.getString(
                         R.string.install_error_incompatible_abi_detailed_guidance,
-                        "unsupported",
+                        apkAbi,
                         deviceAbis,
                         recommended,
                     ),
@@ -184,6 +191,40 @@ object InstallErrorHelper {
         }
     }
 
+    fun isNoCertificatesMessage(message: String?): Boolean {
+        val upper = message.orEmpty().uppercase()
+        return "NO_CERTIFICATE" in upper || "NO_CERTIFICATES" in upper || "NO CERTIFICATE" in upper || "NO CERTIFICATES" in upper
+    }
+
+    fun isMissingSplitMessage(message: String?): Boolean {
+        val upper = message.orEmpty().uppercase()
+        return "MISSING_SPLIT" in upper
+    }
+
+    fun isSecurityMessage(message: String?): Boolean {
+        val upper = message.orEmpty().uppercase()
+        return "SECURITYEXCEPTION" in upper ||
+                "SECURITY_EXCEPTION" in upper ||
+                "STATUS_FAILURE_SECURITY" in upper ||
+                "SESSION DOES NOT BELONG" in upper ||
+                ("PERMISSION DENIED" in upper && "INSTALL" in upper)
+    }
+
+    fun isInternalErrorMessage(message: String?): Boolean {
+        val upper = message.orEmpty().uppercase()
+        return "INTERNAL_ERROR" in upper || "FAILED TO COMMIT" in upper
+    }
+
+    fun shouldSuggestShizuku(message: String?): Boolean {
+        val upper = message.orEmpty().uppercase()
+        return isSecurityMessage(upper) ||
+                isInternalErrorMessage(upper) ||
+                "STATUS_FAILURE" in upper ||
+                "INSTALL_FAILED_INTERNAL_ERROR" in upper ||
+                "USER_RESTRICTED" in upper ||
+                "SECURITYEXCEPTION" in upper
+    }
+
     fun getErrorInfo(context: Context, failure: InstallFailure): ErrorInfo {
         if (isFrpFailure(failure)) {
             return ErrorInfo(
@@ -191,8 +232,33 @@ object InstallErrorHelper {
                 guidance = context.getString(R.string.install_error_security_frp_guidance),
             )
         }
-        if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(failure.message)) {
-            return incompatibleErrorInfo(context, failure.message)
+        val msg = failure.message.orEmpty()
+        if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(msg)) {
+            return incompatibleErrorInfo(context, msg)
+        }
+        if (isNoCertificatesMessage(msg)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_no_certificates_title),
+                guidance = context.getString(R.string.install_error_no_certificates_guidance),
+            )
+        }
+        if (isMissingSplitMessage(msg)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_missing_split_title),
+                guidance = context.getString(R.string.install_error_missing_split_guidance),
+            )
+        }
+        if (isSecurityMessage(msg) || (failure is InstallFailure.Exceptional && failure.exception is SecurityException)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_security_title),
+                guidance = context.getString(R.string.install_error_security_guidance),
+            )
+        }
+        if (isInternalErrorMessage(msg)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_internal_title),
+                guidance = context.getString(R.string.install_error_internal_guidance),
+            )
         }
         return when (failure) {
             is InstallFailure.Aborted -> ErrorInfo(
@@ -253,6 +319,30 @@ object InstallErrorHelper {
         }
         if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(message)) {
             return incompatibleErrorInfo(context, message)
+        }
+        if (isNoCertificatesMessage(message)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_no_certificates_title),
+                guidance = context.getString(R.string.install_error_no_certificates_guidance),
+            )
+        }
+        if (isMissingSplitMessage(message)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_missing_split_title),
+                guidance = context.getString(R.string.install_error_missing_split_guidance),
+            )
+        }
+        if (isSecurityMessage(message)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_security_title),
+                guidance = context.getString(R.string.install_error_security_guidance),
+            )
+        }
+        if (isInternalErrorMessage(message)) {
+            return ErrorInfo(
+                title = context.getString(R.string.install_error_internal_title),
+                guidance = context.getString(R.string.install_error_internal_guidance),
+            )
         }
         val raw = message.orEmpty().uppercase()
         return when {
@@ -316,6 +406,15 @@ object InstallErrorHelper {
         if (app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(rawMessage)) {
             return "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE"
         }
+        if (isNoCertificatesMessage(rawMessage)) {
+            return "INSTALL_PARSE_FAILED_NO_CERTIFICATES"
+        }
+        if (isMissingSplitMessage(rawMessage)) {
+            return "INSTALL_FAILED_MISSING_SPLIT"
+        }
+        if (isSecurityMessage(rawMessage)) {
+            return "INSTALL_FAILED_SECURITY_EXCEPTION"
+        }
         val match = PM_ERROR_CODE_REGEX.find(rawMessage)
         if (match != null) {
             return match.groupValues[1]
@@ -359,6 +458,10 @@ object InstallErrorHelper {
         val upperCode = errorCode.uppercase()
         val rawMessage = failure.message.orEmpty().uppercase()
         return when {
+            isMissingSplitMessage(upperCode) || isMissingSplitMessage(rawMessage) ->
+                "missing_split"
+            isSecurityMessage(upperCode) || isSecurityMessage(rawMessage) ->
+                "permission_denied"
             "SIGNATURE" in upperCode || "UPDATE_INCOMPATIBLE" in upperCode || "CERTIFICATE" in upperCode || "SIGNATURES DO NOT MATCH" in rawMessage ->
                 "signature_mismatch"
             "DOWNGRADE" in upperCode || "VERSION_DOWNGRADE" in rawMessage ->

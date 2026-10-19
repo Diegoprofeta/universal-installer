@@ -25,13 +25,22 @@ object SourceFileDeleter {
             }
             return runCatching {
                 val file = File(path)
-                val deleted = file.exists() && file.delete()
+                if (!file.exists()) {
+                    return@runCatching true // Already deleted or doesn't exist
+                }
+                val deleted = file.delete()
                 if (deleted) {
                     MediaScannerConnection.scanFile(context, arrayOf(path), null, null)
                 }
-                deleted
+                deleted || !file.exists()
             }.onFailure { Log.e(TAG, "Failed to delete source file: $uri", it) }
                 .getOrDefault(false)
+        }
+
+        // For content:// scheme, check if already non-existent on filesystem
+        val resolvedPath = resolveFilePathFromUri(context, uri)
+        if (resolvedPath != null && !File(resolvedPath).exists()) {
+            return true
         }
 
         runCatching {
@@ -63,8 +72,7 @@ object SourceFileDeleter {
         if (crDeleted) return true
 
         // 5. Direct path resolution fallback (e.g. MediaStore DATA column, storage path, MANAGE_EXTERNAL_STORAGE)
-        return runCatching {
-            val resolvedPath = resolveFilePathFromUri(context, uri)
+        val directDeleted = runCatching {
             if (resolvedPath != null) {
                 val file = File(resolvedPath)
                 if (file.exists() && file.delete()) {
@@ -72,13 +80,23 @@ object SourceFileDeleter {
                     MediaScannerConnection.scanFile(context, arrayOf(resolvedPath), null, null)
                     true
                 } else {
-                    false
+                    !file.exists()
                 }
             } else {
                 false
             }
         }.onFailure { Log.e(TAG, "Failed to delete resolved file from uri: $uri", it) }
             .getOrDefault(false)
+        if (directDeleted) return true
+
+        // Verify if file is actually gone
+        return runCatching {
+            if (resolvedPath != null) {
+                !File(resolvedPath).exists()
+            } else {
+                context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { false } ?: true
+            }
+        }.getOrDefault(false)
     }
 
     private fun resolveFilePathFromUri(context: Context, uri: Uri): String? {

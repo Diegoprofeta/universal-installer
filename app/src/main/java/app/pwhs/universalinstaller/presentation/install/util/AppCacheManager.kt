@@ -29,8 +29,9 @@ object AppCacheManager {
             val dir = File(context.cacheDir, EXTERNAL_APKS_DIR).apply { mkdirs() }
             pruneOldStagedFiles(dir)
 
-            val ext = displayName.substringAfterLast('.', "apk").lowercase()
-            val safeBaseName = displayName.substringBeforeLast('.')
+            val rawExt = displayName.substringAfterLast('.', "").lowercase()
+            val ext = if (PackageFileFilter.isSupportedExtension(rawExt)) rawExt else "apk"
+            val safeBaseName = (if (rawExt == ext) displayName.substringBeforeLast('.') else displayName)
                 .ifBlank { "package" }
                 .replace(Regex("[/\\\\:*?\"<>|]"), "_")
                 .take(40)

@@ -351,19 +351,31 @@ abstract class BaseInstallController(
             } catch (e: Exception) {
                 val isFrp = InstallErrorHelper.isFrpException(e)
                 val isAbi = app.pwhs.universalinstaller.presentation.install.util.AbiCompatibilityHelper.isAbiErrorMessage(e.message)
+                val isSecurity = e is SecurityException || InstallErrorHelper.isSecurityMessage(e.message)
+                val isNoCertificates = InstallErrorHelper.isNoCertificatesMessage(e.message)
+                val isMissingSplit = InstallErrorHelper.isMissingSplitMessage(e.message)
                 val errorCode = when {
                     isFrp -> "INSTALL_FAILED_SECURITY_FRP"
                     isAbi -> "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE"
+                    isNoCertificates -> "INSTALL_PARSE_FAILED_NO_CERTIFICATES"
+                    isMissingSplit -> "INSTALL_FAILED_MISSING_SPLIT"
+                    isSecurity -> "INSTALL_FAILED_SECURITY_EXCEPTION"
                     else -> "INSTALL_FAILED_INTERNAL_ERROR"
                 }
                 val errorType = when {
                     isFrp -> "security_frp"
                     isAbi -> "incompatible_device"
+                    isNoCertificates -> "corrupted_package"
+                    isMissingSplit -> "missing_split"
+                    isSecurity -> "permission_denied"
                     else -> "internal_error"
                 }
                 val errorReason = when {
                     isFrp -> "security_frp"
                     isAbi -> "abi_incompatible"
+                    isNoCertificates -> "no_certificates"
+                    isMissingSplit -> "missing_split"
+                    isSecurity -> "SecurityException"
                     else -> e.javaClass.simpleName
                 }
                 reportInstallResult(
@@ -442,6 +454,7 @@ abstract class BaseInstallController(
     private suspend fun deleteSourceFileIfNeeded(sessionId: UUID, context: Context?) {
         if (deleteFlags[sessionId] != true || context == null) return
         val uri = originalFileUris[sessionId] ?: return
+        deleteFlags.remove(sessionId)
         deleteSourceFileAndWarn(context, uri)
     }
 

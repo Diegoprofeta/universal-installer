@@ -62,6 +62,15 @@
     <string name="install_error_failed_title">Cài đặt thất bại</string>
     <string name="install_error_unknown_guidance">Đã xảy ra một lỗi không xác định. Nhấn Thử lại để thử lại.</string>
     <string name="install_error_unknown_guidance_short">Đã xảy ra một lỗi không xác định.</string>
+    <string name="install_error_no_certificates_title">APK chưa ký hoặc chứng chỉ hỏng</string>
+    <string name="install_error_no_certificates_guidance">File APK này chưa có chữ ký số hợp lệ hoặc chứng chỉ đã bị hỏng. Android chặn cài đặt để bảo vệ thiết bị. Hãy tải file từ nguồn uy tín, hoặc dùng chế độ Shizuku/Root nếu đây là bản mod/thử nghiệm.</string>
+    <string name="install_error_missing_split_title">Thiếu file Split APK</string>
+    <string name="install_error_missing_split_guidance">File này là gói split chưa hoàn chỉnh (thiếu file split kiến trúc chip, ngôn ngữ hoặc tài nguyên). Hãy tải bản trọn gói (.apks, .xapk, .apkm) hoặc dùng AntiSplit để gộp.</string>
+    <string name="install_error_security_title">Bị chặn bởi bảo mật hệ thống</string>
+    <string name="install_error_security_guidance">Trình cài đặt hệ thống đã chặn gói này (SecurityException). Hãy chuyển sang chế độ Shizuku trong Cài đặt để vượt qua giới hạn của hãng và cài đặt thành công.</string>
+    <string name="install_error_internal_title">Lỗi trình cài đặt hệ thống</string>
+    <string name="install_error_internal_guidance">Trình cài đặt của Android gặp sự cố nội bộ. Hãy thử lại hoặc chuyển sang chế độ Shizuku trong Cài đặt để khắc phục.</string>
+    <string name="install_error_suggest_shizuku_action">Thử cài bằng Shizuku</string>
     <string name="install_delete_source_failed">Đã cài đặt, nhưng không xoá được file APK. Ứng dụng chia sẻ file cho Universal Installer thường không cho phép xoá — hãy xoá trong trình quản lý file bạn đã mở nó.</string>
     <string name="install_error_miui_hint">Trên thiết bị Xiaomi, Redmi và POCO, tính năng tối ưu hóa MIUI/HyperOS thường âm thầm chặn việc cài đặt. Hãy mở Cài đặt &gt; Cài đặt bổ sung &gt; Tùy chọn nhà phát triển, tắt \"Tối ưu hóa MIUI\", cài đặt ứng dụng rồi bật lại. Khi đang tắt, giao diện hệ thống có thể bị lỗi hiển thị — khởi động lại điện thoại sẽ khắc phục.</string>
     <string name="apk_info_vt_uploading">Đang tải lên VirusTotal… %d%%</string>

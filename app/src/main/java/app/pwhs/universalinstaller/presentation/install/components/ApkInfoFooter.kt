@@ -1,5 +1,6 @@
 package app.pwhs.universalinstaller.presentation.install.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -79,34 +80,40 @@ fun ApkInfoFooter(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (!isExpanded) {
-            OutlinedButton(
-                onClick = onExpand,
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                shape = MaterialTheme.shapes.medium,
+                    .clickable(onClick = onExpand)
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Info,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
                     text = stringResource(R.string.dialog_menu_details),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                 )
                 Spacer(Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Rounded.KeyboardArrowDown,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedButton(
                 onClick = {
@@ -116,7 +123,9 @@ fun ApkInfoFooter(
                         onCancel()
                     }
                 },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(0.35f)
+                    .height(52.dp),
                 shape = MaterialTheme.shapes.medium,
             ) {
                 Text(
@@ -125,64 +134,67 @@ fun ApkInfoFooter(
                     } else {
                         stringResource(R.string.cancel)
                     },
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
-            if (isScanCompleted) {
-                Button(
-                    onClick = onInstall,
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.medium,
-                    enabled = !apkInfo.isBlocked,
-                    colors = if (isDowngrade) {
-                        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                    } else {
-                        ButtonDefaults.buttonColors()
-                    },
-                ) {
-                    if (confirmText == null) {
-                        Icon(Icons.Rounded.InstallMobile, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    Text(
-                        text = confirmText ?: if (isDowngrade) {
-                            stringResource(R.string.dialog_downgrade_btn)
-                        } else {
-                            stringResource(R.string.txt_install)
-                        },
+            Button(
+                onClick = onInstall,
+                modifier = Modifier
+                    .weight(0.65f)
+                    .height(52.dp),
+                shape = MaterialTheme.shapes.medium,
+                enabled = !apkInfo.isBlocked,
+                colors = if (isDowngrade) {
+                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                } else {
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
                     )
+                },
+            ) {
+                if (confirmText == null) {
+                    Icon(Icons.Rounded.InstallMobile, null, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(8.dp))
                 }
-            } else {
-                Button(
-                    onClick = onCheckVirusTotal,
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.medium,
-                    enabled = !isScanning,
-                ) {
-                    if (isScanning) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp,
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.scanning_progress))
+                Text(
+                    text = confirmText ?: if (isDowngrade) {
+                        stringResource(R.string.dialog_downgrade_btn)
                     } else {
-                        Icon(Icons.Rounded.Security, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.scan_virustotal_btn))
-                    }
-                }
+                        stringResource(R.string.txt_install)
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
 
-        if (!isScanCompleted) {
-            TextButton(
-                onClick = onInstall,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !apkInfo.isBlocked,
+        if (strictSecurity && !isScanCompleted) {
+            OutlinedButton(
+                onClick = onCheckVirusTotal,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                shape = MaterialTheme.shapes.medium,
+                enabled = !isScanning,
             ) {
-                Text(stringResource(R.string.skip_and_install_btn))
+                if (isScanning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.scanning_progress), style = MaterialTheme.typography.labelMedium)
+                } else {
+                    Icon(Icons.Rounded.Security, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.scan_virustotal_btn), style = MaterialTheme.typography.labelMedium)
+                }
             }
         }
     }

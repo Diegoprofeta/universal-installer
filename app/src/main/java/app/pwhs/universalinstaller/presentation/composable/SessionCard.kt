@@ -20,6 +20,7 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,6 +61,7 @@ fun SessionCard(
     /** Clear a failed session from the list. Without this a failed install had Retry and no way
      *  out at all — the card stayed for good (issue #93). */
     onDismiss: () -> Unit = {},
+    onOpenShizuku: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val errorText = sessionData.error.resolve(context)
@@ -167,6 +169,26 @@ fun SessionCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+                if (onOpenShizuku != null && app.pwhs.universalinstaller.presentation.install.InstallErrorHelper.shouldSuggestShizuku(errorText)) {
+                    Spacer(Modifier.height(10.dp))
+                    FilledTonalButton(
+                        onClick = onOpenShizuku,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Terminal,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.install_error_suggest_shizuku_action),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
                 }
                 Spacer(Modifier.height(12.dp))
                 Row(

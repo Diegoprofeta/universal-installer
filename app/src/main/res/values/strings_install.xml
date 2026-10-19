@@ -207,6 +207,15 @@
     <string name="install_error_failed_title">Installation failed</string>
     <string name="install_error_unknown_guidance">An unknown error occurred. Tap Retry to try again.</string>
     <string name="install_error_unknown_guidance_short">An unknown error occurred.</string>
+    <string name="install_error_no_certificates_title">Unsigned or corrupted APK</string>
+    <string name="install_error_no_certificates_guidance">This APK is not digitally signed or its certificate is corrupt. Android prevents installing unsigned apps. Try downloading an official release, or install using Shizuku/Root mode if this is a development or modded APK.</string>
+    <string name="install_error_missing_split_title">Missing split APK files</string>
+    <string name="install_error_missing_split_guidance">This package is an incomplete split APK (missing architecture, language, or resource splits). Please download the complete bundle (.apks, .xapk, .apkm) or merge it using AntiSplit.</string>
+    <string name="install_error_security_title">Blocked by system security</string>
+    <string name="install_error_security_guidance">Your device\'s system installer blocked this package with a SecurityException. Switching to Shizuku mode in Settings bypasses vendor restrictions and allows successful installation.</string>
+    <string name="install_error_internal_title">System installer error</string>
+    <string name="install_error_internal_guidance">The Android system package installer encountered an internal error. Retrying or switching to Shizuku mode in Settings usually resolves this issue.</string>
+    <string name="install_error_suggest_shizuku_action">Try with Shizuku</string>
     <string name="install_delete_source_failed">Installed, but the APK file could not be deleted. Apps that share a file with Universal Installer often do not allow deleting it — remove it from the file manager you opened it with.</string>
     <string name="install_error_miui_hint">On Xiaomi, Redmi and POCO devices, MIUI/HyperOS optimization often blocks installs silently. Open Settings &gt; Additional settings &gt; Developer options, turn off \&quot;MIUI optimization\&quot;, install the app, then turn it back on. While it is off the system theme may look distorted — restarting the phone fixes that.</string>
     <string name="dialog_install_btn">Install</string>

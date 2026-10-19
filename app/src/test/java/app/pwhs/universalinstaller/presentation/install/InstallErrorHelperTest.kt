@@ -37,4 +37,32 @@ class InstallErrorHelperTest {
         assertEquals("timeout", InstallErrorHelper.failureKey(InstallFailure.Timeout("test")))
         assertEquals("generic", InstallErrorHelper.failureKey(InstallFailure.Generic("test")))
     }
+
+    @Test
+    fun `isNoCertificatesMessage detects certificate errors correctly`() {
+        org.junit.Assert.assertTrue(InstallErrorHelper.isNoCertificatesMessage("INSTALL_PARSE_FAILED_NO_CERTIFICATES"))
+        org.junit.Assert.assertTrue(InstallErrorHelper.isNoCertificatesMessage("Package has no certificates"))
+        org.junit.Assert.assertFalse(InstallErrorHelper.isNoCertificatesMessage("INSTALL_FAILED_INSUFFICIENT_STORAGE"))
+    }
+
+    @Test
+    fun `isMissingSplitMessage detects split errors correctly`() {
+        org.junit.Assert.assertTrue(InstallErrorHelper.isMissingSplitMessage("INSTALL_FAILED_MISSING_SPLIT: missing split config.arm64"))
+        org.junit.Assert.assertFalse(InstallErrorHelper.isMissingSplitMessage("INSTALL_FAILED_VERSION_DOWNGRADE"))
+    }
+
+    @Test
+    fun `isSecurityMessage detects security exceptions correctly`() {
+        org.junit.Assert.assertTrue(InstallErrorHelper.isSecurityMessage("java.lang.SecurityException: Session does not belong to uid"))
+        org.junit.Assert.assertTrue(InstallErrorHelper.isSecurityMessage("STATUS_FAILURE_SECURITY"))
+        org.junit.Assert.assertFalse(InstallErrorHelper.isSecurityMessage("INSTALL_FAILED_ABORTED"))
+    }
+
+    @Test
+    fun `shouldSuggestShizuku returns true for system and security errors`() {
+        org.junit.Assert.assertTrue(InstallErrorHelper.shouldSuggestShizuku("SecurityException: User 0 cannot install"))
+        org.junit.Assert.assertTrue(InstallErrorHelper.shouldSuggestShizuku("INSTALL_FAILED_INTERNAL_ERROR"))
+        org.junit.Assert.assertTrue(InstallErrorHelper.shouldSuggestShizuku("STATUS_FAILURE_SECURITY"))
+        org.junit.Assert.assertFalse(InstallErrorHelper.shouldSuggestShizuku("INSTALL_FAILED_INSUFFICIENT_STORAGE"))
+    }
 }

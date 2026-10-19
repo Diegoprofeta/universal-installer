@@ -80,19 +80,25 @@ object PackageFileFilter {
         val hasValidExt = ext in SUPPORTED_PACKAGE_EXTENSIONS
         val hasApkMime = mimeType == "application/vnd.android.package-archive" ||
                 mimeType == "application/zip" ||
-                mimeType == "application/x-zip-compressed"
+                mimeType == "application/x-zip-compressed" ||
+                mimeType == "application/x-zip" ||
+                mimeType == "application/octet-stream"
+
+        // Validate ZIP magic bytes (PK\x03\x04 or 0x50, 0x4B)
+        val hasMagicBytes = runCatching {
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                checkZipMagicBytes(stream)
+            } ?: false
+        }.getOrDefault(false)
+
+        if (hasMagicBytes) return true
 
         if (!hasValidExt && !hasApkMime && ext.isNotEmpty()) {
             Timber.w("Rejecting unknown file extension: %s (MIME: %s)", ext, mimeType)
             return false
         }
 
-        // Validate ZIP magic bytes (PK\x03\x04 or 0x50, 0x4B)
-        return runCatching {
-            context.contentResolver.openInputStream(uri)?.use { stream ->
-                checkZipMagicBytes(stream)
-            } ?: (hasValidExt || hasApkMime)
-        }.getOrDefault(hasValidExt || hasApkMime)
+        return hasValidExt || hasApkMime
     }
 
     fun isSupportedPackageFile(file: File, fileName: String? = null): Boolean {
@@ -104,15 +110,14 @@ object PackageFileFilter {
         }
 
         val hasValidExt = ext in SUPPORTED_PACKAGE_EXTENSIONS
-        if (!hasValidExt && ext.isNotEmpty()) {
-            return false
-        }
-
-        return runCatching {
+        val hasMagicBytes = runCatching {
             FileInputStream(file).use { stream ->
                 checkZipMagicBytes(stream)
             }
-        }.getOrDefault(hasValidExt)
+        }.getOrDefault(false)
+
+        if (hasMagicBytes) return true
+        return hasValidExt
     }
 
     private fun checkZipMagicBytes(stream: InputStream): Boolean {

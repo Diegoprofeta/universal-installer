@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
 import app.pwhs.universalinstaller.presentation.setting.SecurityLevel
+import app.pwhs.universalinstaller.presentation.setting.SettingActivity
 import app.pwhs.core.data.local.dataStore
 import app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter
 import app.pwhs.universalinstaller.presentation.install.wear.WearApkSender
@@ -524,7 +525,9 @@ private fun InstallUi(
             val extension = displayName.substringAfterLast('.', "").lowercase()
             val validExtensions = listOf("apk", "apks", "xapk", "apkm", "apk+", "zip")
             val isApkMime = mimeType == "application/vnd.android.package-archive"
-            if (!isApkMime && extension !in validExtensions) {
+            val isSupported = isApkMime || extension in validExtensions ||
+                PackageFileFilter.isSupportedPackage(context, uri, displayName)
+            if (!isSupported) {
                 Toast.makeText(
                     context,
                     resource.getString(R.string.install_unsupported_file),
@@ -532,9 +535,10 @@ private fun InstallUi(
                 ).show()
                 return@LaunchedEffect
             }
+            val effectiveExt = if (extension in validExtensions) extension else "apk"
             val apks = when {
-                (isApkMime || extension == "apk") -> SingletonApkSequence(uri, context).toSplitPackage()
-                extension in listOf("apks", "xapk", "apkm", "apk+", "zip") -> ZippedApkSplits.getApksForUri(uri, context)
+                (isApkMime || effectiveExt == "apk") -> SingletonApkSequence(uri, context).toSplitPackage()
+                effectiveExt in listOf("apks", "xapk", "apkm", "apk+", "zip") -> ZippedApkSplits.getApksForUri(uri, context)
                     .validate()
                     .toSplitPackage()
                     .filterCompatible(context)
@@ -862,6 +866,9 @@ private fun InstallUi(
                         onCancel = { onCancel(session.id) },
                         onRetry = { onRetry(session.id) },
                         onDismiss = { onDismissSession(session.id) },
+                        onOpenShizuku = {
+                            context.startActivity(Intent(context, SettingActivity::class.java))
+                        },
                         modifier = Modifier.animateItem(),
                     )
                 }

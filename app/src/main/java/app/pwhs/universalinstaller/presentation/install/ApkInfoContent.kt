@@ -395,14 +395,6 @@ internal fun ApkInfoContent(
             )
         }
 
-        if (apkInfo.isAbiIncompatible) {
-            AbiIncompatibleBanner(
-                apkAbis = apkInfo.supportedAbis,
-                onClick = { showAbiWarningDialog = true },
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
-            )
-        }
-
         if (apkInfo.isBlocked) {
             InstallBlockedBanner(
                 packageName = apkInfo.packageName,

@@ -21,14 +21,19 @@ import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.ErrorOutline
+import android.content.Intent
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
+import app.pwhs.universalinstaller.presentation.install.InstallErrorHelper
+import app.pwhs.universalinstaller.presentation.setting.SettingActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -464,6 +469,29 @@ fun DialogFailedContent(
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+
+        if (InstallErrorHelper.shouldSuggestShizuku(errorMessage)) {
+            FilledTonalButton(
+                onClick = {
+                    context.startActivity(Intent(context, SettingActivity::class.java))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Terminal,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.install_error_suggest_shizuku_action),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         if (onFallbackInstall != null) {
             Button(

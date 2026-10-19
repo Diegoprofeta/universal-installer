@@ -145,7 +145,8 @@ object DialogInstallUriHelper {
             return
         }
 
-        val ext = displayName.substringAfterLast('.', "").lowercase()
+        val rawExt = displayName.substringAfterLast('.', "").lowercase()
+        val ext = if (app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isSupportedExtension(rawExt)) rawExt else "apk"
         val splitProvider = InstallApkSplitsHelper.buildSplitProvider(context, targetUri, ext)
         viewModel.parseApkInfo(context, targetUri, splitProvider, displayName)
     }
@@ -172,7 +173,8 @@ object DialogInstallUriHelper {
         }
 
         val targetUri = Uri.fromFile(file)
-        val ext = fileName.substringAfterLast('.', "").lowercase()
+        val rawExt = fileName.substringAfterLast('.', "").lowercase()
+        val ext = if (app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isSupportedExtension(rawExt)) rawExt else "apk"
         val splitProvider = InstallApkSplitsHelper.buildSplitProvider(context, targetUri, ext)
         viewModel.parseApkInfo(context, targetUri, splitProvider, fileName)
     }

@@ -39,12 +39,14 @@ object InstallApkSplitsHelper {
         uri: Uri,
         extension: String,
     ): SplitPackage.Provider {
+        val rawExt = extension.lowercase()
+        val ext = if (PackageFileFilter.isSupportedExtension(rawExt)) rawExt else "apk"
         return when {
-            extension == "apk" ||
+            ext == "apk" ||
                     context.contentResolver.getType(uri)?.lowercase() ==
                     "application/vnd.android.package-archive" ->
                 SingletonApkSequence(uri, context).toSplitPackage()
-            extension in listOf("apks", "xapk", "apkm", "zip") ->
+            ext in listOf("apks", "xapk", "apkm", "zip") ->
                 ZippedApkSplits.getApksForUri(uri, context)
                     .validate()
                     .toSplitPackage()
@@ -62,12 +64,14 @@ object InstallApkSplitsHelper {
         onPendingUrisResolved: (List<Uri>) -> Unit,
     ): ApkInfo {
         val pm = context.packageManager
-        val extension = fileName.substringAfterLast('.', "").lowercase()
+        val rawExt = fileName.substringAfterLast('.', "").lowercase()
+        val extension = if (PackageFileFilter.isSupportedExtension(rawExt)) rawExt else "apk"
         val fileFormat = when (extension) {
             "apk" -> "APK"
             "apks" -> "APKS (Split Bundle)"
             "xapk" -> "XAPK (Split Bundle)"
             "apkm" -> "APKM (Split Bundle)"
+            "zip" -> "ZIP Archive"
             else -> extension.uppercase()
         }
 
@@ -111,18 +115,16 @@ object InstallApkSplitsHelper {
             }
             splitCount = entries.size
             if (entries.isEmpty()) {
-                Timber.e("SplitPackage enumerated 0 entries for $originalUri (fileName=$fileName ext=$extension)")
-                if (extension == "apk" || extension.isBlank()) {
-                    splitEntries.add(
-                        SplitEntry(
-                            name = "Base APK (Unparsed)",
-                            type = SplitType.Base,
-                            uri = originalUri,
-                            sizeBytes = fileSize.coerceAtLeast(0L),
-                        )
+                Timber.w("SplitPackage enumerated 0 entries for $originalUri (fileName=$fileName ext=$extension) — adding fallback base APK entry")
+                splitEntries.add(
+                    SplitEntry(
+                        name = "Base APK (Unparsed)",
+                        type = SplitType.Base,
+                        uri = originalUri,
+                        sizeBytes = fileSize.coerceAtLeast(0L),
                     )
-                    baseApkUri = originalUri
-                }
+                )
+                baseApkUri = originalUri
             }
 
             for (entry in entries) {
