@@ -58,6 +58,7 @@ import app.pwhs.universalinstaller.presentation.composable.InstallerModeBadge
 import app.pwhs.universalinstaller.presentation.install.components.AbiIncompatibleBanner
 import app.pwhs.universalinstaller.presentation.install.components.AbisCard
 import app.pwhs.universalinstaller.presentation.install.components.ApkInfoHeader
+import app.pwhs.universalinstaller.presentation.install.components.ApkInfoChipsRow
 import app.pwhs.universalinstaller.presentation.install.components.ApkInfoFooter
 import app.pwhs.universalinstaller.presentation.install.components.DetailsCard
 import app.pwhs.universalinstaller.presentation.install.components.InfoChip
@@ -155,172 +156,15 @@ internal fun ApkInfoContent(
             InstallerModeBadge()
             Spacer(Modifier.height(16.dp))
 
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ApkInfoChipsRow(
+                apkInfo = apkInfo,
+                isExpanded = isExpanded,
+                isDowngrade = isDowngrade,
+                onCheckVirusTotal = onCheckVirusTotal,
+                onShowTrackers = { showTrackersDialog = true },
+                onExpand = { isExpanded = true },
                 modifier = Modifier.fillMaxWidth(),
-            ) {
-                if (isDowngrade) {
-                    InfoChip(
-                        label = stringResource(R.string.dialog_chip_downgrade),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Warning,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    )
-                }
-                if (apkInfo.isAbiIncompatible) {
-                    InfoChip(
-                        label = stringResource(R.string.dialog_chip_abi_incompatible),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Warning,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    )
-                }
-                if (apkInfo.isAndroidAutoSupported) {
-                    InfoChip(
-                        label = stringResource(R.string.aa_compatibility_ok),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Rounded.DirectionsCar,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        },
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-                if (apkInfo.isRootRequested) {
-                    InfoChip(
-                        label = stringResource(R.string.apk_info_root_requested),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Rounded.AdminPanelSettings,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    )
-                }
-                if (apkInfo.isShizukuRequested) {
-                    InfoChip(
-                        label = stringResource(R.string.apk_info_shizuku_requested),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Terminal,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.secondary,
-                            )
-                        },
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                }
-                apkInfo.vtResult?.let { vt ->
-                    VtStatusChip(
-                        vt = vt,
-                        onClick = onCheckVirusTotal,
-                        onOpenWeb = {
-                            if (apkInfo.sha256.isNotBlank()) {
-                                uriHandler.openUri("https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
-                            }
-                        },
-                        onOpenSettings = {
-                            context.startActivity(
-                                Intent(context, SettingActivity::class.java),
-                            )
-                        },
-                    )
-                }
-                if (apkInfo.isScanningTrackers) {
-                    InfoChip(
-                        label = stringResource(R.string.dialog_chip_trackers_scanning),
-                        leadingIcon = {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(12.dp),
-                                strokeWidth = 1.5.dp,
-                                color = MaterialTheme.colorScheme.tertiary,
-                            )
-                        },
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    )
-                } else if (apkInfo.trackers.isNotEmpty()) {
-                    InfoChip(
-                        label = stringResource(R.string.dialog_chip_trackers, apkInfo.trackers.size),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Shield,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.tertiary,
-                            )
-                        },
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                        onClick = { showTrackersDialog = true },
-                    )
-                }
-                if (isExpanded) {
-                    if (apkInfo.versionName.isNotBlank()) {
-                        InfoChip(
-                            label = stringResource(R.string.apk_info_version_chip, apkInfo.versionName),
-                        )
-                    }
-                    if (apkInfo.fileSizeBytes > 0) {
-                        InfoChip(
-                            label = Formatter.formatShortFileSize(context, apkInfo.fileSizeBytes),
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Rounded.Storage,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            },
-                        )
-                    }
-                } else {
-                    if (apkInfo.fileSizeBytes > 0) {
-                        InfoChip(
-                            label = Formatter.formatShortFileSize(context, apkInfo.fileSizeBytes),
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Rounded.Storage,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            },
-                        )
-                    }
-                }
-                if (apkInfo.splitCount > 1) {
-                    InfoChip(
-                        label = stringResource(R.string.apk_info_splits_count, apkInfo.splitCount),
-                    )
-                }
-                if (apkInfo.obbFileNames.isNotEmpty()) {
-                    InfoChip(label = "OBB: ${apkInfo.obbFileNames.size}")
-                }
-            }
+            )
 
             if (isExpanded) {
                 Spacer(Modifier.height(16.dp))
