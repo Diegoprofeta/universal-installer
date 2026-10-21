@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.SupportAgent
 import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -73,6 +76,7 @@ import app.pwhs.universalinstaller.presentation.install.components.SplitsCard
 import app.pwhs.universalinstaller.presentation.install.components.VirusTotalCard
 import app.pwhs.universalinstaller.presentation.install.components.VtStatusChip
 import app.pwhs.universalinstaller.presentation.install.dialog.DialogKeepApkOption
+import app.pwhs.universalinstaller.presentation.install.dialog.InstallSupportBottomSheet
 import app.pwhs.universalinstaller.presentation.setting.SettingActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -115,6 +119,7 @@ internal fun ApkInfoContent(
     var isExpanded by rememberSaveable { mutableStateOf(!startCompact) }
     var showTrackersDialog by rememberSaveable { mutableStateOf(false) }
     var showAbiWarningDialog by rememberSaveable { mutableStateOf(false) }
+    var showSupportSheet by rememberSaveable { mutableStateOf(false) }
 
     androidx.compose.runtime.LaunchedEffect(installError) {
         if (!installError.isNullOrBlank()) {
@@ -262,7 +267,7 @@ internal fun ApkInfoContent(
                     .padding(horizontal = 24.dp, vertical = 6.dp),
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -277,7 +282,26 @@ internal fun ApkInfoContent(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.weight(1f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    TextButton(
+                        onClick = { showSupportSheet = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.SupportAgent,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.dialog_failed_get_support),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
         }
@@ -325,6 +349,23 @@ internal fun ApkInfoContent(
                 apkAbis = apkInfo.supportedAbis,
                 onDismiss = { showAbiWarningDialog = false },
                 onInstallAnyway = onInstall,
+            )
+        }
+
+        if (showSupportSheet && !installError.isNullOrBlank()) {
+            val target = remember(apkInfo) {
+                DialogTarget(
+                    sessionId = java.util.UUID.randomUUID(),
+                    packageName = apkInfo.packageName,
+                    appName = apkInfo.appName,
+                    iconPath = null,
+                    apkUri = null,
+                )
+            }
+            InstallSupportBottomSheet(
+                target = target,
+                errorMessage = installError,
+                onDismiss = { showSupportSheet = false },
             )
         }
     }

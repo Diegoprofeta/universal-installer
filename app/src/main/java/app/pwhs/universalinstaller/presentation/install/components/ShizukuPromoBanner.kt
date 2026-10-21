@@ -76,6 +76,7 @@ private const val SHIZUKU_WEBSITE_URL = "https://shizuku.rikka.app"
 fun ShizukuPromoBanner(
     modifier: Modifier = Modifier,
     settingViewModel: SettingViewModel = koinViewModel(),
+    onDismissed: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -272,7 +273,10 @@ fun ShizukuPromoBanner(
                     Spacer(Modifier.width(4.dp))
 
                     IconButton(
-                        onClick = onDismiss,
+                        onClick = {
+                            onDismiss()
+                            onDismissed?.invoke()
+                        },
                         modifier = Modifier.size(24.dp),
                     ) {
                         Icon(

@@ -37,11 +37,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,8 +66,10 @@ import app.pwhs.universalinstaller.presentation.setting.SettingViewModel
 import app.pwhs.universalinstaller.presentation.setting.ShizukuState
 import app.pwhs.universalinstaller.presentation.setting.security.util.SystemInstallerManager
 import app.pwhs.universalinstaller.util.MicroGCompat
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 import org.koin.androidx.compose.koinViewModel
 
 enum class InstallFeatureTipType(
@@ -136,6 +140,29 @@ fun InstallTipOverlay(
         mutableStateOf(SystemInstallerManager.isSystemPackageInstallerDisabled(context))
     }
 
+    var sessionRecorded by rememberSaveable { mutableStateOf(false) }
+    var isSessionEligible by rememberSaveable { mutableStateOf(false) }
+    var isTipDismissedInSession by rememberSaveable { mutableStateOf(false) }
+    var activeTipId by rememberSaveable { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        if (!sessionRecorded) {
+            sessionRecorded = true
+            val prefs = context.dataStore.data.first()
+            val sessionCount = prefs[PreferencesKeys.TIP_SESSION_COUNT] ?: 0
+            val nextTipSession = prefs[PreferencesKeys.NEXT_TIP_SESSION] ?: 0
+
+            val eligible = sessionCount >= nextTipSession
+            context.dataStore.edit { p ->
+                if (eligible) {
+                    p[PreferencesKeys.NEXT_TIP_SESSION] = sessionCount + Random.nextInt(1, 4)
+                }
+                p[PreferencesKeys.TIP_SESSION_COUNT] = sessionCount + 1
+            }
+            isSessionEligible = eligible
+        }
+    }
+
     LifecycleResumeEffect(Unit) {
         isSystemInstallerFrozen = SystemInstallerManager.isSystemPackageInstallerDisabled(context)
         settingViewModel.updateShizukuState()
@@ -197,19 +224,46 @@ fun InstallTipOverlay(
         shizukuState != ShizukuState.READY &&
         shizukuState != ShizukuState.UNSUPPORTED
 
-    if (shouldShowShizuku) {
-        ShizukuPromoBanner(modifier = modifier, settingViewModel = settingViewModel)
-        return
-    }
+    var wasShizukuShownThisSession by rememberSaveable { mutableStateOf(false) }
 
-    val currentFeatureTip = remember(dismissedFeatureTips) {
-        InstallFeatureTipType.availableTips().firstOrNull { tip ->
-            !dismissedFeatureTips.contains(tip.id)
+    LaunchedEffect(shouldShowShizuku, isSessionEligible, isTipDismissedInSession) {
+        if (shouldShowShizuku && isSessionEligible && !isTipDismissedInSession) {
+            wasShizukuShownThisSession = true
         }
     }
 
+    if (wasShizukuShownThisSession) {
+        if (isSessionEligible) {
+            ShizukuPromoBanner(
+                modifier = modifier,
+                settingViewModel = settingViewModel,
+                onDismissed = {
+                    isTipDismissedInSession = true
+                },
+            )
+        }
+        return
+    }
+
+    val availableTips = remember { InstallFeatureTipType.availableTips() }
+    val unDismissedTips = remember(availableTips, dismissedFeatureTips) {
+        availableTips.filter { !dismissedFeatureTips.contains(it.id) }
+    }
+
+    LaunchedEffect(unDismissedTips, isSessionEligible) {
+        if (isSessionEligible && activeTipId == null && unDismissedTips.isNotEmpty()) {
+            activeTipId = unDismissedTips.random().id
+        }
+    }
+
+    val currentFeatureTip = remember(activeTipId, unDismissedTips) {
+        unDismissedTips.firstOrNull { it.id == activeTipId }
+    }
+
+    val isTipVisible = isSessionEligible && !isTipDismissedInSession && currentFeatureTip != null
+
     AnimatedVisibility(
-        visible = currentFeatureTip != null,
+        visible = isTipVisible,
         enter = fadeIn() + slideInVertically { it },
         exit = fadeOut() + shrinkVertically() + slideOutVertically { it },
         modifier = modifier,
@@ -217,6 +271,7 @@ fun InstallTipOverlay(
         if (currentFeatureTip == null) return@AnimatedVisibility
 
         val onDismiss: () -> Unit = {
+            isTipDismissedInSession = true
             scope.launch {
                 context.dataStore.edit { prefs ->
                     val current = prefs[PreferencesKeys.DISMISSED_FEATURE_TIPS] ?: emptySet()
