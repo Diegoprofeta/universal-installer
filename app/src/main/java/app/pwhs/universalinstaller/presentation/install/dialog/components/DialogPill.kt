@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -56,29 +55,4 @@ fun DialogPill(
             color = contentColor,
         )
     }
-}
-
-@Composable
-fun DialogInfoPill(
-    label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    modifier: Modifier = Modifier,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
-    onClick: (() -> Unit)? = null,
-) {
-    DialogPill(
-        label = label,
-        modifier = modifier,
-        leadingIcon = {
-            androidx.compose.material3.Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp),
-                tint = iconTint,
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        onClick = onClick,
-    )
 }

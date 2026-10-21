@@ -8,7 +8,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import app.pwhs.universalinstaller.presentation.install.dialog.components.DialogInfoPill
 import app.pwhs.universalinstaller.presentation.install.dialog.components.DialogPill
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -29,18 +28,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.rounded.AdminPanelSettings
-import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Key
-import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.Shield
-import androidx.compose.material.icons.rounded.Storage
-import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.rounded.AdminPanelSettings
+import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -158,6 +153,16 @@ fun DialogPrepareContent(
             }
         }
 
+        // ── Size ──
+        val sizeText = Formatter.formatFileSize(context, apkInfo.fileSizeBytes)
+        if (apkInfo.fileSizeBytes > 0) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = sizeText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         // ── Warning Chips ──
         val hasChips = isDowngrade || apkInfo.splitCount > 1 || apkInfo.obbFileNames.isNotEmpty() || apkInfo.isAndroidAutoSupported || apkInfo.isRootRequested || apkInfo.isShizukuRequested
@@ -254,42 +259,18 @@ fun DialogPrepareContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             InstallerModeBadge()
-            if (apkInfo.fileSizeBytes > 0) {
-                DialogInfoPill(
-                    label = Formatter.formatShortFileSize(context, apkInfo.fileSizeBytes),
-                    icon = Icons.Rounded.Storage,
-                    onClick = onMenu,
-                )
-            }
-            if (apkInfo.targetSdkVersion > 0) {
-                DialogInfoPill(
-                    label = "API ${apkInfo.targetSdkVersion}",
-                    icon = Icons.Rounded.Android,
-                    onClick = onMenu,
-                )
-            }
-            if (!apkInfo.isAbiIncompatible) {
-                val abiLabel = when {
-                    apkInfo.supportedAbis.isEmpty() -> "Universal"
-                    apkInfo.supportedAbis.size == 1 -> apkInfo.supportedAbis.first()
-                    else -> "${apkInfo.supportedAbis.first()} +${apkInfo.supportedAbis.size - 1}"
-                }
-                DialogInfoPill(
-                    label = abiLabel,
-                    icon = Icons.Rounded.Memory,
-                    onClick = onMenu,
-                )
-            }
-            if (apkInfo.permissions.isNotEmpty()) {
-                DialogInfoPill(
-                    label = stringResource(R.string.apk_info_section_permissions, apkInfo.permissions.size),
-                    icon = Icons.Rounded.Key,
-                    onClick = onMenu,
-                )
-            }
-            DialogInfoPill(
+            DialogPill(
                 label = stringResource(R.string.dialog_menu_details),
-                icon = Icons.Rounded.Info,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                },
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onMenu,
             )
             if (apkInfo.isAbiIncompatible) {
