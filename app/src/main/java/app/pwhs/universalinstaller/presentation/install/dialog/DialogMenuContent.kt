@@ -137,6 +137,7 @@ fun DialogMenuContent(
     onToggleAllUsers: (Boolean) -> Unit = {},
     onSelectUserId: (Int?) -> Unit = {},
     onMergeSplits: (() -> Unit)? = null,
+    initialTab: Int = 0,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -302,7 +303,13 @@ fun DialogMenuContent(
         DialogTabItem(stringResource(R.string.dialog_tab_security), Icons.Rounded.Security),
         DialogTabItem(stringResource(R.string.dialog_tab_advanced), Icons.Rounded.Tune),
     )
-    val pagerState = rememberPagerState(pageCount = { tabs.size })
+    val clampedInitialPage = initialTab.coerceIn(0, tabs.size - 1)
+    val pagerState = rememberPagerState(initialPage = clampedInitialPage, pageCount = { tabs.size })
+    androidx.compose.runtime.LaunchedEffect(clampedInitialPage) {
+        if (pagerState.currentPage != clampedInitialPage) {
+            pagerState.scrollToPage(clampedInitialPage)
+        }
+    }
 
     Column(
         modifier = Modifier

@@ -26,6 +26,8 @@ import app.pwhs.universalinstaller.ui.theme.Spacing
 @Composable
 fun LoadingContent(
     onSkipParse: (() -> Unit)? = null,
+    onFallbackInstall: (() -> Unit)? = null,
+    onCancel: (() -> Unit)? = null,
 ) {
     Column(
         modifier = Modifier
@@ -39,8 +41,12 @@ fun LoadingContent(
         // Title line
         ShimmerBox(modifier = Modifier.width(180.dp).height(20.dp), shape = RoundedCornerShape(6.dp))
         Spacer(modifier = Modifier.height(Spacing.S))
-        // Subtitle line
-        ShimmerBox(modifier = Modifier.width(140.dp).height(14.dp), shape = RoundedCornerShape(6.dp))
+        // Status text
+        androidx.compose.material3.Text(
+            text = androidx.compose.ui.res.stringResource(app.pwhs.universalinstaller.R.string.file_picker_parsing),
+            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Spacer(modifier = Modifier.height(20.dp))
         // Chip row (2 chips)
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.S)) {
@@ -49,22 +55,45 @@ fun LoadingContent(
         }
         
         Spacer(modifier = Modifier.height(20.dp))
-        
-        // Button row
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.S)) {
-            ShimmerBox(modifier = Modifier.weight(1f).height(40.dp), shape = RoundedCornerShape(20.dp))
-            ShimmerBox(modifier = Modifier.weight(1f).height(40.dp), shape = RoundedCornerShape(20.dp))
+
+        if (onFallbackInstall != null) {
+            androidx.compose.material3.Button(
+                onClick = onFallbackInstall,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                androidx.compose.material3.Text(
+                    androidx.compose.ui.res.stringResource(
+                        app.pwhs.universalinstaller.R.string.dialog_failed_fallback_install,
+                        "Install via System Installer"
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Cancel button placeholder
-        ShimmerBox(modifier = Modifier.fillMaxWidth().height(40.dp), shape = RoundedCornerShape(20.dp))
+        if (onCancel != null) {
+            androidx.compose.material3.OutlinedButton(
+                onClick = onCancel,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                androidx.compose.material3.Text(
+                    androidx.compose.ui.res.stringResource(app.pwhs.universalinstaller.R.string.dialog_cancel_btn)
+                )
+            }
+        } else {
+            // Cancel button placeholder
+            ShimmerBox(modifier = Modifier.fillMaxWidth().height(40.dp), shape = RoundedCornerShape(20.dp))
+        }
 
         if (onSkipParse != null) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             androidx.compose.material3.TextButton(onClick = onSkipParse) {
-                androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(app.pwhs.universalinstaller.R.string.dialog_menu_skip_analysis, "Skip & Install"))
+                androidx.compose.material3.Text(
+                    androidx.compose.ui.res.stringResource(
+                        app.pwhs.universalinstaller.R.string.dialog_menu_skip_analysis,
+                        "Skip & Install"
+                    )
+                )
             }
         }
     }

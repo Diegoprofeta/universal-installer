@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import app.pwhs.universalinstaller.presentation.install.dialog.components.DialogPill
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.DirectionsCar
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.AdminPanelSettings
@@ -257,6 +259,20 @@ fun DialogPrepareContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             InstallerModeBadge()
+            DialogPill(
+                label = stringResource(R.string.dialog_menu_details),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                },
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                onClick = onMenu,
+            )
             if (apkInfo.isAbiIncompatible) {
                 DialogPill(
                     label = stringResource(R.string.dialog_chip_abi_incompatible),
@@ -446,42 +462,3 @@ fun DialogPrepareContent(
         }
     }
 }
-
-@Composable
-private fun DialogPill(
-    label: String,
-    modifier: Modifier = Modifier,
-    leadingIcon: (@Composable () -> Unit)? = null,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-    contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    borderColor: Color? = null,
-    onClick: (() -> Unit)? = null,
-) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .then(
-                if (borderColor != null) {
-                    Modifier.border(BorderStroke(0.5.dp, borderColor), RoundedCornerShape(50))
-                } else Modifier
-            )
-            .then(
-                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
-            )
-            .background(containerColor)
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        if (leadingIcon != null) {
-            leadingIcon()
-            Spacer(Modifier.width(6.dp))
-        }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = contentColor,
-        )
-    }
-}
-

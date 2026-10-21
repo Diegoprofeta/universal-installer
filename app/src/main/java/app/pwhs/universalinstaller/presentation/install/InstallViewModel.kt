@@ -113,6 +113,7 @@ class InstallViewModel(
         virusTotalNotifier = virusTotalNotifier,
         obbDelegate = obbDelegate,
         onProfileMatched = { _selectedProfileId.value = it },
+        onParseFailed = { dialogDelegate.parseFailed(it) },
     )
 
     private val scanDelegate = InstallScanDelegate(
@@ -144,6 +145,12 @@ class InstallViewModel(
 
     private val _mergeSplits = MutableStateFlow(false)
     private val _selectedProfileId = MutableStateFlow<String?>(null)
+    private val _installError = MutableStateFlow<String?>(null)
+    val installError: StateFlow<String?> = _installError.asStateFlow()
+
+    fun clearInstallError() {
+        _installError.value = null
+    }
 
     private val blacklist: StateFlow<Set<String>> = application.dataStore.data
         .map { InstallBlacklist.read(it) }
@@ -223,7 +230,7 @@ class InstallViewModel(
 
     fun dialogStartLoading() = dialogDelegate.startLoading()
     fun dialogShowPrepare() = dialogDelegate.showPrepare()
-    fun dialogShowMenu() = dialogDelegate.showMenu()
+    fun dialogShowMenu(initialTab: Int = 0) = dialogDelegate.showMenu(initialTab)
     fun dialogBackToPrepare() = dialogDelegate.backToPrepare()
     fun dialogStartInstalling() = dialogDelegate.startInstalling()
     fun dialogInstallSuccess() = dialogDelegate.installSuccess()
@@ -289,6 +296,8 @@ class InstallViewModel(
     val pendingOriginalUri: Uri?
         get() = parseDelegate.pendingOriginalUri
 
+    fun setPendingOriginalUri(uri: Uri?) = parseDelegate.setPendingOriginalUri(uri)
+
     fun parseApkInfo(
         context: Context,
         uri: Uri,
@@ -309,7 +318,10 @@ class InstallViewModel(
     }
 
     fun toggleSplit(index: Int) = parseDelegate.toggleSplit(index)
-    fun dismissPendingInstall() = parseDelegate.dismissPendingInstall()
+    fun dismissPendingInstall() {
+        _installError.value = null
+        parseDelegate.dismissPendingInstall()
+    }
     suspend fun stashPendingInstall() = parseDelegate.stashPendingInstall()
     fun restorePendingInstall(entry: PendingInstallStore.Entry) = parseDelegate.restorePendingInstall(entry)
     fun scanVirusTotal(context: Context) = parseDelegate.scanVirusTotal(context)
@@ -338,12 +350,13 @@ class InstallViewModel(
         }
         val blockedPackage = apkInfo?.packageName.orEmpty()
         if (blockedPackage.isNotBlank() && blockedPackage in blacklist.value) {
+            val msg = application.getString(R.string.install_blocked_by_blacklist, blockedPackage)
             android.widget.Toast.makeText(
                 application,
-                application.getString(R.string.install_blocked_by_blacklist, blockedPackage),
+                msg,
                 android.widget.Toast.LENGTH_LONG,
             ).show()
-            dismissPendingInstall()
+            _installError.value = msg
             return
         }
         val apkSize = apkInfo?.fileSizeBytes ?: 0L
@@ -357,9 +370,7 @@ class InstallViewModel(
         val attachedObbs = obbDelegate.attachedObbFiles.value
         parseDelegate.stashCurrentParsed()
         dialogDelegate.resetRetry()
-        if (!trackDialogTarget) {
-            dismissPendingInstall()
-        }
+        _installError.value = null
 
         val installScope = if (trackDialogTarget) appScope else viewModelScope
         installScope.launch {
@@ -383,6 +394,21 @@ class InstallViewModel(
                 onDialogTargetCreated = { dialogDelegate.setTarget(it) },
                 onCopyObbs = { src, obbs, attached, pkg, name ->
                     obbDelegate.copyObbFiles(src, obbs, attached, pkg, name)
+                },
+                onStarted = {
+                    if (!trackDialogTarget) {
+                        dismissPendingInstall()
+                    }
+                },
+                onAbort = {
+                    dialogDelegate.backToPrepare()
+                },
+                onFailed = { error ->
+                    if (trackDialogTarget) {
+                        dialogDelegate.installFailed(error)
+                    } else {
+                        _installError.value = error
+                    }
                 },
             )
         }

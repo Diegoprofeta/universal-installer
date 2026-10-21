@@ -155,7 +155,7 @@ object DialogInstallActivityHelper {
                 }
             }
             dialogStage == app.pwhs.universalinstaller.presentation.install.DialogStage.Prepare ||
-            dialogStage == app.pwhs.universalinstaller.presentation.install.DialogStage.Menu ||
+            dialogStage is app.pwhs.universalinstaller.presentation.install.DialogStage.Menu ||
             viewModel.uiState.value.pendingApkInfo != null -> {
                 scope.launch {
                     val canPost = promptNotifier.canPost()

@@ -106,6 +106,7 @@ internal fun ApkInfoContent(
     keepApk: Boolean = false,
     onKeepApkChanged: (Boolean) -> Unit = {},
     onMergeSplits: (() -> Unit)? = null,
+    installError: String? = null,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -113,6 +114,12 @@ internal fun ApkInfoContent(
     var isExpanded by rememberSaveable { mutableStateOf(!startCompact) }
     var showTrackersDialog by rememberSaveable { mutableStateOf(false) }
     var showAbiWarningDialog by rememberSaveable { mutableStateOf(false) }
+
+    androidx.compose.runtime.LaunchedEffect(installError) {
+        if (!installError.isNullOrBlank()) {
+            isExpanded = true
+        }
+    }
 
     val iconBitmap by produceState<ImageBitmap?>(
         initialValue = null,
@@ -400,6 +407,35 @@ internal fun ApkInfoContent(
                 packageName = apkInfo.packageName,
                 onUnblock = onUnblock,
             )
+        }
+
+        if (!installError.isNullOrBlank()) {
+            Surface(
+                color = MaterialTheme.colorScheme.errorContainer,
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 6.dp),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = installError,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
         }
 
         if (showKeepApkOption) {

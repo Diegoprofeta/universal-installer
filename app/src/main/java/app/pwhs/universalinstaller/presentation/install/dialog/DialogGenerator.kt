@@ -65,6 +65,10 @@ fun generateDialogParams(
     onFallbackInstall: (() -> Unit)? = null,
     onGrantInstallPermission: () -> Unit = {},
     onMergeSplits: (() -> Unit)? = null,
+    uiStyle: app.pwhs.universalinstaller.domain.model.InstallUiStyle = app.pwhs.universalinstaller.domain.model.InstallUiStyle.Dialog,
+    onChangeEngine: (() -> Unit)? = null,
+    onOpenAdvanced: (() -> Unit)? = null,
+    onOpenDetails: (() -> Unit)? = null,
 ): DialogParams {
     return when (val stage = uiState.dialogStage) {
         DialogStage.Loading -> {
@@ -82,7 +86,11 @@ fun generateDialogParams(
             } else {
                 DialogParams(
                     content = DialogInnerParams("loading") {
-                        LoadingContent(onSkipParse = onSkipParse)
+                        LoadingContent(
+                            onSkipParse = onSkipParse,
+                            onFallbackInstall = onFallbackInstall,
+                            onCancel = onCancel,
+                        )
                     }
                 )
             }
@@ -91,7 +99,15 @@ fun generateDialogParams(
         DialogStage.Prepare -> {
             val info = uiState.pendingApkInfo
             if (info == null) {
-                DialogParams(content = DialogInnerParams("loading") { LoadingContent() })
+                DialogParams(
+                    content = DialogInnerParams("loading") {
+                        LoadingContent(
+                            onSkipParse = onSkipParse,
+                            onFallbackInstall = onFallbackInstall,
+                            onCancel = onCancel,
+                        )
+                    }
+                )
             } else {
                 DialogParams(
                     icon = DialogInnerParams("icon_${info.packageName}") {
@@ -158,10 +174,10 @@ fun generateDialogParams(
             }
         }
 
-        DialogStage.Menu -> {
+        is DialogStage.Menu -> {
             val info = uiState.pendingApkInfo
             if (info == null) {
-                DialogParams(content = DialogInnerParams("loading") { LoadingContent() })
+                DialogParams(content = DialogInnerParams("loading") { LoadingContent(onCancel = onCancel) })
             } else {
                 DialogParams(
                     title = DialogInnerParams("menu_title") {
@@ -189,6 +205,7 @@ fun generateDialogParams(
                             onToggleAllUsers = onToggleAllUsers,
                             onSelectUserId = onSelectUserId,
                             onMergeSplits = onMergeSplits,
+                            initialTab = stage.initialTab,
                         )
                     }
                 )
@@ -197,7 +214,14 @@ fun generateDialogParams(
 
         DialogStage.Installing -> {
             if (dialogTarget == null) {
-                DialogParams(content = DialogInnerParams("loading") { LoadingContent() })
+                DialogParams(
+                    content = DialogInnerParams("loading") {
+                        LoadingContent(
+                            onFallbackInstall = onFallbackInstall,
+                            onCancel = onCancel,
+                        )
+                    }
+                )
             } else {
                 val sp = uiState.sessionsProgress.find { it.id == dialogTarget.sessionId }
                 val fraction = sp?.let {
@@ -217,7 +241,7 @@ fun generateDialogParams(
 
         DialogStage.Success -> {
             if (dialogTarget == null) {
-                DialogParams(content = DialogInnerParams("loading") { LoadingContent() })
+                DialogParams(content = DialogInnerParams("loading") { LoadingContent(onCancel = onCancel) })
             } else {
                 DialogParams(
                     content = DialogInnerParams("success_${dialogTarget.sessionId}") {
@@ -254,21 +278,28 @@ fun generateDialogParams(
         }
 
         is DialogStage.Failed -> {
-            if (dialogTarget == null) {
-                DialogParams(content = DialogInnerParams("loading") { LoadingContent() })
-            } else {
-                DialogParams(
-                    content = DialogInnerParams("failed_${dialogTarget.sessionId}") {
-                        DialogFailedContent(
-                            target = dialogTarget,
-                            errorMessage = stage.errorMessage,
-                            onClose = { onCloseAfterResult(false) },
-                            onRetry = onRetry,
-                            onFallbackInstall = onFallbackInstall
-                        )
-                    }
-                )
-            }
+            val target = dialogTarget ?: DialogTarget(
+                sessionId = java.util.UUID.randomUUID(),
+                packageName = uiState.pendingApkInfo?.packageName.orEmpty(),
+                appName = uiState.pendingApkInfo?.appName.orEmpty(),
+                iconPath = null,
+                apkUri = null,
+            )
+            DialogParams(
+                content = DialogInnerParams("failed_${target.sessionId}") {
+                    DialogFailedContent(
+                        target = target,
+                        errorMessage = stage.errorMessage,
+                        onClose = { onCloseAfterResult(false) },
+                        onRetry = onRetry,
+                        onFallbackInstall = onFallbackInstall,
+                        uiStyle = uiStyle,
+                        onChangeEngine = onChangeEngine,
+                        onOpenAdvanced = onOpenAdvanced,
+                        onOpenDetails = onOpenDetails,
+                    )
+                }
+            )
         }
 
         is DialogStage.ReadFailed -> DialogParams(
@@ -278,6 +309,8 @@ fun generateDialogParams(
                     title = stringResource(R.string.dialog_read_failed_title),
                     explanation = stringResource(R.string.dialog_read_failed_text),
                     detail = stage.reason,
+                    actionLabel = onFallbackInstall?.let { stringResource(R.string.dialog_failed_fallback_install, "Install via System Installer") },
+                    onAction = onFallbackInstall,
                     onClose = { onCloseAfterResult(false) },
                 )
             }
@@ -290,6 +323,8 @@ fun generateDialogParams(
                     title = stringResource(R.string.dialog_parse_failed_title),
                     explanation = stringResource(R.string.dialog_parse_failed_text),
                     detail = stage.reason,
+                    actionLabel = onFallbackInstall?.let { stringResource(R.string.dialog_failed_fallback_install, "Install via System Installer") },
+                    onAction = onFallbackInstall,
                     onClose = { onCloseAfterResult(false) },
                 )
             }

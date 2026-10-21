@@ -184,10 +184,13 @@ fun InstallScreen(
         }
     } else null
 
+    val installError by viewModel.installError.collectAsState()
+
     InstallUi(
         modifier = modifier,
         uiState = uiState,
         history = history,
+        installError = installError,
         showDownloadTab = showDownloadTab,
         onFilePicked = { uri, splitPackage, fileName ->
             viewModel.parseApkInfo(context, uri, splitPackage, fileName)
@@ -315,6 +318,7 @@ private fun InstallUi(
     modifier: Modifier = Modifier,
     uiState: InstallUiState = InstallUiState(),
     history: List<InstallHistoryEntity> = emptyList(),
+    installError: String? = null,
     showDownloadTab: Boolean = true,
     onMergeSplits: (() -> Unit)? = null,
     onFilePicked: (uri: Uri, splitPackage: SplitPackage.Provider, fileName: String) -> Unit = { _, _, _ -> },
@@ -684,6 +688,7 @@ private fun InstallUi(
                 onUnblock = onUnblock,
                 strictSecurity = strictSecurity,
                 onMergeSplits = onMergeSplits,
+                installError = installError,
             )
         }
     }

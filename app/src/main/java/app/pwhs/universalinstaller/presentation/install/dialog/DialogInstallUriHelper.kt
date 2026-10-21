@@ -8,6 +8,8 @@ import app.pwhs.universalinstaller.presentation.install.util.AppCacheManager
 import app.pwhs.universalinstaller.presentation.install.InstallViewModel
 import app.pwhs.universalinstaller.presentation.install.util.InstallApkSplitsHelper
 import app.pwhs.universalinstaller.util.extension.getDisplayName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object DialogInstallUriHelper {
 
@@ -135,19 +137,28 @@ object DialogInstallUriHelper {
             context.contentResolver.getDisplayName(targetUri).ifBlank { originalDisplayName }
         }
 
+        viewModel.setPendingOriginalUri(targetUri)
+
         if (!app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isSupportedPackage(context, targetUri, displayName)) {
-            android.widget.Toast.makeText(
-                context,
-                context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file),
-                android.widget.Toast.LENGTH_LONG,
-            ).show()
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(
+                    context,
+                    context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file),
+                    android.widget.Toast.LENGTH_LONG,
+                ).show()
+            }
             viewModel.dialogParseFailed(context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file))
             return
         }
 
         val rawExt = displayName.substringAfterLast('.', "").lowercase()
         val ext = if (app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isSupportedExtension(rawExt)) rawExt else "apk"
-        val splitProvider = InstallApkSplitsHelper.buildSplitProvider(context, targetUri, ext)
+        val splitProvider = runCatching {
+            InstallApkSplitsHelper.buildSplitProvider(context, targetUri, ext)
+        }.getOrElse { e ->
+            viewModel.dialogParseFailed(e.message ?: context.getString(app.pwhs.universalinstaller.R.string.dialog_parse_failed_text))
+            return
+        }
         viewModel.parseApkInfo(context, targetUri, splitProvider, displayName)
     }
 
@@ -162,20 +173,29 @@ object DialogInstallUriHelper {
         fileName: String,
         viewModel: InstallViewModel,
     ) {
+        val targetUri = Uri.fromFile(file)
+        viewModel.setPendingOriginalUri(targetUri)
+
         if (!app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isSupportedPackageFile(file, fileName)) {
-            android.widget.Toast.makeText(
-                context,
-                context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file),
-                android.widget.Toast.LENGTH_LONG,
-            ).show()
+            withContext(Dispatchers.Main) {
+                android.widget.Toast.makeText(
+                    context,
+                    context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file),
+                    android.widget.Toast.LENGTH_LONG,
+                ).show()
+            }
             viewModel.dialogParseFailed(context.getString(app.pwhs.universalinstaller.R.string.install_unsupported_file))
             return
         }
 
-        val targetUri = Uri.fromFile(file)
         val rawExt = fileName.substringAfterLast('.', "").lowercase()
         val ext = if (app.pwhs.universalinstaller.presentation.install.util.PackageFileFilter.isSupportedExtension(rawExt)) rawExt else "apk"
-        val splitProvider = InstallApkSplitsHelper.buildSplitProvider(context, targetUri, ext)
+        val splitProvider = runCatching {
+            InstallApkSplitsHelper.buildSplitProvider(context, targetUri, ext)
+        }.getOrElse { e ->
+            viewModel.dialogParseFailed(e.message ?: context.getString(app.pwhs.universalinstaller.R.string.dialog_parse_failed_text))
+            return
+        }
         viewModel.parseApkInfo(context, targetUri, splitProvider, fileName)
     }
 }

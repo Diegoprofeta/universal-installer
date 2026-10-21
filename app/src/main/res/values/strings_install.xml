@@ -417,4 +417,6 @@
     <string name="install_fallback_dialog_open_app">Open %1$s</string>
     <string name="install_engine_fallback_toast">%1$s is unavailable. Falling back to system installer.</string>
     <string name="install_running_in_background">Installing in the background…</string>
+    <string name="action_change_installer_engine">Change Installer Engine</string>
+    <string name="action_open_advanced_settings">Advanced Settings</string>
 </resources>

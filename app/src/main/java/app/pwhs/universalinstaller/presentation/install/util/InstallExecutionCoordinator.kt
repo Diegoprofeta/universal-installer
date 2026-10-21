@@ -50,6 +50,9 @@ object InstallExecutionCoordinator {
         resolveActiveController: suspend (String?) -> BaseInstallController,
         onDialogTargetCreated: (DialogTarget) -> Unit,
         onCopyObbs: suspend (Uri?, List<ObbEntry>, List<AttachedObb>, String, String) -> Unit,
+        onStarted: (() -> Unit)? = null,
+        onAbort: (() -> Unit)? = null,
+        onFailed: ((String) -> Unit)? = null,
     ) {
         val prefs = try { application.dataStore.data.first() } catch (_: Exception) { null }
         val profiles = ProfileManager.parseProfiles(prefs?.get(PreferencesKeys.INSTALLER_PROFILES))
@@ -141,9 +144,17 @@ object InstallExecutionCoordinator {
                 } else {
                     R.string.install_targeted_no_backend
                 }
-                android.widget.Toast.makeText(application, application.getString(errorRes), android.widget.Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(application, application.getString(errorRes), Toast.LENGTH_LONG).show()
+                }
+                if (onFailed != null) {
+                    onFailed(application.getString(errorRes))
+                } else {
+                    onAbort?.invoke()
+                }
                 return
             }
+            onStarted?.invoke()
             manualController.installTargeted(
                 uris = uris,
                 sessionData = sessionData,
@@ -169,6 +180,7 @@ object InstallExecutionCoordinator {
             )
         } else {
             InstallSessionManager.writeProfileFlags(application, profile)
+            onStarted?.invoke()
             controller.install(
                 uris = uris,
                 sessionData = sessionData,

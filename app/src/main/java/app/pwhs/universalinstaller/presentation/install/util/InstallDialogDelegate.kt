@@ -63,8 +63,8 @@ class InstallDialogDelegate {
         _retryCount.value = 0
     }
 
-    fun showMenu() {
-        _dialogStage.value = DialogStage.Menu
+    fun showMenu(initialTab: Int = 0) {
+        _dialogStage.value = DialogStage.Menu(initialTab)
     }
 
     fun backToPrepare() {

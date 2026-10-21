@@ -19,7 +19,7 @@ sealed interface DialogStage {
     data object Prepare : DialogStage
 
     /** User tapped Menu — show extended options: permissions, VT, OBB, splits, install flags. */
-    data object Menu : DialogStage
+    data class Menu(val initialTab: Int = 0) : DialogStage
 
     /** Install session is in progress — show progress bar. */
     data object Installing : DialogStage

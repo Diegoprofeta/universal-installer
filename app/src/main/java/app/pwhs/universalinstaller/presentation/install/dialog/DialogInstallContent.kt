@@ -245,6 +245,16 @@ fun DialogInstallContent(
             )
         }
 
+        var showEnginePicker by remember { mutableStateOf(false) }
+
+        if (showEnginePicker) {
+            val settingViewModel: app.pwhs.universalinstaller.presentation.setting.SettingViewModel = org.koin.androidx.compose.koinViewModel()
+            app.pwhs.universalinstaller.presentation.composable.InstallPriorityBottomSheet(
+                onDismissRequest = { showEnginePicker = false },
+                settingViewModel = settingViewModel,
+            )
+        }
+
         if (uiState.dialogStage == DialogStage.None) return@UniversalInstallerTheme
 
         val isSheet = uiStyle == InstallUiStyle.Sheet
@@ -327,10 +337,10 @@ fun DialogInstallContent(
                                 null
                             },
                             onFallbackInstall = {
-                                val apkUri = dialogTarget?.apkUri
-                                if (isApk && apkUri != null) {
+                                val apkUri = dialogTarget?.apkUri ?: viewModel.pendingOriginalUri
+                                if (apkUri != null) {
                                     val intent = SystemIntentInstaller.createInstallIntent(context, apkUri)
-                                    val launched = intent != null && runCatching { context.startActivity(intent) }
+                                    val launched = runCatching { context.startActivity(intent) }
                                         .onFailure { Timber.e(it, "Failed to launch system installer fallback") }
                                         .isSuccess
                                     if (!launched) {
@@ -342,12 +352,16 @@ fun DialogInstallContent(
                                     }
                                     onDismissAndFinish()
                                 }
-                            }.takeIf { isApk && dialogTarget?.apkUri != null },
+                            }.takeIf { (dialogTarget?.apkUri ?: viewModel.pendingOriginalUri) != null },
                             onMergeSplits = onMergeSplits,
+                            uiStyle = uiStyle,
+                            onChangeEngine = { showEnginePicker = true },
+                            onOpenAdvanced = { viewModel.dialogShowMenu(initialTab = 2) },
+                            onOpenDetails = { viewModel.dialogShowMenu(initialTab = 0) },
                         )
 
                         PositionDialog(
-                            modifier = if (uiState.dialogStage != DialogStage.Menu) {
+                            modifier = if (uiState.dialogStage !is DialogStage.Menu) {
                                 Modifier.verticalScroll(rememberScrollState())
                             } else {
                                 Modifier

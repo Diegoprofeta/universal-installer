@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.solrudev.ackpine.splits.SplitPackage
+import timber.log.Timber
 
 class InstallParseDelegate(
     private val application: Application,
@@ -31,6 +32,7 @@ class InstallParseDelegate(
     private val virusTotalNotifier: VirusTotalNotifier,
     private val obbDelegate: InstallObbDelegate,
     private val onProfileMatched: (String) -> Unit,
+    private val onParseFailed: ((String) -> Unit)? = null,
 ) {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -49,6 +51,10 @@ class InstallParseDelegate(
 
     var pendingOriginalUri: Uri? = null
         private set
+
+    fun setPendingOriginalUri(uri: Uri?) {
+        pendingOriginalUri = uri
+    }
 
     private var lastParsedApkInfo: ApkInfo? = null
     private var lastParsedApkUris: List<Uri>? = null
@@ -96,37 +102,56 @@ class InstallParseDelegate(
             _isApk.value = fileName.substringAfterLast('.', "").lowercase() == "apk"
             pendingFileName = fileName
             pendingOriginalUri = uri
-            val result = InstallParseCoordinator.parseApkInfo(
-                context = context,
-                uri = uri,
-                splitPackage = splitPackage,
-                fileName = fileName,
-                isAndroidAuto = isAndroidAuto,
-                blacklist = blacklist,
-                currentProfiles = currentProfiles,
-                appProfileMapping = appProfileMapping,
-            )
-            val status = if (result.info.packageName.isNotEmpty()) {
-                app.pwhs.core.telemetry.TelemetryEvents.PARSE_SUCCESS
-            } else {
-                app.pwhs.core.telemetry.TelemetryEvents.PARSE_CORRUPTED
+            try {
+                val result = InstallParseCoordinator.parseApkInfo(
+                    context = context,
+                    uri = uri,
+                    splitPackage = splitPackage,
+                    fileName = fileName,
+                    isAndroidAuto = isAndroidAuto,
+                    blacklist = blacklist,
+                    currentProfiles = currentProfiles,
+                    appProfileMapping = appProfileMapping,
+                )
+
+                if (result.info.packageName.isEmpty() ||
+                    (result.info.packageName == "Unknown" && result.splitUris.isNullOrEmpty() && result.info.versionCode == 0L)
+                ) {
+                    _isLoading.value = false
+                    _pendingApkInfo.value = null
+                    onParseFailed?.invoke(context.getString(app.pwhs.universalinstaller.R.string.dialog_parse_failed_text))
+                    return@launch
+                }
+
+                val status = if (result.info.packageName.isNotEmpty()) {
+                    app.pwhs.core.telemetry.TelemetryEvents.PARSE_SUCCESS
+                } else {
+                    app.pwhs.core.telemetry.TelemetryEvents.PARSE_CORRUPTED
+                }
+                app.pwhs.core.telemetry.AnalyticsHelper.logPackageParseResult(
+                    fileType = fileName.substringAfterLast('.', ""),
+                    status = status,
+                    hasObb = result.obbEntries.isNotEmpty(),
+                    targetSdk = result.info.targetSdkVersion
+                )
+                pendingApkUris = result.splitUris
+                obbDelegate.setPendingEntries(result.obbEntries)
+                _pendingApkInfo.value = result.info
+                stashCurrentParsed()
+                _isLoading.value = false
+                if (result.matchingProfileId != null) {
+                    onProfileMatched(result.matchingProfileId)
+                }
+                launchHashLookupOnly(context, uri)
+                launchTrackerScan(context, uri, result.splitUris)
+            } catch (ce: kotlinx.coroutines.CancellationException) {
+                throw ce
+            } catch (t: Throwable) {
+                Timber.e(t, "parseApkInfo failed for $fileName")
+                _isLoading.value = false
+                _pendingApkInfo.value = null
+                onParseFailed?.invoke(t.message ?: context.getString(app.pwhs.universalinstaller.R.string.dialog_parse_failed_text))
             }
-            app.pwhs.core.telemetry.AnalyticsHelper.logPackageParseResult(
-                fileType = fileName.substringAfterLast('.', ""),
-                status = status,
-                hasObb = result.obbEntries.isNotEmpty(),
-                targetSdk = result.info.targetSdkVersion
-            )
-            pendingApkUris = result.splitUris
-            obbDelegate.setPendingEntries(result.obbEntries)
-            _pendingApkInfo.value = result.info
-            stashCurrentParsed()
-            _isLoading.value = false
-            if (result.matchingProfileId != null) {
-                onProfileMatched(result.matchingProfileId)
-            }
-            launchHashLookupOnly(context, uri)
-            launchTrackerScan(context, uri, result.splitUris)
         }
     }
 
