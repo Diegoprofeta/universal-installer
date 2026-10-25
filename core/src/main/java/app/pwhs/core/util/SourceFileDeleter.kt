@@ -75,12 +75,16 @@ object SourceFileDeleter {
         val directDeleted = runCatching {
             if (resolvedPath != null) {
                 val file = File(resolvedPath)
-                if (file.exists() && file.delete()) {
-                    runCatching { context.contentResolver.delete(uri, null, null) }
-                    MediaScannerConnection.scanFile(context, arrayOf(resolvedPath), null, null)
-                    true
+                if (file.exists()) {
+                    if (file.delete()) {
+                        runCatching { context.contentResolver.delete(uri, null, null) }
+                        MediaScannerConnection.scanFile(context, arrayOf(resolvedPath), null, null)
+                        true
+                    } else {
+                        !file.exists()
+                    }
                 } else {
-                    !file.exists()
+                    true
                 }
             } else {
                 false
@@ -96,26 +100,29 @@ object SourceFileDeleter {
             } else {
                 context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { false } ?: true
             }
-        }.getOrDefault(false)
+        }.getOrElse { throwable ->
+            throwable is java.io.FileNotFoundException
+        }
     }
 
     private fun resolveFilePathFromUri(context: Context, uri: Uri): String? {
         return runCatching {
-            val rawPath = uri.path
+            val rawPath = Uri.decode(uri.path) ?: uri.path
             if (rawPath != null) {
                 val storageIdx = rawPath.indexOf("/storage/")
                 if (storageIdx != -1) {
-                    val candidate = rawPath.substring(storageIdx)
-                    if (File(candidate).exists()) return candidate
+                    return rawPath.substring(storageIdx)
                 }
             }
 
             if (DocumentsContract.isDocumentUri(context, uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
                 if (docId.startsWith("primary:")) {
-                    val relativePath = docId.substringAfter("primary:")
+                    val relativePath = Uri.decode(docId.substringAfter("primary:"))
                     val file = File(Environment.getExternalStorageDirectory(), relativePath)
-                    if (file.exists()) return file.absolutePath
+                    return file.absolutePath
+                } else if (docId.startsWith("raw:")) {
+                    return Uri.decode(docId.substringAfter("raw:"))
                 }
             }
 
@@ -125,7 +132,7 @@ object SourceFileDeleter {
                     val colIdx = cursor.getColumnIndex(MediaStore.MediaColumns.DATA)
                     if (colIdx != -1) {
                         val filePath = cursor.getString(colIdx)
-                        if (!filePath.isNullOrBlank() && File(filePath).exists()) {
+                        if (!filePath.isNullOrBlank()) {
                             return filePath
                         }
                     }

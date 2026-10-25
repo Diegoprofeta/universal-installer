@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">Port server, autentificare cu cod PIN</string>
     <string name="sync_require_pin_off">Fără PIN</string>
+    <string name="quick_transfer_title">Transfer rapid</string>
+    <string name="quick_transfer_subtitle">Trimiteți către Android TV sau sincronizați și primiți prin Web și rețeaua locală Wi-Fi.</string>
+    <string name="quick_transfer_send_tv_title">Trimite la TV</string>
+    <string name="quick_transfer_send_tv_desc">Instalați fișiere APK pe televizor prin Wi-Fi</string>
+    <string name="quick_transfer_sync_title">Sincronizare Web și LAN</string>
+    <string name="quick_transfer_sync_desc">Partajați fișiere prin browser sau rețeaua locală</string>
+    <string name="quick_transfer_sync_active">Activ</string>
 </resources>

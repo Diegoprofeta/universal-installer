@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">服务器端口、PIN 码验证</string>
     <string name="sync_require_pin_off">无 PIN 码</string>
+    <string name="quick_transfer_title">快速传输</string>
+    <string name="quick_transfer_subtitle">发送到 Android TV，或通过网页和局域网 Wi-Fi 同步与接收。</string>
+    <string name="quick_transfer_send_tv_title">发送到电视</string>
+    <string name="quick_transfer_send_tv_desc">通过 Wi-Fi 侧载 APK 到电视</string>
+    <string name="quick_transfer_sync_title">网页与局域网同步</string>
+    <string name="quick_transfer_sync_desc">通过浏览器或局域网共享文件</string>
+    <string name="quick_transfer_sync_active">已启用</string>
 </resources>

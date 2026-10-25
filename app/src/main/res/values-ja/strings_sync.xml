@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">サーバーポート、PINコード認証</string>
     <string name="sync_require_pin_off">PINなし</string>
+    <string name="quick_transfer_title">クイック転送</string>
+    <string name="quick_transfer_subtitle">Android TV に送信、または Web や Wi-Fi LAN 経由で同期・受信します。</string>
+    <string name="quick_transfer_send_tv_title">TV に送信</string>
+    <string name="quick_transfer_send_tv_desc">Wi-Fi 経由でテレビに APK をサイドロード</string>
+    <string name="quick_transfer_sync_title">Web &amp; LAN 同期</string>
+    <string name="quick_transfer_sync_desc">ブラウザまたはローカルネットワーク経由でファイルを共有</string>
+    <string name="quick_transfer_sync_active">アクティブ</string>
 </resources>

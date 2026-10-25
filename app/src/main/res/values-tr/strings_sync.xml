@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">Sunucu bağlantı noktası, PIN kodu kimlik doğrulaması</string>
     <string name="sync_require_pin_off">PIN yok</string>
+    <string name="quick_transfer_title">Hızlı Aktarım</string>
+    <string name="quick_transfer_subtitle">Android TV\'ye gönderin veya Web ve Wi-Fi LAN üzerinden senkronize edip alın.</string>
+    <string name="quick_transfer_send_tv_title">TV\'ye Gönder</string>
+    <string name="quick_transfer_send_tv_desc">Wi-Fi üzerinden TV\'nize APK yükleyin</string>
+    <string name="quick_transfer_sync_title">Web ve LAN Senkronizasyonu</string>
+    <string name="quick_transfer_sync_desc">Tarayıcı veya yerel ağ üzerinden dosya paylaşın</string>
+    <string name="quick_transfer_sync_active">Aktif</string>
 </resources>

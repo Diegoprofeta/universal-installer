@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">Port server, autentikasi kode PIN</string>
     <string name="sync_require_pin_off">Tanpa PIN</string>
+    <string name="quick_transfer_title">Transfer Cepat</string>
+    <string name="quick_transfer_subtitle">Kirim ke Android TV, atau sinkronkan &amp; terima melalui Web dan Wi-Fi LAN.</string>
+    <string name="quick_transfer_send_tv_title">Kirim ke TV</string>
+    <string name="quick_transfer_send_tv_desc">Sideload APK ke TV Anda melalui Wi-Fi</string>
+    <string name="quick_transfer_sync_title">Sinkronisasi Web &amp; LAN</string>
+    <string name="quick_transfer_sync_desc">Bagikan file melalui browser atau jaringan lokal</string>
+    <string name="quick_transfer_sync_active">Aktif</string>
 </resources>

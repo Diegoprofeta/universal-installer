@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -93,6 +94,7 @@ fun DialogUninstallSheet(
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
             exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
         ) {
+            val isAmoled = MaterialTheme.colorScheme.background == Color.Black && MaterialTheme.colorScheme.surface == Color.Black
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -100,8 +102,9 @@ fun DialogUninstallSheet(
                         detectTapGestures { /* consume tap inside sheet */ }
                     },
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 6.dp,
+                color = if (isAmoled) Color.Black else MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = if (isAmoled) 0.dp else 6.dp,
+                border = if (isAmoled) BorderStroke(1.dp, Color(0xFF262626)) else null,
             ) {
                 Column(
                     modifier = Modifier

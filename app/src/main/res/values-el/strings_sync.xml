@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">Θύρα διακομιστή, έλεγχος ταυτότητας με κωδικό PIN</string>
     <string name="sync_require_pin_off">Χωρίς PIN</string>
+    <string name="quick_transfer_title">Γρήγορη μεταφορά</string>
+    <string name="quick_transfer_subtitle">Αποστολή σε Android TV ή συγχρονισμός και λήψη μέσω Web και τοπικού δικτύου Wi-Fi.</string>
+    <string name="quick_transfer_send_tv_title">Αποστολή στην TV</string>
+    <string name="quick_transfer_send_tv_desc">Εγκαταστήστε αρχεία APK στην τηλεόρασή σας μέσω Wi-Fi</string>
+    <string name="quick_transfer_sync_title">Συγχρονισμός Web &amp; LAN</string>
+    <string name="quick_transfer_sync_desc">Κοινή χρήση αρχείων μέσω προγράμματος περιήγησης ή τοπικού δικτύου</string>
+    <string name="quick_transfer_sync_active">Ενεργό</string>
 </resources>

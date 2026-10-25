@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">सर्वर पोर्ट, पिन कोड प्रमाणीकरण</string>
     <string name="sync_require_pin_off">कोई पिन नहीं</string>
+    <string name="quick_transfer_title">त्वरित स्थानांतरण</string>
+    <string name="quick_transfer_subtitle">Android TV पर भेजें, या वेब और Wi-Fi LAN पर सिंक व प्राप्त करें।</string>
+    <string name="quick_transfer_send_tv_title">TV पर भेजें</string>
+    <string name="quick_transfer_send_tv_desc">Wi-Fi के माध्यम से अपने TV पर APK इंस्टॉल करें</string>
+    <string name="quick_transfer_sync_title">वेब और LAN सिंक</string>
+    <string name="quick_transfer_sync_desc">ब्राउज़र या स्थानीय नेटवर्क के माध्यम से फ़ाइलें साझा करें</string>
+    <string name="quick_transfer_sync_active">सक्रिय</string>
 </resources>

@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">Порт сервера, автентифікація за PIN-кодом</string>
     <string name="sync_require_pin_off">Без PIN-коду</string>
+    <string name="quick_transfer_title">Швидка передача</string>
+    <string name="quick_transfer_subtitle">Надсилайте на Android TV або синхронізуйте та отримуйте через веб і локальну мережу Wi-Fi.</string>
+    <string name="quick_transfer_send_tv_title">Надіслати на TV</string>
+    <string name="quick_transfer_send_tv_desc">Встановлюйте APK на телевізор через Wi-Fi</string>
+    <string name="quick_transfer_sync_title">Синхронізація через веб і LAN</string>
+    <string name="quick_transfer_sync_desc">Діліться файлами через браузер або локальну мережу</string>
+    <string name="quick_transfer_sync_active">Активно</string>
 </resources>

@@ -209,7 +209,7 @@ fun UpdatesTopAppBar(
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.updates_menu_import)) },
-                        leadingIcon = { Icon(Icons.Rounded.FileUpload, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Rounded.FileDownload, contentDescription = null) },
                         onClick = {
                             showMenu = false
                             onImportClick()
@@ -217,7 +217,7 @@ fun UpdatesTopAppBar(
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.updates_menu_export)) },
-                        leadingIcon = { Icon(Icons.Rounded.FileDownload, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Rounded.FileUpload, contentDescription = null) },
                         onClick = {
                             showMenu = false
                             onExportClick()

@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">Server-Port, PIN-Code-Authentifizierung</string>
     <string name="sync_require_pin_off">Keine PIN</string>
+    <string name="quick_transfer_title">Schnellübertragung</string>
+    <string name="quick_transfer_subtitle">An Android TV senden oder über Web und Wi-Fi-LAN synchronisieren und empfangen.</string>
+    <string name="quick_transfer_send_tv_title">An TV senden</string>
+    <string name="quick_transfer_send_tv_desc">APKs über Wi-Fi auf Ihren Fernseher übertragen</string>
+    <string name="quick_transfer_sync_title">Web- &amp; LAN-Synchronisierung</string>
+    <string name="quick_transfer_sync_desc">Dateien über Browser oder lokales Netzwerk freigeben</string>
+    <string name="quick_transfer_sync_active">Aktiv</string>
 </resources>

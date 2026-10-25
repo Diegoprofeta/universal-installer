@@ -118,4 +118,11 @@
     <string name="watch_chip_wear_os">Wear OS</string>
     <string name="sync_server_settings_sub">منفذ الخادم، المصادقة برمز PIN</string>
     <string name="sync_require_pin_off">بدون PIN</string>
+    <string name="quick_transfer_title">نقل سريع</string>
+    <string name="quick_transfer_subtitle">إرسال إلى Android TV، أو مزامنة واستلام عبر الويب وشبكة Wi-Fi المحلية.</string>
+    <string name="quick_transfer_send_tv_title">إرسال إلى TV</string>
+    <string name="quick_transfer_send_tv_desc">تثبيت ملفات APK على جهاز TV عبر Wi-Fi</string>
+    <string name="quick_transfer_sync_title">مزامنة الويب والشبكة المحلية</string>
+    <string name="quick_transfer_sync_desc">مشاركة الملفات عبر المتصفح أو الشبكة المحلية</string>
+    <string name="quick_transfer_sync_active">نشط</string>
 </resources>

@@ -117,4 +117,11 @@
     <string name="watch_sheet_pick_file">অন্য ফাইল বেছে নিন…</string>
     <string name="watch_sheet_send">পাঠান</string>
     <string name="watch_chip_wear_os">Wear OS</string>
+    <string name="quick_transfer_title">দ্রুত স্থানান্তর</string>
+    <string name="quick_transfer_subtitle">Android TV-তে পাঠান, অথবা ওয়েব এবং Wi-Fi LAN-এর মাধ্যমে সিঙ্ক ও গ্রহণ করুন।</string>
+    <string name="quick_transfer_send_tv_title">TV-তে পাঠান</string>
+    <string name="quick_transfer_send_tv_desc">Wi-Fi-এর মাধ্যমে আপনার TV-তে APK সাইডলোড করুন</string>
+    <string name="quick_transfer_sync_title">ওয়েব ও LAN সিঙ্ক</string>
+    <string name="quick_transfer_sync_desc">ব্রাউজার বা স্থানীয় নেটওয়ার্কের মাধ্যমে ফাইল শেয়ার করুন</string>
+    <string name="quick_transfer_sync_active">সক্রিয়</string>
 </resources>
