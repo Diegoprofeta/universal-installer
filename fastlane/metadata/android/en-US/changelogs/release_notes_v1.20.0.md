@@ -1,0 +1,7 @@
+### 📱 Phone (App)
+• Added package metadata chips (size, SDK, ABI, permissions) to install sheet
+• Added troubleshooting support sheet for failed installations
+• Fixed AMOLED pure black theming across install dialogs and bottom bar
+• Fixed source file deletion verification on modern Android versions
+• Fixed Import and Export icon alignment in Updates
+• Improved installation error handling and sheet state persistence
