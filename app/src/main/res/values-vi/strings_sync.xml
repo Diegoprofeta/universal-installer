@@ -30,6 +30,13 @@
     <string name="remote_download_failed">Tải xuống thất bại: %s</string>
     <string name="remote_download_unsupported">Tệp đã tải xuống không phải là gói được hỗ trợ</string>
     <string name="qs_tile_sync_label">Đồng bộ &amp; Chia sẻ</string>
+    <string name="quick_transfer_title">Truyền file nhanh</string>
+    <string name="quick_transfer_subtitle">Gửi file sang Android TV hoặc nhận/đồng bộ qua Web và Wi-Fi LAN.</string>
+    <string name="quick_transfer_send_tv_title">Gửi sang TV</string>
+    <string name="quick_transfer_send_tv_desc">Cài đặt APK trực tiếp lên TV qua Wi-Fi</string>
+    <string name="quick_transfer_sync_title">Web &amp; Đồng bộ LAN</string>
+    <string name="quick_transfer_sync_desc">Nhận và chia sẻ file qua trình duyệt web</string>
+    <string name="quick_transfer_sync_active">Đang bật</string>
     <string name="download_notif_running_text">%1$s / %2$s · %3$d%%</string>
     <string name="tv_sync_screen_title">Gửi tới TV</string>
     <string name="tv_sync_hero_title">Gửi ứng dụng tới Android TV</string>

@@ -65,6 +65,7 @@ import app.pwhs.universalinstaller.util.AppIconData
 import app.pwhs.universalinstaller.util.DhizukuState
 import androidx.datastore.preferences.core.Preferences
 import org.koin.androidx.compose.koinViewModel
+import app.pwhs.universalinstaller.presentation.composable.CommunityActionButtons
 import app.pwhs.universalinstaller.presentation.setting.sections.AboutSection
 import app.pwhs.universalinstaller.presentation.setting.sections.AdvancedSection
 import app.pwhs.universalinstaller.presentation.setting.sections.ProfilesSection
@@ -230,6 +231,9 @@ private fun SettingUi(
                         text = stringResource(R.string.setting_title),
                         style = MaterialTheme.typography.headlineMedium,
                     )
+                },
+                navigationIcon = {
+                    CommunityActionButtons()
                 },
                 actions = {
                     IconButton(onClick = {

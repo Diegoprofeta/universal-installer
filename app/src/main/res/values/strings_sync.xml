@@ -31,6 +31,13 @@
     <string name="remote_download_failed">Download failed: %s</string>
     <string name="remote_download_unsupported">Downloaded file is not a supported package</string>
     <string name="qs_tile_sync_label">Sync &amp; Share</string>
+    <string name="quick_transfer_title">Quick Transfer</string>
+    <string name="quick_transfer_subtitle">Send to Android TV, or sync &amp; receive over Web and Wi-Fi LAN.</string>
+    <string name="quick_transfer_send_tv_title">Send to TV</string>
+    <string name="quick_transfer_send_tv_desc">Sideload APKs to your TV over Wi-Fi</string>
+    <string name="quick_transfer_sync_title">Web &amp; LAN Sync</string>
+    <string name="quick_transfer_sync_desc">Share files via browser or local network</string>
+    <string name="quick_transfer_sync_active">Active</string>
     <string name="tv_sync_screen_title">Send to TV</string>
     <string name="tv_sync_hero_title">Send Apps to Android TV</string>
     <string name="tv_sync_hero_subtitle">Easily transfer and install APK packages onto your TV over local Wi-Fi.</string>

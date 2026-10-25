@@ -31,7 +31,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.Tv
 import androidx.compose.material.icons.rounded.Watch
 import androidx.compose.material.icons.rounded.WifiTethering
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -61,10 +62,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.pwhs.universalinstaller.IntentHandoff
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.data.local.InstallHistoryEntity
+import app.pwhs.universalinstaller.presentation.composable.CommunityActionButtons
 import app.pwhs.universalinstaller.presentation.composable.InstallerModeBadge
 import app.pwhs.universalinstaller.presentation.composable.SessionCard
 import app.pwhs.universalinstaller.presentation.install.components.InstallTipOverlay
@@ -272,6 +276,9 @@ fun InstallScreen(
         onSkipBatchParse = viewModel::skipBatchParseAndInstall,
         onSkipParseSingle = viewModel::skipParseAndInstallSingle,
         onToggleSplit = viewModel::toggleSplit,
+        onOpenSendToTv = {
+            context.startActivity(android.content.Intent(context, app.pwhs.universalinstaller.presentation.sync.SendToTvActivity::class.java))
+        },
         onOpenSyncServer = {
             context.startActivity(android.content.Intent(context, app.pwhs.universalinstaller.presentation.sync.SyncActivity::class.java))
         },
@@ -356,6 +363,7 @@ private fun InstallUi(
     onSkipBatchParse: () -> Unit = {},
     onSkipParseSingle: () -> Unit = {},
     onToggleSplit: (Int) -> Unit = {},
+    onOpenSendToTv: () -> Unit = {},
     onOpenSyncServer: () -> Unit = {},
     onSetMergeSplits: (Boolean) -> Unit = { },
     onProfileSelected: (app.pwhs.universalinstaller.domain.model.InstallerProfile?) -> Unit = {},
@@ -731,6 +739,8 @@ private fun InstallUi(
         onDismiss = { showPermissions = false },
     )
 
+    val isSyncRunning = uiState.syncState == app.pwhs.universalinstaller.presentation.sync.SyncState.RUNNING
+
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -738,18 +748,28 @@ private fun InstallUi(
             LargeTopAppBar(
                 expandedHeight = 140.dp,
                 title = {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    val isExpanded = LocalTextStyle.current.fontSize >= 25.sp
+                    if (isExpanded) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = stringResource(R.string.fab_install),
+                                style = MaterialTheme.typography.headlineMedium,
+                            )
+                            InstallerModeBadge()
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                    } else {
                         Text(
                             text = stringResource(R.string.fab_install),
-                            style = MaterialTheme.typography.headlineMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                        InstallerModeBadge()
-                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 },
+                navigationIcon = {
+                    CommunityActionButtons()
+                },
                 actions = {
-                    val isSyncRunning = uiState.syncState == app.pwhs.universalinstaller.presentation.sync.SyncState.RUNNING
-
                     if (WearApkSender.isAvailable) {
                         IconButton(
                             onClick = {
@@ -766,6 +786,15 @@ private fun InstallUi(
                     }
 
                     IconButton(
+                        onClick = onOpenSendToTv,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Tv,
+                            contentDescription = stringResource(R.string.tv_sync_screen_title),
+                        )
+                    }
+
+                    IconButton(
                         onClick = onOpenSyncServer,
                         modifier = if (isSyncRunning) Modifier.background(
                             MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
@@ -776,12 +805,6 @@ private fun InstallUi(
                             imageVector = Icons.Rounded.WifiTethering,
                             contentDescription = stringResource(R.string.setting_section_sync),
                             tint = if (isSyncRunning) MaterialTheme.colorScheme.primary else LocalContentColor.current
-                        )
-                    }
-                    IconButton(onClick = { showPermissions = true }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Shield,
-                            contentDescription = stringResource(R.string.permissions_menu_cd),
                         )
                     }
                 },

@@ -290,6 +290,38 @@ object AnalyticsHelper {
         )
     }
 
+    // ── Giai đoạn 6: Wear OS Transfer (Send to Watch) ────────────────────
+    fun logWatchSendStarted(
+        fileSizeBytes: Long,
+        isWatchApp: Boolean,
+        deviceName: String?,
+    ) {
+        val sizeMb = if (fileSizeBytes > 0) round((fileSizeBytes.toDouble() / (1024 * 1024)) * 10.0) / 10.0 else 0.0
+        val params = mutableMapOf<String, Any?>(
+            TelemetryEvents.PARAM_FILE_SIZE_MB to sizeMb,
+            TelemetryEvents.PARAM_IS_WATCH_APP to isWatchApp,
+        )
+        if (!deviceName.isNullOrBlank()) {
+            params[TelemetryEvents.PARAM_DEVICE_NAME] = deviceName
+        }
+        Telemetry.event(TelemetryEvents.EVENT_WATCH_SEND_STARTED, params)
+    }
+
+    fun logWatchSendResult(
+        status: String,
+        durationMs: Long,
+        errorReason: String? = null,
+    ) {
+        val params = mutableMapOf<String, Any?>(
+            TelemetryEvents.PARAM_STATUS to status,
+            TelemetryEvents.PARAM_DURATION_MS to durationMs,
+        )
+        if (!errorReason.isNullOrBlank()) {
+            params[TelemetryEvents.PARAM_ERROR_REASON] = errorReason
+        }
+        Telemetry.event(TelemetryEvents.EVENT_WATCH_SEND_RESULT, params)
+    }
+
     // ── User Properties ───────────────────────────────────────────────────
     fun updateInstallerMode(mode: String) {
         Telemetry.setUserProperty(TelemetryEvents.PROPERTY_INSTALLER_MODE, mode)

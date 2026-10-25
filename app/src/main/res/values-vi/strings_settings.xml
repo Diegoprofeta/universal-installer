@@ -13,7 +13,7 @@
     <string name="logs_expand_cd">Mở rộng</string>
     <string name="logs_collapse_cd">Thu gọn</string>
     <string name="logs_delete_entry_cd">Xóa mục</string>
-    <string name="setting_title">Cài đặt</string>
+    <string name="setting_title">Thiết lập</string>
     <string name="setting_section_installation">Cài đặt</string>
     <string name="setting_shizuku_not_installed">Shizuku chưa được cài đặt</string>
     <string name="setting_shizuku_not_running">Shizuku đã được cài đặt nhưng không chạy</string>

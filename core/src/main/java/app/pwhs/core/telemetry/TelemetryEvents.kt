@@ -132,6 +132,17 @@ object TelemetryEvents {
     const val PARAM_VALUE = "value"
     const val PARAM_CURRENCY = "currency"
 
+    // ── Giai đoạn 6: Wear OS Transfer (Send to Watch) ────────────────────
+    const val EVENT_WATCH_SEND_STARTED = "watch_send_started"
+    const val EVENT_WATCH_SEND_RESULT = "watch_send_result"
+
+    const val PARAM_IS_WATCH_APP = "is_watch_app"
+    const val PARAM_DEVICE_NAME = "device_name"
+
+    const val STATUS_WATCH_SUCCESS = "success"
+    const val STATUS_WATCH_FAILED = "failed"
+    const val STATUS_WATCH_CANCELLED = "cancelled"
+
     // ── User Properties (User Scopes) ────────────────────────────────────
     const val PROPERTY_INSTALLER_MODE = "installer_mode"
     const val PROPERTY_IS_DEFAULT_INSTALLER = "is_default_installer"

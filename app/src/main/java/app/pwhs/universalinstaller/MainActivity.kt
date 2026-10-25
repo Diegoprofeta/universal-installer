@@ -40,6 +40,7 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import app.pwhs.universalinstaller.presentation.install.InstallActivity
+import app.pwhs.universalinstaller.presentation.sync.SendToTvActivity
 import app.pwhs.universalinstaller.presentation.sync.SyncActivity
 import app.pwhs.universalinstaller.presentation.manage.ManageActivity
 import app.pwhs.universalinstaller.util.extension.disableSceneTransition
@@ -156,11 +157,12 @@ class MainActivity : ComponentActivity() {
                                 return@LaunchedEffect
                             }
 
-                            // Handle internal deep-links (sync, uninstall).
+                            // Handle internal deep-links (sync, tv, uninstall).
                             // Regular launches default to InstallActivity.
                             val targetActivity = if (uri?.scheme == "universalinstaller") {
                                 when (uri.host) {
                                     "sync" -> SyncActivity::class.java
+                                    "send_tv", "tv" -> SendToTvActivity::class.java
                                     "uninstall" -> ManageActivity::class.java
                                     "updates" -> runCatching { Class.forName("app.pwhs.updater.presentation.UpdatesActivity") }.getOrNull()
                                         ?: InstallActivity::class.java
@@ -198,6 +200,16 @@ class MainActivity : ComponentActivity() {
             .setIntent(syncIntent)
             .build()
 
+        val tvIntent = Intent(this, MainActivity::class.java).apply {
+            action = Intent.ACTION_VIEW
+            data = "universalinstaller://send_tv".toUri()
+        }
+        val tvShortcut = ShortcutInfoCompat.Builder(this, "shortcut_send_tv")
+            .setShortLabel(getString(R.string.tv_sync_screen_title))
+            .setIcon(IconCompat.createWithResource(this, R.drawable.ic_shortcut_tv))
+            .setIntent(tvIntent)
+            .build()
+
         val uninstallIntent = Intent(this, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
             data = "universalinstaller://uninstall".toUri()
@@ -208,7 +220,7 @@ class MainActivity : ComponentActivity() {
             .setIntent(uninstallIntent)
             .build()
 
-        ShortcutManagerCompat.addDynamicShortcuts(this, listOf(syncShortcut, uninstallShortcut))
+        ShortcutManagerCompat.addDynamicShortcuts(this, listOf(syncShortcut, tvShortcut, uninstallShortcut))
     }
 
     override fun onNewIntent(intent: Intent) {

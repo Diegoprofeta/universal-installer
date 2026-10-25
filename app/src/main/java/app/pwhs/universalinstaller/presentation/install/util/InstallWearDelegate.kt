@@ -90,7 +90,13 @@ class InstallWearDelegate(
 
     fun confirmSendToWatch() {
         val pending = sendState.value as? WatchSendState.ConfirmNotWatchApp ?: return
-        WearTransferService.start(application, pending.apkUri, pending.fileName)
+        WearTransferService.start(
+            context = application,
+            uri = pending.apkUri,
+            fileName = pending.fileName,
+            isWatchApp = false,
+            deviceName = _watchName.value,
+        )
     }
 
     fun cancelWatchSend() {
@@ -109,7 +115,13 @@ class InstallWearDelegate(
 
     private fun startOrConfirm(apkUri: Uri, fileName: String, declaresWatchFeature: Boolean) {
         if (declaresWatchFeature) {
-            WearTransferService.start(application, apkUri, fileName)
+            WearTransferService.start(
+                context = application,
+                uri = apkUri,
+                fileName = fileName,
+                isWatchApp = true,
+                deviceName = _watchName.value,
+            )
         } else {
             WearTransferState.update(WatchSendState.ConfirmNotWatchApp(apkUri, fileName))
         }
