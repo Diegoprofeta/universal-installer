@@ -18,7 +18,6 @@ Use direct register: `vi` uses "bạn", `pt-BR` uses "você".
 - Dhizuku
 - Universal Installer
 - APK
-- TV
 
 ## Glossary
 
@@ -40,6 +39,7 @@ Use direct register: `vi` uses "bạn", `pt-BR` uses "você".
 - `de` — German (informal/direct UI register)
 - `el` — Greek
 - `es` — Spanish (standard direct second-person "tú")
+- `fa` — Persian / Farsi (RTL, concise for TV cards, "نصب" for install, "تلویزیون" for TV)
 - `fr` — French (standard polite UI register "vous")
 - `hi` — Hindi
 - `in` — Indonesian (Android's legacy code `in`, never write `id` in CSV)

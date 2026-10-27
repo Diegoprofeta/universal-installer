@@ -89,6 +89,7 @@ private fun LanguageUi(
             "de" to "Deutsch",
             "el" to "Ελληνικά",
             "es" to "Español",
+            "fa" to "فارسی",
             "fr" to "Français",
             "hi" to "हिन्दी",
             "in" to "Indonesia",

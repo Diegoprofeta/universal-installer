@@ -88,7 +88,7 @@ function validate(translatedPath, sourcePath, contextTarget, strictGlossary) {
         if (!value.trim()) {
             problems.push(`${where}: empty translation`);
         }
-        if (value.includes('\\')) {
+        if (value.includes('\\') && !rec.default_value?.includes('\\')) {
             problems.push(`${where}: contains a backslash — provide raw text, the importer escapes for Android`);
         }
         if (locale && androidLocale(locale) !== locale.replace(/_/g, '-')) {

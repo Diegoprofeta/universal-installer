@@ -35,6 +35,7 @@ const RULES = {
     fil: ['one', 'other'], tl: ['one', 'other'], uz: ['one', 'other'],
     kk: ['one', 'other'], ky: ['one', 'other'], mn: ['one', 'other'],
     is: ['one', 'other'], mk: ['one', 'other'], am: ['one', 'other'],
+    fa: ['one', 'other'],
 
     // Romance languages that also carry a "many" class in current CLDR
     es: ['one', 'many', 'other'],

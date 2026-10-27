@@ -45,6 +45,7 @@ Use direct register: `vi` uses "bạn", `pt-BR` uses "você".
 - `de` — German (standard informal/direct UI register)
 - `el` — Greek
 - `es` — Spanish (standard direct second-person "tú")
+- `fa` — Persian / Farsi (RTL, uses direct register, "نصب" for install, "تنظیمات" for settings)
 - `fr` — French (standard polite UI register "vous")
 - `hi` — Hindi
 - `in` — Indonesian (Android's legacy code `in`, never write `id` in CSV)

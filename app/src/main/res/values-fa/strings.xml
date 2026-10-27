@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="txt_install">نصب</string>
+    <string name="txt_updates">به‌روزرسانی‌ها</string>
+    <string name="txt_manage">مدیریت</string>
+    <string name="more_actions_cd">اقدامات بیشتر</string>
+    <string name="cancel">لغو</string>
+    <string name="status_success">موفقیت‌آمیز</string>
+    <string name="status_failed">ناموفق</string>
+    <string name="permission_install_title">نصب برنامه‌های ناشناخته</string>
+    <string name="permission_install_desc">برای نصب بسته‌های APK، APK+، XAPK، APKS و APKM لازم است. بدون این مجوز، هیچ بسته‌ای نصب نخواهد شد.</string>
+    <string name="permission_storage_title">دسترسی به همه فایل‌ها</string>
+    <string name="permission_storage_desc">به جستجوی خودکار اجازه می‌دهد دستگاه شما را برای بسته‌ها اسکن کند و داده‌های OBB را در اندروید ۱۱ به بالا کپی کند. اختیاری — انتخاب‌گر مرورگر فایل بدون آن نیز کار می‌کند.</string>
+    <string name="permission_notifications_title">اعلان‌ها</string>
+    <string name="permission_notifications_desc">پیشرفت بارگیری، کپی OBB و اسکن VirusTotal را نمایش می‌دهد تا در کارهای طولانی بتوانید از برنامه خارج شوید.</string>
+    <string name="permission_usage_title">دسترسی به داده‌های استفاده</string>
+    <string name="permission_usage_desc">اختیاری — به صفحه لغو نصب اجازه می‌دهد برنامه‌ها را بر اساس آخرین استفاده مرتب کرده و زمان استفاده هر برنامه را نشان دهد.</string>
+    <string name="back_cd">بازگشت</string>
+    <string name="done_cd">تمام</string>
+    <string name="edit">ویرایش</string>
+    <string name="file_size_gb">%1$.1f گیگابایت</string>
+    <string name="file_size_mb">%1$.1f مگابایت</string>
+    <string name="file_size_kb">%1$.0f کیلوبایت</string>
+    <string name="file_size_b">%1$d بایت</string>
+    <string name="permission_install_prompt_required">لطفاً برای استفاده از Package Installer، مجوز \"نصب برنامه‌های ناشناخته\" را اعطا کنید.</string>
+    <string name="dir_picker_browse_action">مرور پوشه‌ها</string>
+    <string name="dir_picker_use_folder">استفاده از این پوشه</string>
+    <string name="dir_picker_new_folder">پوشه جدید</string>
+    <string name="dir_picker_create">ایجاد</string>
+    <string name="dir_picker_folder_name">نام پوشه</string>
+    <string name="dir_picker_empty">هیچ زیرپوشه‌ای اینجا نیست</string>
+    <string name="dir_picker_grant_title">نیاز به دسترسی به حافظه</string>
+    <string name="dir_picker_grant_message">برای ذخیره در پوشه‌هایی مانند Download، برنامه Universal Installer به دسترسی به همه فایل‌ها نیاز دارد. این مجوز را اعطا کرده و سپس دوباره امتحان کنید.</string>
+    <string name="dir_picker_grant_action">اعطای دسترسی</string>
+    <string name="error_cannot_open_app">باز کردن برنامه امکان‌پذیر نیست</string>
+    <string name="error_no_file_picker">هیچ برنامه مدیریت فایلی برای انتخاب فایل‌ها یافت نشد</string>
+</resources>

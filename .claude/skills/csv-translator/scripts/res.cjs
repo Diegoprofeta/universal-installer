@@ -118,7 +118,7 @@ function escapeAndroidString(value) {
 
 /** Format placeholders, as a sorted multiset, for comparing source against translation. */
 function placeholders(value) {
-    const found = String(value ?? '').match(/%(?:\d+\$)?[-+ 0#,(]*\d*(?:\.\d+)?[a-zA-Z]|%%/g) || [];
+    const found = String(value ?? '').match(/(?<!\d)%(?:\d+\$)?[-+ 0#,(]*\d*(?:\.\d+)?[a-zA-Z]|%%/g) || [];
     return found.sort();
 }
 
