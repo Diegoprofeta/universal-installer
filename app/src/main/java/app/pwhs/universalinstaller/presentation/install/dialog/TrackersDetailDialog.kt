@@ -50,11 +50,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.TrackerInfo
 
@@ -65,6 +67,7 @@ fun TrackersDetailSheet(
     onDismiss: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
 
     val categoryCounts = remember(trackers) {
         trackers.flatMap { it.categories }
@@ -197,7 +200,7 @@ fun TrackersDetailSheet(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(14.dp))
                                 .clickable(enabled = !tracker.website.isNullOrBlank()) {
-                                    tracker.website?.let { uriHandler.openUri(it) }
+                                    tracker.website?.let { uriHandler.openUriSafely(context, it) }
                                 },
                             shape = RoundedCornerShape(14.dp),
                             color = MaterialTheme.colorScheme.surfaceContainerLow,

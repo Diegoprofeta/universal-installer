@@ -32,9 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.ApkInfo
 import app.pwhs.universalinstaller.domain.model.VtStatus
@@ -56,6 +58,7 @@ fun VirusTotalInstallPrompt(
 ) {
     val extendedColors = LocalExtendedColors.current
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
     val vt = apkInfo.vtResult
     val status = vt?.status
 
@@ -112,7 +115,7 @@ fun VirusTotalInstallPrompt(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .clickable(enabled = apkInfo.sha256.isNotBlank()) {
-                            uriHandler.openUri("https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
+                            uriHandler.openUriSafely(context, "https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
                         }
                         .background(extendedColors.success.copy(alpha = 0.12f))
                         .border(
@@ -157,7 +160,7 @@ fun VirusTotalInstallPrompt(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .clickable(enabled = apkInfo.sha256.isNotBlank()) {
-                            uriHandler.openUri("https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
+                            uriHandler.openUriSafely(context, "https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
                         }
                         .background(containerColor)
                         .border(BorderStroke(1.dp, contentColor), RoundedCornerShape(50))

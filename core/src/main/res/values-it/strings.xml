@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">es. 1 o $1 (predefinito: $1 o $0)</string>
     <string name="updates_config_category_label">Categoria</string>
     <string name="updates_config_category_placeholder">es. Strumenti, Social, Giochi</string>
+    <string name="error_cannot_open_link_copied">Impossibile aprire il link. Copiato negli appunti</string>
 </resources>

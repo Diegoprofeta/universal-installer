@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">z.B. 1 oder $1 (Standard: $1 oder $0)</string>
     <string name="updates_config_category_label">Kategorie</string>
     <string name="updates_config_category_placeholder">z.B. Tools, Social, Spiele</string>
+    <string name="error_cannot_open_link_copied">Link kann nicht geöffnet werden. In Zwischenablage kopiert</string>
 </resources>

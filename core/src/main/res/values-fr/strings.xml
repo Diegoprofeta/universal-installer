@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">ex. 1 ou $1 (défaut : $1 ou $0)</string>
     <string name="updates_config_category_label">Catégorie</string>
     <string name="updates_config_category_placeholder">ex. Outils, Réseaux, Jeux</string>
+    <string name="error_cannot_open_link_copied">Impossible d\'ouvrir le lien. Copié dans le presse-papiers</string>
 </resources>

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import app.pwhs.core.util.openUriSafely
 
 /**
  * Universal Anti-Split Bridge / Protocol Constants.
@@ -109,10 +110,7 @@ object AntiSplitBridge {
      * Opens the Universal Anti-Split download / releases page on GitHub.
      */
     fun openDownloadPage(context: Context) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(GITHUB_RELEASES_URL)).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        runCatching { context.startActivity(intent) }
+        context.openUriSafely(GITHUB_RELEASES_URL)
     }
 
     data class MergeResult(

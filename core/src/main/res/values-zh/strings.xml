@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">例如：1 或 $1 (默认：$1 或 $0)</string>
     <string name="updates_config_category_label">分类</string>
     <string name="updates_config_category_placeholder">例如：工具、社交、游戏</string>
+    <string name="error_cannot_open_link_copied">无法打开链接，已复制到剪贴板</string>
 </resources>

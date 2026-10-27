@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">उदा. 1 या $1 (डिफ़ॉल्ट: $1 या $0)</string>
     <string name="updates_config_category_label">श्रेणी</string>
     <string name="updates_config_category_placeholder">उदा. उपकरण, सोशल, खेल</string>
+    <string name="error_cannot_open_link_copied">लिंक खोला नहीं जा सका। क्लिपबोर्ड पर कॉपी किया गया</string>
 </resources>

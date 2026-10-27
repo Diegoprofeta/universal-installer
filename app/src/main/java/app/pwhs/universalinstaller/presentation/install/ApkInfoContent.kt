@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import app.pwhs.core.util.openUriSafely
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -224,13 +225,13 @@ internal fun ApkInfoContent(
                         )
                     },
                     onGetKey = {
-                        uriHandler.openUri("https://www.virustotal.com/gui/my-apikey")
+                        uriHandler.openUriSafely(context, "https://www.virustotal.com/gui/my-apikey")
                     },
                     onOpenLink = {
                         if (apkInfo.vtResult?.status in setOf(VtStatus.CLEAN, VtStatus.MALICIOUS, VtStatus.SUSPICIOUS) &&
                             apkInfo.sha256.isNotBlank()
                         ) {
-                            uriHandler.openUri("https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
+                            uriHandler.openUriSafely(context, "https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
                         }
                     },
                 )

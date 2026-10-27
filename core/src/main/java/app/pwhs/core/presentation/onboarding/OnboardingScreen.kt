@@ -62,6 +62,7 @@ import app.pwhs.core.telemetry.AnalyticsHelper
 import app.pwhs.core.telemetry.TelemetryEvents
 import app.pwhs.core.util.DeviceCompat
 import app.pwhs.core.util.PermissionMonitor
+import app.pwhs.core.util.openUriSafely
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -150,7 +151,7 @@ fun OnboardingScreen(
                     // so "get a key" and "paste it here" read as one step.
                     actionLabel = stringResource(R.string.onboarding_virustotal_get_key),
                     actionIcon = Icons.AutoMirrored.Rounded.OpenInNew,
-                    onAction = { uriHandler.openUri(VIRUSTOTAL_API_KEY_URL) },
+                    onAction = { uriHandler.openUriSafely(context, VIRUSTOTAL_API_KEY_URL) },
                 )
             )
         }

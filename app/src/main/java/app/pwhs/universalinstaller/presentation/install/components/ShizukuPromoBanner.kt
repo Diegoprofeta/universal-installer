@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import app.pwhs.core.data.local.dataStore
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.presentation.setting.InstallMode
 import app.pwhs.universalinstaller.presentation.setting.PreferencesKeys
@@ -190,20 +191,11 @@ fun ShizukuPromoBanner(
                                 Toast.makeText(context, context.getString(R.string.error_cannot_open_app), Toast.LENGTH_SHORT).show()
                             }
                     } else {
-                        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(SHIZUKU_WEBSITE_URL)).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        runCatching { context.startActivity(browserIntent) }
+                        context.openUriSafely(SHIZUKU_WEBSITE_URL)
                     }
                 }
                 else -> {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(SHIZUKU_WEBSITE_URL)).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    runCatching { context.startActivity(browserIntent) }
-                        .onFailure {
-                            Toast.makeText(context, context.getString(R.string.error_cannot_open_app), Toast.LENGTH_SHORT).show()
-                        }
+                    context.openUriSafely(SHIZUKU_WEBSITE_URL)
                 }
             }
         }

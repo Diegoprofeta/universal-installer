@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.InstallBackend
 import app.pwhs.universalinstaller.presentation.install.controller.RootState
@@ -82,13 +83,7 @@ internal fun handleBackendSelection(
                         context.getString(R.string.setting_shizuku_install_hint),
                         Toast.LENGTH_SHORT
                     ).show()
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api")
-                    ).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    runCatching { context.startActivity(intent) }
+                    context.openUriSafely("https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api")
                 }
                 ShizukuState.UNSUPPORTED -> {
                     Toast.makeText(

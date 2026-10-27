@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -185,7 +186,7 @@ fun PromotedAppCard(
                 ) {
                     if (app.githubUrl != null) {
                         IconButton(
-                            onClick = { uriHandler.openUri(app.githubUrl) },
+                            onClick = { uriHandler.openUriSafely(context, app.githubUrl) },
                             modifier = Modifier.size(36.dp),
                         ) {
                             Icon(
@@ -263,8 +264,5 @@ private fun openAppStoreOrReleases(context: Context, app: PromotedApp) {
         }
     }
     val fallbackUrl = app.playStoreUrl ?: app.releasesUrl ?: app.githubUrl ?: return
-    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUrl)).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    }
-    runCatching { context.startActivity(browserIntent) }
+    context.openUriSafely(fallbackUrl)
 }

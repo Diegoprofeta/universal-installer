@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">例: 1 または $1 (デフォルト: $1 または $0)</string>
     <string name="updates_config_category_label">カテゴリ</string>
     <string name="updates_config_category_placeholder">例: ツール、SNS、ゲーム</string>
+    <string name="error_cannot_open_link_copied">リンクを開けません。クリップボードにコピーしました</string>
 </resources>

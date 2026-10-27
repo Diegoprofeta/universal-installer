@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.ApkInfo
 import app.pwhs.universalinstaller.presentation.setting.SettingActivity
@@ -129,7 +130,7 @@ fun ApkInfoChipsRow(
                 onClick = onCheckVirusTotal,
                 onOpenWeb = {
                     if (apkInfo.sha256.isNotBlank()) {
-                        uriHandler.openUri("https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
+                        uriHandler.openUriSafely(context, "https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
                     }
                 },
                 onOpenSettings = {

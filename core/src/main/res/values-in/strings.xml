@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">cth. 1 atau $1 (bawaan: $1 atau $0)</string>
     <string name="updates_config_category_label">Kategori</string>
     <string name="updates_config_category_placeholder">cth. Alat, Sosial, Game</string>
+    <string name="error_cannot_open_link_copied">Tidak dapat membuka tautan. Disalin ke papan klip</string>
 </resources>

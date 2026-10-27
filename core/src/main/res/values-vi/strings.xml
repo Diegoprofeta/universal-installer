@@ -115,4 +115,7 @@
     <string name="updates_config_installed_match_group_placeholder">VD: 1 hoặc $1 (mặc định: $1 hoặc $0)</string>
     <string name="updates_config_category_label">Danh mục</string>
     <string name="updates_config_category_placeholder">VD: Công cụ, Xã hội, Trò chơi</string>
+
+    <!-- Web Link Helper -->
+    <string name="error_cannot_open_link_copied">Không thể mở liên kết. Đã sao chép vào bộ nhớ tạm</string>
 </resources>

@@ -9,10 +9,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 
 private const val TELEGRAM_URL = "https://t.me/blockads_android"
@@ -26,13 +28,14 @@ fun CommunityActionButtons(
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
 
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
-            onClick = { uriHandler.openUri(TELEGRAM_URL) },
+            onClick = { uriHandler.openUriSafely(context, TELEGRAM_URL) },
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_telegram),
@@ -42,7 +45,7 @@ fun CommunityActionButtons(
             )
         }
         IconButton(
-            onClick = { uriHandler.openUri(GITHUB_URL) },
+            onClick = { uriHandler.openUriSafely(context, GITHUB_URL) },
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_github),

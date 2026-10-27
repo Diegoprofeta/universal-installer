@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import app.pwhs.core.ui.component.verticalScrollbar
+import app.pwhs.core.util.openUriSafely
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Launch
 import androidx.compose.material.icons.rounded.Block
@@ -181,8 +182,7 @@ fun TrackedAppDetailBottomSheet(
 
                 OutlinedButton(
                     onClick = {
-                        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(app.sourceUrl))
-                        context.startActivity(browserIntent)
+                        context.openUriSafely(app.sourceUrl)
                     },
                     modifier = Modifier.weight(1f),
                     shape = MaterialTheme.shapes.medium,

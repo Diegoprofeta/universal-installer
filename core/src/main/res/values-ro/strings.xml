@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">ex. 1 sau $1 (implicit: $1 sau $0)</string>
     <string name="updates_config_category_label">Categorie</string>
     <string name="updates_config_category_placeholder">ex. Utilitare, Social, Jocuri</string>
+    <string name="error_cannot_open_link_copied">Nu se poate deschide linkul. Copiat în clipboard</string>
 </resources>

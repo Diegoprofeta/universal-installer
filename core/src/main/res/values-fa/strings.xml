@@ -111,4 +111,5 @@
     <string name="transfer_eta_seconds">حدود %1$d ثانیه باقی‌مانده</string>
     <string name="transfer_eta_minutes_seconds">حدود %1$d دقیقه و %2$d ثانیه باقی‌مانده</string>
     <string name="transfer_eta_hours_minutes">حدود %1$d ساعت و %2$d دقیقه باقی‌مانده</string>
+    <string name="error_cannot_open_link_copied">باز کردن پیوند ممکن نیست. در کلیپ‌بورد کپی شد</string>
 </resources>

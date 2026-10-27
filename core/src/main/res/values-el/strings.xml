@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">π.χ. 1 ή $1 (προεπιλογή: $1 ή $0)</string>
     <string name="updates_config_category_label">Κατηγορία</string>
     <string name="updates_config_category_placeholder">π.χ. Εργαλεία, Κοινωνικά, Παιχνίδια</string>
+    <string name="error_cannot_open_link_copied">Δεν είναι δυνατό το άνοιγμα του συνδέσμου. Αντιγράφηκε στο πρόχειρο</string>
 </resources>

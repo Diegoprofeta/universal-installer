@@ -55,6 +55,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
+import app.pwhs.core.util.openUriSafely
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -175,7 +176,7 @@ private fun AboutUi(
                     subtitle = stringResource(R.string.setting_rate_subtitle),
                     onClick = {
                         app.pwhs.core.telemetry.AnalyticsHelper.logManualRateClicked("settings_menu")
-                        uriHandler.openUri("https://play.google.com/store/apps/details?id=app.pwhs.universalinstaller")
+                        uriHandler.openUriSafely(context, "https://play.google.com/store/apps/details?id=app.pwhs.universalinstaller")
                     },
                 )
             }
@@ -186,7 +187,7 @@ private fun AboutUi(
                     title = stringResource(R.string.setting_sponsor_title),
                     subtitle = stringResource(R.string.setting_sponsor_subtitle),
                     iconTint = MaterialTheme.colorScheme.error,
-                    onClick = { uriHandler.openUri("https://github.com/sponsors/pass-with-high-score") },
+                    onClick = { uriHandler.openUriSafely(context, "https://github.com/sponsors/pass-with-high-score") },
                 )
             }
             item { HorizontalDivider(modifier = Modifier.padding(top = 8.dp)) }
@@ -202,7 +203,7 @@ private fun AboutUi(
                     icon = Icons.Rounded.Public,
                     title = stringResource(R.string.setting_website_title),
                     subtitle = stringResource(R.string.setting_website_subtitle),
-                    onClick = { uriHandler.openUri("https://universal-installer.pwhs.app/") },
+                    onClick = { uriHandler.openUriSafely(context, "https://universal-installer.pwhs.app/") },
                 )
             }
             item { AboutRowDivider() }
@@ -211,7 +212,7 @@ private fun AboutUi(
                     iconPainter = painterResource(R.drawable.ic_github),
                     title = stringResource(R.string.setting_github_title),
                     subtitle = stringResource(R.string.setting_github_subtitle),
-                    onClick = { uriHandler.openUri("https://github.com/pass-with-high-score/universal-installer") },
+                    onClick = { uriHandler.openUriSafely(context, "https://github.com/pass-with-high-score/universal-installer") },
                 )
             }
             item { AboutRowDivider() }
@@ -220,7 +221,7 @@ private fun AboutUi(
                     iconPainter = painterResource(R.drawable.ic_telegram),
                     title = stringResource(R.string.setting_telegram_title),
                     subtitle = stringResource(R.string.setting_telegram_subtitle),
-                    onClick = { uriHandler.openUri("https://t.me/blockads_android") },
+                    onClick = { uriHandler.openUriSafely(context, "https://t.me/blockads_android") },
                 )
             }
             item { AboutRowDivider() }
@@ -229,7 +230,7 @@ private fun AboutUi(
                     icon = Icons.Rounded.Person,
                     title = stringResource(R.string.about_creator_title),
                     subtitle = stringResource(R.string.about_creator_subtitle),
-                    onClick = { uriHandler.openUri("https://github.com/pass-with-high-score") },
+                    onClick = { uriHandler.openUriSafely(context, "https://github.com/pass-with-high-score") },
                 )
             }
             item { HorizontalDivider(modifier = Modifier.padding(top = 8.dp)) }
@@ -242,7 +243,7 @@ private fun AboutUi(
                     title = stringResource(R.string.about_license_title),
                     subtitle = stringResource(R.string.about_license_subtitle),
                     onClick = {
-                        uriHandler.openUri("https://github.com/pass-with-high-score/universal-installer/blob/main/LICENSE")
+                        uriHandler.openUriSafely(context, "https://github.com/pass-with-high-score/universal-installer/blob/main/LICENSE")
                     },
                 )
             }
@@ -252,7 +253,7 @@ private fun AboutUi(
                     icon = Icons.Rounded.Shield,
                     title = stringResource(R.string.setting_privacy_title),
                     subtitle = stringResource(R.string.setting_privacy_subtitle),
-                    onClick = { uriHandler.openUri("https://universal-installer.pwhs.app/privacy") },
+                    onClick = { uriHandler.openUriSafely(context, "https://universal-installer.pwhs.app/privacy") },
                 )
             }
             item { AboutRowDivider() }
@@ -261,7 +262,7 @@ private fun AboutUi(
                     icon = Icons.Rounded.Gavel,
                     title = stringResource(R.string.setting_terms_title),
                     subtitle = stringResource(R.string.setting_terms_subtitle),
-                    onClick = { uriHandler.openUri("https://universal-installer.pwhs.app/terms") },
+                    onClick = { uriHandler.openUriSafely(context, "https://universal-installer.pwhs.app/terms") },
                 )
             }
             item { HorizontalDivider(modifier = Modifier.padding(top = 8.dp)) }

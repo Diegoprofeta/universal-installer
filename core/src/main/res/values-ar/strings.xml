@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">مثال: 1 أو $1 (الافتراضي: $1 أو $0)</string>
     <string name="updates_config_category_label">الفئة</string>
     <string name="updates_config_category_placeholder">مثال: أدوات، تواصل، ألعاب</string>
+    <string name="error_cannot_open_link_copied">تعذر فتح الرابط. تم النسخ إلى الحافظة</string>
 </resources>

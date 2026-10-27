@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">예: 1 또는 $1 (기본값: $1 또는 $0)</string>
     <string name="updates_config_category_label">카테고리</string>
     <string name="updates_config_category_placeholder">예: 도구, 소셜, 게임</string>
+    <string name="error_cannot_open_link_copied">링크를 열 수 없습니다. 클립보드에 복사되었습니다</string>
 </resources>

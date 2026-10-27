@@ -4,7 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
+import app.pwhs.core.R as CoreR
+import app.pwhs.core.util.copyToClipboard
 import timber.log.Timber
 
 /**
@@ -33,6 +36,13 @@ object CustomTabsHelper {
                     }
                 }
                 context.startActivity(fallbackIntent)
+            }.onFailure {
+                context.copyToClipboard(url)
+                Toast.makeText(
+                    context,
+                    context.getString(CoreR.string.error_cannot_open_link_copied),
+                    Toast.LENGTH_SHORT,
+                ).show()
             }
         }
     }

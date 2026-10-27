@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.ApkInfo
 import app.pwhs.universalinstaller.domain.model.VtStatus
@@ -275,7 +276,7 @@ private fun RiskAction(
             onExistingAppUninstalled()
         }
     }
-    val report = { sha: String -> uriHandler.openUri("$VT_FILE_REPORT_URL$sha") }
+    val report = { sha: String -> uriHandler.openUriSafely(context, "$VT_FILE_REPORT_URL$sha") }
 
     val label: Int
     val actionIcon: ImageVector

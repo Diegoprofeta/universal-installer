@@ -28,6 +28,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.domain.model.ApkInfo
 import app.pwhs.universalinstaller.domain.model.VtStatus
@@ -100,7 +101,7 @@ internal fun androidx.compose.foundation.lazy.LazyListScope.securityTab(
                 when {
                     vtResult?.status in listOf(VtStatus.CLEAN, VtStatus.MALICIOUS, VtStatus.SUSPICIOUS) -> {
                         if (apkInfo.sha256.isNotBlank()) {
-                            uriHandler.openUri("https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
+                            uriHandler.openUriSafely(context, "https://www.virustotal.com/gui/file/${apkInfo.sha256}/detection")
                         }
                     }
                     // Without a key, tapping Check only rewrites the same "no key" line the user
@@ -204,7 +205,7 @@ internal fun androidx.compose.foundation.lazy.LazyListScope.securityTab(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
                             .clickable(enabled = !tracker.website.isNullOrBlank()) {
-                                tracker.website?.let { uriHandler.openUri(it) }
+                                tracker.website?.let { uriHandler.openUriSafely(context, it) }
                             }
                             .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically,

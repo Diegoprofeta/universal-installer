@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">напр. 1 или $1 (по умолчанию: $1 или $0)</string>
     <string name="updates_config_category_label">Категория</string>
     <string name="updates_config_category_placeholder">напр. Инструменты, Игры</string>
+    <string name="error_cannot_open_link_copied">Не удалось открыть ссылку. Скопировано в буфер обмена</string>
 </resources>

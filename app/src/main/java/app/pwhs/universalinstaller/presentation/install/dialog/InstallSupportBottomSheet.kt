@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.pwhs.core.util.openUriSafely
 import app.pwhs.universalinstaller.BuildConfig
 import app.pwhs.universalinstaller.R
 import app.pwhs.universalinstaller.presentation.install.DialogTarget
@@ -238,12 +239,7 @@ fun InstallSupportBottomSheet(
                         val clip = ClipData.newPlainText("install-error-report", reportText)
                         clipboard.setClipEntry(ClipEntry(clip))
                         Toast.makeText(context, copiedToast, Toast.LENGTH_LONG).show()
-                        runCatching {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(TELEGRAM_SUPPORT_URL)).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
-                            context.startActivity(intent)
-                        }
+                        context.openUriSafely(TELEGRAM_SUPPORT_URL)
                         onDismiss()
                     }
                 },
@@ -260,12 +256,7 @@ fun InstallSupportBottomSheet(
                     val issueTitle = Uri.encode("[Bug]: Install failed - ${target?.appName ?: target?.packageName ?: "Unknown"}")
                     val issueBody = Uri.encode(reportText)
                     val url = "$GITHUB_NEW_ISSUE_URL?title=$issueTitle&body=$issueBody"
-                    runCatching {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        context.startActivity(intent)
-                    }
+                    context.openUriSafely(url)
                     onDismiss()
                 },
             )
@@ -299,12 +290,7 @@ fun InstallSupportBottomSheet(
                 subtitle = stringResource(R.string.dialog_support_faq_sub),
                 onClick = {
                     val targetUrl = InstallSupportHelper.resolveErrorDocUrl(errorMessage)
-                    runCatching {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl)).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        context.startActivity(intent)
-                    }
+                    context.openUriSafely(targetUrl)
                     onDismiss()
                 },
             )

@@ -109,4 +109,5 @@
     <string name="updates_config_installed_match_group_placeholder">örn. 1 veya $1 (varsayılan: $1 veya $0)</string>
     <string name="updates_config_category_label">Kategori</string>
     <string name="updates_config_category_placeholder">örn. Araçlar, Sosyal, Oyunlar</string>
+    <string name="error_cannot_open_link_copied">Bağlantı açılamıyor. Panoya kopyalandı</string>
 </resources>
